@@ -47,6 +47,65 @@ const httpClient: AxiosInstance = axios.create({
   },
 });
 
+const ENABLE_API_DEBUG_LOGS = true;
+
+const getRequestPath = (config: AxiosRequestConfig): string => {
+  const base = (config.baseURL ?? '').replace(/\/$/, '');
+  const url = String(config.url ?? '');
+  return url.startsWith('http') ? url : base + (url.startsWith('/') ? url : '/' + url);
+};
+
+if (ENABLE_API_DEBUG_LOGS) {
+  httpClient.interceptors.request.use((config) => {
+    const startedAt = Date.now();
+    (config as AxiosRequestConfig & { metadata?: { startedAt: number } }).metadata = {
+      startedAt,
+    };
+    const method = String(config.method ?? 'GET').toUpperCase();
+    const path = getRequestPath(config);
+    console.log('[API REQUEST]', method, path, { params: config.params, data: config.data });
+    return config;
+  });
+
+  httpClient.interceptors.response.use(
+    (response) => {
+      const configWithMeta = response.config as AxiosRequestConfig & {
+        metadata?: { startedAt: number };
+      };
+      const startedAt = configWithMeta.metadata?.startedAt;
+      const durationMs = startedAt ? Date.now() - startedAt : undefined;
+      const method = String(response.config.method ?? 'GET').toUpperCase();
+      const path = getRequestPath(response.config);
+      console.log('[API RESPONSE]', method, path, {
+        status: response.status,
+        durationMs,
+        data: response.data,
+      });
+      return response;
+    },
+    (error) => {
+      if (axios.isAxiosError(error)) {
+        const config = error.config as
+          | (AxiosRequestConfig & { metadata?: { startedAt: number } })
+          | undefined;
+        const startedAt = config?.metadata?.startedAt;
+        const durationMs = startedAt ? Date.now() - startedAt : undefined;
+        const method = String(config?.method ?? 'GET').toUpperCase();
+        const path = config ? getRequestPath(config) : 'unknown';
+        console.log('[API ERROR]', method, path, {
+          status: error.response?.status ?? 0,
+          durationMs,
+          message: error.message,
+          data: error.response?.data,
+        });
+      } else {
+        console.log('[API ERROR]', 'UNKNOWN', { message: String(error) });
+      }
+      return Promise.reject(error);
+    }
+  );
+}
+
 httpClient.interceptors.request.use(async (config) => {
   const headers = config.headers as
     | (Record<string, string> & {

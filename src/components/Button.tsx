@@ -1,5 +1,5 @@
 import React from 'react';
-import { Pressable, StyleSheet, ViewStyle } from 'react-native';
+import { Pressable, StyleProp, StyleSheet, ViewStyle } from 'react-native';
 import Text from './Text';
 import { useAppTheme } from '../theme/ThemeProvider';
 
@@ -10,12 +10,21 @@ type Props = {
   onPress: () => void;
   variant?: ButtonVariant;
   disabled?: boolean;
+  containerStyle?: StyleProp<ViewStyle>;
+  textColor?: string;
 };
 
-export default function Button({ label, onPress, variant = 'primary', disabled = false }: Props) {
+export default function Button({
+  label,
+  onPress,
+  variant = 'primary',
+  disabled = false,
+  containerStyle,
+  textColor,
+}: Props) {
   const { theme } = useAppTheme();
 
-  const containerStyle: ViewStyle = {
+  const variantContainerStyle: ViewStyle = {
     backgroundColor:
       variant === 'primary'
         ? theme.colors.primary
@@ -30,12 +39,18 @@ export default function Button({ label, onPress, variant = 'primary', disabled =
     <Pressable
       onPress={onPress}
       disabled={disabled}
-      style={({ pressed }) => [styles.container, containerStyle, pressed && styles.pressed, disabled && styles.disabled]}
+      style={({ pressed }) => [
+        styles.container,
+        variantContainerStyle,
+        containerStyle,
+        pressed && styles.pressed,
+        disabled && styles.disabled,
+      ]}
     >
       <Text
         variant="body"
         weight="semiBold"
-        color={variant === 'primary' ? theme.colors.white : theme.colors.text}
+        color={textColor ?? (variant === 'primary' ? theme.colors.white : theme.colors.text)}
       >
         {label}
       </Text>

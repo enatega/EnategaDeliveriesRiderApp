@@ -1,13 +1,14 @@
 import apiClient from './apiClient';
 import { AuthSessionResponse, AuthUser, LoginPayload } from './authTypes';
 
-const AUTH_BASE = '/api/v1/auth';
+const AUTH_RIDER_LOGIN = '/auth/login/rider/email';
+const AUTH_ME = '/auth/me';
 
 export const authService = {
   login: (payload: LoginPayload) =>
-    apiClient.post<AuthSessionResponse>(AUTH_BASE + '/login', payload, { skipAuth: true }),
+    apiClient.post<AuthSessionResponse>(AUTH_RIDER_LOGIN, payload, { skipAuth: true }),
 
-  me: () => apiClient.get<AuthUser>(AUTH_BASE + '/me'),
+  me: () => apiClient.get<AuthUser>(AUTH_ME),
 
   // Useful for local app wiring before backend auth endpoints are ready.
   createDemoSession: async (appTag: 'store' | 'rider'): Promise<AuthSessionResponse> => ({

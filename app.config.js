@@ -1,3 +1,5 @@
+const googleMapsApiKey = process.env.GOOGLE_MAPS_API_KEY ?? 'DUMMY_GOOGLE_MAPS_API_KEY';
+
 module.exports = {
   expo: {
     name: 'EnategaDeliveriesRiderApp',
@@ -26,6 +28,15 @@ module.exports = {
     web: {
       favicon: './assets/favicon.png',
     },
-    plugins: ['expo-secure-store'],
+    plugins: [
+      'expo-secure-store',
+      [
+        'react-native-maps',
+        {
+          androidGoogleMapsApiKey: googleMapsApiKey,
+          iosGoogleMapsApiKey: googleMapsApiKey,
+        },
+      ],
+    ],
   },
 };
