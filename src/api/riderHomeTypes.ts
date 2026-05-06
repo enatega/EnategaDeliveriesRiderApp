@@ -9,6 +9,8 @@ export type RiderHomeOrder = {
   orderCode: string | null;
   status: string | null;
   statusLabel: string | null;
+  riderStatus: string | null;
+  riderStatusLabel: string | null;
   storeName: string | null;
   storeImage: string | null;
   pickupAddress: string | null;
@@ -52,4 +54,27 @@ export type AssignOrderResponse = {
   orderId?: string;
   riderId?: string;
   status?: string;
+};
+
+export type RiderOrderUpdatableStatus =
+  | 'heading_to_store'
+  | 'arrived_at_store'
+  | 'waiting_for_order'
+  | 'picked_up'
+  | 'out_for_delivery'
+  | 'arrived'
+  | 'delivered'
+  | 'failed';
+
+export type UpdateRiderOrderStatusPayload = {
+  status: RiderOrderUpdatableStatus;
+  riderId: string;
+};
+
+export type UpdateRiderOrderStatusResponse = {
+  message?: string;
+  orderId?: string;
+  status?: string;
+  riderStatus?: string;
+  riderStatusLabel?: string;
 };

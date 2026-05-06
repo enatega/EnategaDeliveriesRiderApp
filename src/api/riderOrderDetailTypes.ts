@@ -13,6 +13,8 @@ export type RiderOrderDetail = {
   orderCode: string | null;
   status: string | null;
   statusLabel: string | null;
+  riderStatus: string | null;
+  riderStatusLabel: string | null;
   orderType: string | null;
   storeName: string | null;
   storeImage: string | null;

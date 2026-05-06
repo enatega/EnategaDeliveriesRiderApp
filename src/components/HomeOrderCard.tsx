@@ -42,7 +42,11 @@ export default function HomeOrderCard({ order, tab }: Props) {
   const assignOrderMutation = useAssignOrderMutation();
 
   const safeOrderCode = order.orderCode ?? order.orderId ?? '—';
-  const safeStatusLabel = order.statusLabel ?? order.status ?? t('status_unknown');
+  const safeStatusLabel =
+    (tab === 'processing' ? order.riderStatusLabel ?? order.riderStatus : null)
+    ?? order.statusLabel
+    ?? order.status
+    ?? t('status_unknown');
   const safeStoreName = order.storeName ?? '—';
   const safePickupAddress = order.pickupAddress ?? '—';
   const safeDeliveryAddress = order.deliveryAddress ?? '—';

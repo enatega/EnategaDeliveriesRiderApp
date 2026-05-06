@@ -27,6 +27,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       .getSession()
       .then((value) => {
         setSession(value);
+        if (value.token) {
+          console.log('[AUTH TOKEN][RIDER]', value.token);
+        }
       })
       .finally(() => {
         setIsReady(true);
@@ -35,6 +38,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const setSessionFromResponse = async (payload: AuthSessionResponse) => {
     await authSession.setSession(payload);
+    console.log('[AUTH TOKEN][RIDER]', payload.accessToken);
     setSession({
       token: payload.accessToken,
       refreshToken: payload.refreshToken ?? null,

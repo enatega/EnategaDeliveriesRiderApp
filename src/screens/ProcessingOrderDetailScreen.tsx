@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
   Dimensions,
@@ -18,23 +18,44 @@ import Button from '../components/Button';
 import { MainStackParamList } from '../navigation/types';
 import { useAppTheme } from '../theme/ThemeProvider';
 import { useTranslations } from '../localization/LocalizationProvider';
+import { useAuth } from '../auth/AuthProvider';
 import { useRiderOrderDetailQuery } from '../hooks/useRiderOrderDetailQuery';
+import { useUpdateRiderOrderStatusMutation } from '../hooks/useRiderHomeMutations';
 import OrderDetailTopBar from './orderDetail/components/OrderDetailTopBar';
 import OrderSummarySection from './orderDetail/components/OrderSummarySection';
 import OrderPaymentSection from './orderDetail/components/OrderPaymentSection';
 import OrderItemsSection from './orderDetail/components/OrderItemsSection';
 import DeliveryProgressSection from './orderDetail/components/DeliveryProgressSection';
+import type { RiderOrderUpdatableStatus } from '../api/riderHomeTypes';
+import {
+  resolveProgressStatus,
+  RiderDeliveryProgressStatus,
+  toApiUpdatableStatus,
+} from './orderDetail/progress';
 
 type Props = NativeStackScreenProps<MainStackParamList, 'ProcessingOrderDetail'>;
 
 const FALLBACK_PICKUP = { latitude: 33.6844, longitude: 73.0479 };
 const FALLBACK_DELIVERY = { latitude: 33.6952, longitude: 73.0689 };
 
+const STATUS_ACTION_LABELS: Record<RiderOrderUpdatableStatus, string> = {
+  heading_to_store: 'Heading to Store',
+  arrived_at_store: 'Arrived at Store',
+  waiting_for_order: 'Waiting for Order',
+  picked_up: 'Picked Up',
+  out_for_delivery: 'Out for Delivery',
+  arrived: 'Arrived at Customer',
+  delivered: 'Delivered',
+  failed: 'Mark as Failed',
+};
+
 export default function ProcessingOrderDetailScreen({ route, navigation }: Props) {
   const { theme } = useAppTheme();
   const { t } = useTranslations('app');
+  const { session } = useAuth();
   const { orderId } = route.params;
   const detailQuery = useRiderOrderDetailQuery(orderId);
+  const updateStatusMutation = useUpdateRiderOrderStatusMutation(orderId);
   const screenHeight = Dimensions.get('window').height;
   const collapsedHeight = 220;
   const defaultHeight = Math.min(screenHeight * 0.62, screenHeight - 250);
@@ -54,6 +75,30 @@ export default function ProcessingOrderDetailScreen({ route, navigation }: Props
   const openNavigation = async () => {
     const url = `https://www.google.com/maps/dir/?api=1&origin=${FALLBACK_PICKUP.latitude},${FALLBACK_PICKUP.longitude}&destination=${FALLBACK_DELIVERY.latitude},${FALLBACK_DELIVERY.longitude}&travelmode=driving`;
     await Linking.openURL(url);
+  };
+
+  const [selectedStatus, setSelectedStatus] = useState<RiderDeliveryProgressStatus | null>(null);
+
+  const currentProgressStatus = useMemo(
+    () => resolveProgressStatus(detailQuery.data?.riderStatus ?? detailQuery.data?.status),
+    [detailQuery.data?.riderStatus, detailQuery.data?.status],
+  );
+
+  useEffect(() => {
+    setSelectedStatus(currentProgressStatus);
+  }, [currentProgressStatus, orderId]);
+
+  const nextStatus = (selectedStatus ? toApiUpdatableStatus(selectedStatus) : null) as RiderOrderUpdatableStatus | null;
+  const canUpdateStatus = Boolean(
+    detailQuery.data?.canUpdateStatus
+    && nextStatus,
+  );
+  const updateStatusLabel = nextStatus ? STATUS_ACTION_LABELS[nextStatus] : null;
+
+  const handleUpdateStatus = () => {
+    const riderId = session.user?.id;
+    if (!nextStatus || !riderId) return;
+    updateStatusMutation.mutate({ status: nextStatus, riderId });
   };
 
   return (
@@ -78,7 +123,11 @@ export default function ProcessingOrderDetailScreen({ route, navigation }: Props
           ]}
         />
         <OrderDetailTopBar
-          title={detailQuery.data?.statusLabel ?? t('order_assigned_title')}
+          title={
+            detailQuery.data?.riderStatusLabel
+            ?? detailQuery.data?.statusLabel
+            ?? t('order_assigned_title')
+          }
           onBack={() => navigation.goBack()}
         />
       </View>
@@ -112,7 +161,25 @@ export default function ProcessingOrderDetailScreen({ route, navigation }: Props
             <OrderSummarySection order={detailQuery.data} />
             <OrderPaymentSection order={detailQuery.data} />
             <OrderItemsSection order={detailQuery.data} />
-            <DeliveryProgressSection status={detailQuery.data.status} />
+            <DeliveryProgressSection
+              status={detailQuery.data.status}
+              riderStatus={detailQuery.data.riderStatus}
+              selectedStatus={selectedStatus}
+              onSelectStatus={setSelectedStatus}
+            />
+            {canUpdateStatus && updateStatusLabel ? (
+              <Button
+                label={
+                  updateStatusMutation.isPending
+                    ? t('order_status_updating')
+                    : `${t('order_status_update_to')} ${updateStatusLabel}`
+                }
+                onPress={handleUpdateStatus}
+                disabled={updateStatusMutation.isPending}
+                containerStyle={styles.primaryButton}
+                textColor={theme.colors.gray900}
+              />
+            ) : null}
             <Button
               label={t('order_start_navigation')}
               onPress={openNavigation}

@@ -1,5 +1,9 @@
 import apiClient from './apiClient';
 import { RiderOrderDetail, RiderOrderDetailEnvelope } from './riderOrderDetailTypes';
+import {
+  UpdateRiderOrderStatusPayload,
+  UpdateRiderOrderStatusResponse,
+} from './riderHomeTypes';
 
 const RIDER_HOME_BASE = '/apps/deliveries/rider/home';
 
@@ -8,6 +12,8 @@ const EMPTY_ORDER_DETAIL: RiderOrderDetail = {
   orderCode: null,
   status: null,
   statusLabel: null,
+  riderStatus: null,
+  riderStatusLabel: null,
   orderType: null,
   storeName: null,
   storeImage: null,
@@ -52,5 +58,12 @@ export const riderOrderDetailService = {
     );
 
     return normalizeOrderDetail(response);
+  },
+
+  updateOrderStatus: async (orderId: string, payload: UpdateRiderOrderStatusPayload) => {
+    return apiClient.patch<UpdateRiderOrderStatusResponse>(
+      `${RIDER_HOME_BASE}/orders/${orderId}/status`,
+      payload,
+    );
   },
 };

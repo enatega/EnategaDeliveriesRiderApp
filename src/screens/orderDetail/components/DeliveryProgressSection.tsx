@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 import Text from '../../../components/Text';
 import { useAppTheme } from '../../../theme/ThemeProvider';
 import { useTranslations } from '../../../localization/LocalizationProvider';
@@ -11,6 +11,9 @@ import {
 
 type Props = {
   status?: string | null;
+  riderStatus?: string | null;
+  selectedStatus?: RiderDeliveryProgressStatus | null;
+  onSelectStatus?: (status: RiderDeliveryProgressStatus) => void;
 };
 
 const STATUS_LABEL_KEY: Record<RiderDeliveryProgressStatus, string> = {
@@ -22,12 +25,18 @@ const STATUS_LABEL_KEY: Record<RiderDeliveryProgressStatus, string> = {
   [RiderDeliveryProgressStatus.OUT_FOR_DELIVERY]: 'order_status_out_for_delivery',
   [RiderDeliveryProgressStatus.ARRIVED_AT_CUSTOMER]: 'order_status_arrived_at_customer',
   [RiderDeliveryProgressStatus.DELIVERED]: 'order_status_delivered',
+  [RiderDeliveryProgressStatus.FAILED]: 'order_status_failed',
 };
 
-export default function DeliveryProgressSection({ status }: Props) {
+export default function DeliveryProgressSection({
+  status,
+  riderStatus,
+  selectedStatus,
+  onSelectStatus,
+}: Props) {
   const { theme } = useAppTheme();
   const { t } = useTranslations('app');
-  const currentStatus = resolveProgressStatus(status);
+  const currentStatus = resolveProgressStatus(riderStatus ?? status);
   const currentIndex = DELIVERY_PROGRESS_ORDER.indexOf(currentStatus);
 
   return (
@@ -37,26 +46,35 @@ export default function DeliveryProgressSection({ status }: Props) {
       <View style={styles.listWrap}>
         {DELIVERY_PROGRESS_ORDER.map((item, index) => {
           const active = index <= currentIndex;
+          const isSelected = selectedStatus === item;
           return (
-            <View key={item} style={styles.row}>
+            <Pressable
+              key={item}
+              style={styles.row}
+              onPress={() => {
+                if (!onSelectStatus) return;
+                onSelectStatus(item);
+              }}
+              disabled={!onSelectStatus}
+            >
               <View
                 style={[
                   styles.dot,
                   {
-                    borderColor: active ? '#10B981' : '#D1D5DB',
-                    backgroundColor: active ? '#10B981' : '#FFFFFF',
+                    borderColor: isSelected || active ? '#10B981' : '#D1D5DB',
+                    backgroundColor: isSelected || active ? '#10B981' : '#FFFFFF',
                   },
                 ]}
               >
-                {active ? <View style={styles.dotInner} /> : null}
+                {isSelected || active ? <View style={styles.dotInner} /> : null}
               </View>
               <Text
-                weight={active ? 'medium' : 'regular'}
-                color={active ? theme.colors.gray900 : theme.colors.gray600}
+                weight={isSelected || active ? 'medium' : 'regular'}
+                color={isSelected || active ? theme.colors.gray900 : theme.colors.gray600}
               >
                 {t(STATUS_LABEL_KEY[item])}
               </Text>
-            </View>
+            </Pressable>
           );
         })}
       </View>

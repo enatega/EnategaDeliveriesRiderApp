@@ -61,6 +61,9 @@ const en = {
   order_status_out_for_delivery: 'Out for Delivery',
   order_status_arrived_at_customer: 'Arrived at Customer',
   order_status_delivered: 'Delivered',
+  order_status_failed: 'Failed',
+  order_status_update_to: 'Update to',
+  order_status_updating: 'Updating...',
 
   menu_availability: 'Availability',
   menu_available: 'Available',

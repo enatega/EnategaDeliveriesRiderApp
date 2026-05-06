@@ -61,6 +61,9 @@ const fr = {
   order_status_out_for_delivery: 'En cours de livraison',
   order_status_arrived_at_customer: 'Arrive chez le client',
   order_status_delivered: 'Livre',
+  order_status_failed: 'Echoue',
+  order_status_update_to: 'Mettre a jour vers',
+  order_status_updating: 'Mise a jour...',
 
   menu_availability: 'Disponibilite',
   menu_available: 'Disponible',
