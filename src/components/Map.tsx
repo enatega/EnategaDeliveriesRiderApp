@@ -8,7 +8,7 @@ import MapView, {
   type MapPolylineProps,
   type MapViewProps,
 } from 'react-native-maps';
-import { StyleSheet } from 'react-native';
+import { Platform, StyleSheet } from 'react-native';
 
 const HIDDEN_COORDINATE: LatLng = { latitude: 0, longitude: 0 };
 
@@ -45,7 +45,15 @@ type Props = Omit<MapViewProps, 'children'> & {
 };
 
 const Map = forwardRef<MapView, Props>(function Map(
-  { markers, polylines, style, provider, useGoogleProvider = true, children, ...rest },
+  {
+    markers,
+    polylines,
+    style,
+    provider,
+    useGoogleProvider = Platform.OS === 'android',
+    children,
+    ...rest
+  },
   ref,
 ) {
   const resolvedProvider = provider ?? (useGoogleProvider ? PROVIDER_GOOGLE : undefined);

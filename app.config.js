@@ -16,6 +16,9 @@ module.exports = {
     ios: {
       supportsTablet: true,
       bundleIdentifier: 'com.enatega.deliveries.rider',
+      config: {
+        googleMapsApiKey,
+      },
     },
     android: {
       adaptiveIcon: {
@@ -24,19 +27,17 @@ module.exports = {
       },
       package: 'com.enatega.deliveries.rider',
       edgeToEdgeEnabled: true,
+      config: {
+        googleMaps: {
+          apiKey: googleMapsApiKey,
+        },
+      },
     },
     web: {
       favicon: './assets/favicon.png',
     },
     plugins: [
       'expo-secure-store',
-      [
-        'react-native-maps',
-        {
-          androidGoogleMapsApiKey: googleMapsApiKey,
-          iosGoogleMapsApiKey: googleMapsApiKey,
-        },
-      ],
     ],
   },
 };
