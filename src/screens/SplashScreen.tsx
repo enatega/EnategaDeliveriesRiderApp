@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { ImageBackground, StyleSheet, View } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { AuthStackParamList } from '../navigation/types';
+import { lightColors } from '../theme/colors';
 
 const BG_IMAGE_URI =
   'http://localhost:3845/assets/4170dc3471aa1409d50c9ae0c261d502b57bc2fb.png';
@@ -31,6 +32,6 @@ export default function SplashScreen({ navigation }: Props) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#020B2B',
+    backgroundColor: lightColors.splashBackground,
   },
 });

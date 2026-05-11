@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { Animated, Pressable, StyleSheet } from 'react-native';
+import { lightColors } from '../theme/colors';
 
 type Props = {
   value: boolean;
@@ -23,7 +24,7 @@ export default function ToggleSwitch({ value, onValueChange, disabled = false }:
     }).start();
   }, [value, translateX]);
 
-  const trackColor = value ? '#4F46E5' : '#D1D5DB';
+  const trackColor = value ? lightColors.indigo600 : lightColors.gray300;
 
   return (
     <Pressable
@@ -43,8 +44,8 @@ const styles = StyleSheet.create({
     width: THUMB_SIZE,
     height: THUMB_SIZE,
     borderRadius: 10,
-    backgroundColor: '#FFFFFF',
-    shadowColor: '#000',
+    backgroundColor: lightColors.white,
+    shadowColor: lightColors.black,
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
     shadowRadius: 2,

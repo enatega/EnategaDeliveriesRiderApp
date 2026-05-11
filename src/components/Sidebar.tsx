@@ -4,6 +4,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Text from './Text';
 import ToggleSwitch from './ToggleSwitch';
 import { useAppTheme } from '../theme/ThemeProvider';
+import { lightColors } from '../theme/colors';
 import { useAuth } from '../auth/AuthProvider';
 import { useLogoutMutation } from '../hooks/useAuthMutations';
 import { useTranslations } from '../localization/LocalizationProvider';
@@ -196,16 +197,16 @@ export default function Sidebar({ visible, onClose, availability, onAvailability
 
 const styles = StyleSheet.create({
   container: { zIndex: 20 },
-  backdrop: { ...StyleSheet.absoluteFillObject, backgroundColor: '#000', opacity: 0.24 },
-  drawer: { width: DRAWER_WIDTH, height: '100%', overflow: 'hidden', elevation: 10, shadowColor: '#000', shadowOffset: { width: 2, height: 0 }, shadowOpacity: 0.18, shadowRadius: 8 },
-  header: { backgroundColor: '#90E36D', paddingHorizontal: 16, paddingBottom: 16 },
-  avatarCircle: { width: 54, height: 54, borderRadius: 27, backgroundColor: '#FFFFFF', alignItems: 'center', justifyContent: 'center', marginBottom: 8 },
+  backdrop: { ...StyleSheet.absoluteFillObject, backgroundColor: lightColors.black, opacity: 0.24 },
+  drawer: { width: DRAWER_WIDTH, height: '100%', overflow: 'hidden', elevation: 10, shadowColor: lightColors.black, shadowOffset: { width: 2, height: 0 }, shadowOpacity: 0.18, shadowRadius: 8 },
+  header: { backgroundColor: lightColors.primary, paddingHorizontal: 16, paddingBottom: 16 },
+  avatarCircle: { width: 54, height: 54, borderRadius: 27, backgroundColor: lightColors.white, alignItems: 'center', justifyContent: 'center', marginBottom: 8 },
   userName: { marginBottom: 2 },
   menuScroll: { flex: 1 },
   menuContent: { paddingTop: 0 },
   row: { minHeight: 56, paddingHorizontal: 16, flexDirection: 'row', alignItems: 'center', gap: 12 },
   rowLabel: { flex: 1, fontSize: 14, lineHeight: 20 },
-  iconBox: { width: 40, height: 40, borderRadius: 20, backgroundColor: '#E5E7EB', alignItems: 'center', justifyContent: 'center' },
+  iconBox: { width: 40, height: 40, borderRadius: 20, backgroundColor: lightColors.gray200, alignItems: 'center', justifyContent: 'center' },
   iconImage: { width: 18, height: 18 },
   toggleWrapper: { alignItems: 'center', justifyContent: 'center', gap: 2, marginRight: 8 },
   chevron: { width: 10, height: 10, borderTopWidth: 1.5, borderRightWidth: 1.5, transform: [{ rotate: '45deg' }] },

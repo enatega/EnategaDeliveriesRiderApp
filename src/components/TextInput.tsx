@@ -9,6 +9,7 @@ import {
   ViewStyle,
 } from 'react-native';
 import { useAppTheme } from '../theme/ThemeProvider';
+import { lightColors } from '../theme/colors';
 import Text from './Text';
 
 type Props = RNTextInputProps & {
@@ -35,7 +36,7 @@ export default function TextInput({
         style={[
           styles.inputContainer,
           {
-            borderColor: error ? '#EF4444' : theme.colors.border,
+            borderColor: error ? theme.colors.red500 : theme.colors.border,
             backgroundColor: theme.colors.surface,
           },
         ]}
@@ -60,7 +61,7 @@ export default function TextInput({
       </View>
 
       {error ? (
-        <Text variant="caption" color="#EF4444" style={styles.errorText}>
+        <Text variant="caption" color={theme.colors.red500} style={styles.errorText}>
           {error}
         </Text>
       ) : null}
@@ -90,7 +91,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 17,
     paddingVertical: 9,
     gap: 6,
-    shadowColor: '#000',
+    shadowColor: lightColors.black,
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.05,
     shadowRadius: 2,

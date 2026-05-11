@@ -7,6 +7,8 @@ import WalletIcon from './icons/WalletIcon';
 import EarningsIcon from './icons/EarningsIcon';
 import ProfileIcon from './icons/ProfileIcon';
 import { useTranslations } from '../localization/LocalizationProvider';
+import { lightColors } from '../theme/colors';
+import { typography } from '../theme/typography';
 
 const TAB_META = {
   HomeTab: { key: 'nav_home', Icon: HomeIcon },
@@ -15,11 +17,11 @@ const TAB_META = {
   ProfileTab: { key: 'nav_profile', Icon: ProfileIcon },
 } as const;
 
-export default function BottomTabBar({ state, descriptors, navigation, insets }: BottomTabBarProps) {
+export default function BottomTabBar({ state, navigation }: BottomTabBarProps) {
   const { t } = useTranslations('app');
 
   return (
-    <View style={[styles.container, { paddingBottom: Math.max(10, insets.bottom) }]}> 
+    <View style={styles.container}> 
       {state.routes.map((route, index) => {
         const focused = state.index === index;
         const meta = TAB_META[route.name as keyof typeof TAB_META];
@@ -48,7 +50,7 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    backgroundColor: '#1F2937',
+    backgroundColor: lightColors.gray800,
     paddingHorizontal: 16,
     paddingVertical: 10,
     borderTopLeftRadius: 12,
@@ -56,7 +58,7 @@ const styles = StyleSheet.create({
   },
   tab: { alignItems: 'center', gap: 7, minWidth: 70 },
   iconWrap: { width: 24, height: 24, alignItems: 'center', justifyContent: 'center' },
-  label: { fontSize: 12, lineHeight: 16 },
-  active: { color: '#90E36D' },
-  inactive: { color: '#9CA3AF' },
+  label: { fontSize: typography.size.xs, lineHeight: typography.lineHeight.xs },
+  active: { color: lightColors.primary },
+  inactive: { color: lightColors.gray400 },
 });

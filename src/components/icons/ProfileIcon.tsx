@@ -1,10 +1,11 @@
 import React from 'react';
 import Svg, { Circle, Path } from 'react-native-svg';
+import { lightColors } from '../../theme/colors';
 
 type Props = { active?: boolean };
 
 export default function ProfileIcon({ active = false }: Props) {
-  const color = active ? '#90E36D' : '#9CA3AF';
+  const color = active ? lightColors.primary : lightColors.gray400;
   return (
     <Svg width={24} height={24} viewBox="0 0 24 24" fill="none">
       <Circle cx={12} cy={8} r={4} stroke={color} strokeWidth={1.5} />

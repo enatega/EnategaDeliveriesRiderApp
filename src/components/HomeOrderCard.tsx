@@ -5,6 +5,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import Text from './Text';
 import Button from './Button';
 import { useAppTheme } from '../theme/ThemeProvider';
+import type { ThemeColors } from '../theme/colors';
 import { useTranslations } from '../localization/LocalizationProvider';
 import { RiderHomeOrder, RiderOrderTab } from '../api/riderHomeTypes';
 import { useAssignOrderMutation } from '../hooks/useRiderHomeMutations';
@@ -15,18 +16,18 @@ type Props = {
   tab: RiderOrderTab;
 };
 
-function statusColors(label?: string | null) {
+function statusColors(colors: ThemeColors, label?: string | null) {
   const lower = (label ?? '').toLowerCase();
 
   if (lower.includes('deliver')) {
-    return { bg: '#D1FAE5', text: '#10B981' };
+    return { bg: colors.emerald100, text: colors.emerald500 };
   }
 
   if (lower.includes('assign')) {
-    return { bg: '#FEF3C7', text: '#92400E' };
+    return { bg: colors.amber100, text: colors.amber800 };
   }
 
-  return { bg: '#FEE2E2', text: '#991B1B' };
+  return { bg: colors.red100, text: colors.red800 };
 }
 
 function getActionLabel(tab: RiderOrderTab, order: RiderHomeOrder, t: (key: string) => string) {
@@ -61,7 +62,7 @@ export default function HomeOrderCard({ order, tab }: Props) {
     : '—';
   const canAssignMe = Boolean(order.canAssignMe);
 
-  const badge = statusColors(safeStatusLabel);
+  const badge = statusColors(theme.colors, safeStatusLabel);
   const actionLabel = getActionLabel(tab, order, t);
   const showAction = tab === 'new' && canAssignMe;
   const isAssigning = tab === 'new' && assignOrderMutation.isPending;
@@ -100,7 +101,7 @@ export default function HomeOrderCard({ order, tab }: Props) {
         {safeStoreImage ? (
           <Image source={{ uri: safeStoreImage }} style={styles.storeImage} />
         ) : (
-          <View style={[styles.storeImage, styles.storeImageFallback]} />
+          <View style={[styles.storeImage, { backgroundColor: theme.colors.gray200 }]} />
         )}
         <Text variant="subtitle" weight="bold" color={theme.colors.gray900}>{safeStoreName}</Text>
       </View>
@@ -180,9 +181,6 @@ const styles = StyleSheet.create({
     width: 32,
     height: 32,
     borderRadius: 8,
-  },
-  storeImageFallback: {
-    backgroundColor: '#E5E7EB',
   },
   addressSection: {
     gap: 2,
