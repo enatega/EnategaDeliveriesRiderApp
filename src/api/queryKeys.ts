@@ -12,3 +12,13 @@ export const riderHomeKeys = {
   orders: (tab: 'new' | 'processing' | 'delivered', search: string) =>
     [...riderHomeKeys.all, 'orders', tab, search] as const,
 };
+
+export const earningsKeys = {
+  all: ['earnings'] as const,
+  summary: (groupBy: 'day' | 'week' | 'month', recentLimit: number) =>
+    [...earningsKeys.all, 'summary', groupBy, recentLimit] as const,
+  activities: (page: number, limit: number) =>
+    [...earningsKeys.all, 'activities', page, limit] as const,
+  activityDeliveries: (activityDate: string) =>
+    [...earningsKeys.all, 'activityDeliveries', activityDate] as const,
+};

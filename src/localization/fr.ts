@@ -32,6 +32,8 @@ const fr = {
   earnings_hours_worked: 'Heures travaillees',
   earnings_tips: 'Pourboires',
   earnings_summary: 'Resume',
+  earnings_deliveries_empty_title: 'Aucune livraison trouvee',
+  earnings_deliveries_empty_subtitle: 'Les livraisons terminees pour cette date apparaitront ici.',
 
   home_header_title: 'Commandes',
   orders_new: 'Nouvelles',

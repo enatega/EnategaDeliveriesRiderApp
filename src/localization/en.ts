@@ -32,6 +32,8 @@ const en = {
   earnings_hours_worked: 'Hours Worked',
   earnings_tips: 'Tips',
   earnings_summary: 'Summary',
+  earnings_deliveries_empty_title: 'No deliveries found',
+  earnings_deliveries_empty_subtitle: 'Completed deliveries for this date will appear here.',
 
   home_header_title: 'Orders',
   orders_new: 'New Orders',

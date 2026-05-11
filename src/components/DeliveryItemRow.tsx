@@ -1,6 +1,7 @@
 import React from 'react';
 import { StyleSheet, View } from 'react-native';
 import Text from './Text';
+import type { RiderEarningsActivityDelivery } from '../api/earningsTypes';
 import { useAppTheme } from '../theme/ThemeProvider';
 
 export type DeliveryItemRowData = {
@@ -9,9 +10,20 @@ export type DeliveryItemRowData = {
   payment: number;
 };
 
+type DeliveryItemRenderable = DeliveryItemRowData | RiderEarningsActivityDelivery;
+
 type Props = {
-  item: DeliveryItemRowData;
+  item: DeliveryItemRenderable;
 };
+
+const getOrderId = (item: DeliveryItemRenderable) =>
+  'order_code' in item ? item.order_code : item.id;
+
+const getStatus = (item: DeliveryItemRenderable) =>
+  'order_code' in item ? item.status : item.status;
+
+const getPayment = (item: DeliveryItemRenderable) =>
+  'order_code' in item ? item.rider_earning : item.payment;
 
 export default function DeliveryItemRow({ item }: Props) {
   const { theme } = useAppTheme();
@@ -21,11 +33,11 @@ export default function DeliveryItemRow({ item }: Props) {
       <View style={styles.content}>
         <View style={styles.topRow}>
           <Text variant="body" weight="medium" color={theme.colors.gray800} style={styles.orderId} numberOfLines={1}>
-            Order ID  {item.id}
+            Order ID  {getOrderId(item)}
           </Text>
           <View style={[styles.badge, { backgroundColor: theme.colors.emerald100 }]}>
             <Text variant="caption" weight="medium" color={theme.colors.emerald900} style={styles.badgeText}>
-              {item.status}
+              {getStatus(item)}
             </Text>
           </View>
         </View>
@@ -34,7 +46,7 @@ export default function DeliveryItemRow({ item }: Props) {
             Payment
           </Text>
           <Text variant="body" weight="semiBold" color={theme.colors.gray800} style={styles.paymentAmount}>
-            ${item.payment}
+            ${getPayment(item)}
           </Text>
         </View>
       </View>

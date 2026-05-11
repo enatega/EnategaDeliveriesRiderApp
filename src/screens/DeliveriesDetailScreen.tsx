@@ -1,22 +1,28 @@
 import React from 'react';
-import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Svg, { Path } from 'react-native-svg';
 import DeliveryItemRow from '../components/DeliveryItemRow';
+import DeliveriesEmptyState from '../components/DeliveriesEmptyState';
 import Text from '../components/Text';
+import VerticalList from '../components/VerticalList';
+import type { RiderEarningsActivityDelivery } from '../api/earningsTypes';
+import { useRiderEarningsActivityDeliveriesQuery } from '../hooks/useEarningsQueries';
 import { useTranslations } from '../localization/LocalizationProvider';
 import { MainStackParamList } from '../navigation/types';
 import { lightColors } from '../theme/colors';
 import { useAppTheme } from '../theme/ThemeProvider';
 import { typography } from '../theme/typography';
-import { deliveryItems } from './earnings/mockData';
 
 type Props = NativeStackScreenProps<MainStackParamList, 'DeliveriesDetail'>;
 
-export default function DeliveriesDetailScreen({ navigation }: Props) {
+export default function DeliveriesDetailScreen({ navigation, route }: Props) {
   const { theme } = useAppTheme();
   const { t } = useTranslations('app');
+  const activityDate = route.params?.earningId;
+  const { data, isLoading } = useRiderEarningsActivityDeliveriesQuery(activityDate);
+  const hasDeliveries = (data?.deliveries.length ?? 0) > 0;
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]} edges={['top']}>
@@ -30,11 +36,23 @@ export default function DeliveriesDetailScreen({ navigation }: Props) {
         <View style={styles.iconButton} />
       </View>
 
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.listContent}>
-        {deliveryItems.map((item) => (
-          <DeliveryItemRow key={item.id} item={item} />
-        ))}
-      </ScrollView>
+      <VerticalList
+        data={data?.deliveries}
+        keyExtractor={(item: RiderEarningsActivityDelivery) => item.order_id}
+        renderItem={({ item }) => <DeliveryItemRow item={item} />}
+        style={styles.list}
+        contentContainerStyle={[styles.listContent, !hasDeliveries ? styles.emptyListContent : null]}
+        ListEmptyComponent={
+          isLoading ? (
+            <View style={styles.emptyLoadingPlaceholder} />
+          ) : (
+            <DeliveriesEmptyState
+              title={t('earnings_deliveries_empty_title')}
+              subtitle={t('earnings_deliveries_empty_subtitle')}
+            />
+          )
+        }
+      />
     </SafeAreaView>
   );
 }
@@ -77,8 +95,19 @@ const styles = StyleSheet.create({
     lineHeight: typography.lineHeight.md,
     textAlign: 'center',
   },
+  list: {
+    flex: 1,
+  },
   listContent: {
     paddingTop: 0,
     paddingBottom: 24,
+  },
+  emptyListContent: {
+    flexGrow: 1,
+    justifyContent: 'center',
+    paddingHorizontal: 16,
+  },
+  emptyLoadingPlaceholder: {
+    minHeight: 180,
   },
 });

@@ -5,6 +5,7 @@ import Text from './Text';
 import { useTranslations } from '../localization/LocalizationProvider';
 import { lightColors } from '../theme/colors';
 import { typography } from '../theme/typography';
+import { RiderEarningsActivity } from '../api/earningsTypes';
 
 export type EarningsActivityRowItem = {
   id: string;
@@ -12,12 +13,25 @@ export type EarningsActivityRowItem = {
   amount: number;
 };
 
-type Props<T extends EarningsActivityRowItem> = {
+type EarningsActivityRenderableItem = EarningsActivityRowItem | RiderEarningsActivity;
+
+type Props<T extends EarningsActivityRenderableItem> = {
   item: T;
   onPress?: (item: T) => void;
 };
 
-export default function EarningsActivityRow<T extends EarningsActivityRowItem>({
+const getActivityDate = (item: EarningsActivityRenderableItem) =>
+  'activity_date' in item ? item.activity_date : item.date;
+
+const getActivityTitle = (
+  item: EarningsActivityRenderableItem,
+  fallbackTitle: string,
+) => ('title' in item ? item.title : fallbackTitle);
+
+const getActivityAmount = (item: EarningsActivityRenderableItem) =>
+  'total_earnings' in item ? item.total_earnings : item.amount;
+
+export default function EarningsActivityRow<T extends EarningsActivityRenderableItem>({
   item,
   onPress,
 }: Props<T>) {
@@ -38,14 +52,14 @@ export default function EarningsActivityRow<T extends EarningsActivityRowItem>({
       <View style={styles.rowContent}>
         <View style={styles.leftGroup}>
           <Text variant="caption" color={lightColors.gray900} style={styles.metaText} numberOfLines={1}>
-            {item.date}
+            {getActivityDate(item)}
           </Text>
           <Text variant="caption" weight="semiBold" color={lightColors.gray900} style={[styles.metaText, { fontWeight: 'bold' }]} numberOfLines={1}>
-            {t('earnings_total_earning')}
+            {getActivityTitle(item, t('earnings_total_earning'))}
           </Text>
         </View>
         <Text variant="caption" weight="semiBold" color={lightColors.gray900} style={styles.amount} numberOfLines={1}>
-          ${item.amount}
+          ${getActivityAmount(item)}
         </Text>
       </View>
       <ChevronRight color={lightColors.gray900} />

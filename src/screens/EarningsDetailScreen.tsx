@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Svg, { Path } from 'react-native-svg';
@@ -7,31 +7,47 @@ import EarningsActivityRow from '../components/EarningsActivityRow';
 import EarningsBottomSheet from '../components/EarningsBottomSheet';
 import SummaryCard from '../components/SummaryCard';
 import Text from '../components/Text';
+import VerticalList from '../components/VerticalList';
+import type { RiderEarningsActivity } from '../api/earningsTypes';
+import { useRiderEarningsActivitiesQuery } from '../hooks/useEarningsQueries';
 import { useTranslations } from '../localization/LocalizationProvider';
 import { MainStackParamList } from '../navigation/types';
 import { lightColors } from '../theme/colors';
 import { useAppTheme } from '../theme/ThemeProvider';
 import { typography } from '../theme/typography';
-import { earningsActivities, earningsSummary, EarningsActivity } from './earnings/mockData';
 
 type Props = NativeStackScreenProps<MainStackParamList, 'EarningsDetail'>;
+const ACTIVITIES_PAGE = 1;
+const ACTIVITIES_LIMIT = 10;
 
 export default function EarningsDetailScreen({ navigation }: Props) {
   const { theme } = useAppTheme();
   const { t } = useTranslations('app');
-  const [selectedActivity, setSelectedActivity] = useState<EarningsActivity | null>(null);
+  const [selectedActivity, setSelectedActivity] = useState<RiderEarningsActivity | null>(null);
+  const { data: activitiesData } = useRiderEarningsActivitiesQuery(
+    ACTIVITIES_PAGE,
+    ACTIVITIES_LIMIT,
+  );
 
   const summaryItems = useMemo(
     () => [
-      { label: t('earnings_hours'), value: earningsSummary.hours },
-      { label: t('earnings_deliveries'), value: `${earningsSummary.deliveries}` },
-      { label: t('earnings_total_earnings'), value: `$${earningsSummary.totalEarnings}` },
+      { label: t('earnings_hours'), value: activitiesData?.summary.hours_worked ?? '' },
+      { label: t('earnings_deliveries'), value: `${activitiesData?.summary.deliveries ?? ''}` },
+      {
+        label: t('earnings_total_earnings'),
+        value: activitiesData ? `$${activitiesData.summary.total_earnings}` : '',
+      },
     ],
-    [t],
+    [activitiesData, t],
   );
 
+  const dateRangeTitle = activitiesData
+    ? `${activitiesData.date_range.start_date} - ${activitiesData.date_range.end_date}`
+    : '';
+
   const handlePressDeliveries = () => {
-    const activityId = selectedActivity?.id;
+    const activityDate = selectedActivity?.activity_date;
+    const activityId = activityDate ? activityDate.split('T')[0] : undefined;
     setSelectedActivity(null);
     navigation.navigate('DeliveriesDetail', { earningId: activityId });
   };
@@ -43,26 +59,28 @@ export default function EarningsDetailScreen({ navigation }: Props) {
           <ArrowLeft color={theme.colors.gray900} />
         </Pressable>
         <Text variant="body" weight="semiBold" color={lightColors.black} style={styles.headerTitle} numberOfLines={1}>
-          01/21/2023 - 02/20/2023
+          {dateRangeTitle}
         </Text>
         <Pressable style={styles.iconButton} hitSlop={8} accessibilityRole="button" accessibilityLabel="Select date range">
           <FunnelIcon color={theme.colors.gray900} />
         </Pressable>
       </View>
 
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
-        <SummaryCard title={t('earnings_summary')} items={summaryItems} />
-
-        <View style={styles.activityList}>
-          {earningsActivities.map((item) => (
+      <VerticalList
+        data={activitiesData?.data}
+        keyExtractor={(item: RiderEarningsActivity) => item.activity_date}
+        renderItem={({ item, index }) => (
+          <View style={[styles.activityListItem, index === 0 ? styles.firstActivityListItem : null]}>
             <EarningsActivityRow
-              key={item.id}
               item={item}
               onPress={setSelectedActivity}
             />
-          ))}
-        </View>
-      </ScrollView>
+          </View>
+        )}
+        ListHeaderComponent={<SummaryCard title={t('earnings_summary')} items={summaryItems} />}
+        style={styles.list}
+        contentContainerStyle={styles.listContent}
+      />
 
       <EarningsBottomSheet
         visible={Boolean(selectedActivity)}
@@ -125,14 +143,17 @@ const styles = StyleSheet.create({
     fontSize: typography.size.md,
     lineHeight: typography.lineHeight.md,
     textAlign: 'center',
-
-
   },
-  scrollContent: {
+  list: {
+    flex: 1,
+  },
+  listContent: {
     paddingBottom: 24,
   },
-  activityList: {
+  activityListItem: {
     paddingHorizontal: 16,
+  },
+  firstActivityListItem: {
     paddingTop: 12,
   },
 });

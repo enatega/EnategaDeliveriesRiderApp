@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -6,18 +6,39 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import EarningsActivityRow from '../components/EarningsActivityRow';
 import EarningsChart from '../components/EarningsChart';
 import Text from '../components/Text';
+import VerticalList from '../components/VerticalList';
+import { earningsService } from '../api/earningsService';
+import { RiderEarningsActivity, RiderEarningsResponse } from '../api/earningsTypes';
 import { useTranslations } from '../localization/LocalizationProvider';
 import { MainStackParamList } from '../navigation/types';
 import { lightColors } from '../theme/colors';
 import { typography } from '../theme/typography';
-import { earningsActivities, earningsChartData } from './earnings/mockData';
 
 export default function EarningsScreen() {
   const { t } = useTranslations('app');
   const navigation = useNavigation<NativeStackNavigationProp<MainStackParamList>>();
-  const recentActivities = earningsActivities.slice(0, 7);
+  const [earningsData, setEarningsData] = useState<RiderEarningsResponse | null>(null);
 
   const handleSeeMore = () => navigation.navigate('EarningsDetail');
+
+  useEffect(() => {
+    let isActive = true;
+
+    earningsService
+      .getRiderEarnings({ groupBy: 'week', recentLimit: 7 })
+      .then((response) => {
+        if (isActive) {
+          setEarningsData(response);
+        }
+      })
+      .catch((error: unknown) => {
+        console.log('[EARNINGS API ERROR]', error);
+      });
+
+    return () => {
+      isActive = false;
+    };
+  }, []);
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: lightColors.background }]} edges={['top']}>
@@ -31,7 +52,7 @@ export default function EarningsScreen() {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
       >
-        <EarningsChart data={earningsChartData} />
+        <EarningsChart data={earningsData?.chart} />
 
         <View style={styles.activitySection}>
           <View style={styles.sectionHeader}>
@@ -45,11 +66,14 @@ export default function EarningsScreen() {
             </Pressable>
           </View>
 
-          <View>
-            {recentActivities.map((item) => (
-              <EarningsActivityRow key={item.id} item={item} onPress={handleSeeMore} />
-            ))}
-          </View>
+          <VerticalList
+            data={earningsData?.recent_activity}
+            keyExtractor={(item: RiderEarningsActivity) => item.activity_date}
+            renderItem={({ item }) => (
+              <EarningsActivityRow item={item} onPress={handleSeeMore} />
+            )}
+            scrollEnabled={false}
+          />
         </View>
       </ScrollView>
     </SafeAreaView>

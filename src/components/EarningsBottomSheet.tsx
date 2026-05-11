@@ -3,12 +3,13 @@ import { Modal, Pressable, StyleSheet, useWindowDimensions, View } from 'react-n
 import Svg, { Path } from 'react-native-svg';
 import SwipeableBottomSheet from './SwipeableBottomSheet';
 import Text from './Text';
+import type { RiderEarningsActivity } from '../api/earningsTypes';
 import { useTranslations } from '../localization/LocalizationProvider';
 import { lightColors } from '../theme/colors';
 import { useAppTheme } from '../theme/ThemeProvider';
 import { typography } from '../theme/typography';
 
-export type EarningsBottomSheetItem = {
+type LegacyEarningsBottomSheetItem = {
   amount: number;
   hoursWorked: string;
   tips: number;
@@ -16,12 +17,28 @@ export type EarningsBottomSheetItem = {
   deliveriesAmount: number;
 };
 
+export type EarningsBottomSheetItem = LegacyEarningsBottomSheetItem | RiderEarningsActivity;
+
 type Props = {
   visible: boolean;
   item: EarningsBottomSheetItem | null;
   onClose: () => void;
   onPressDeliveries: () => void;
 };
+
+const getTotalEarnings = (item: EarningsBottomSheetItem) =>
+  'activity_date' in item ? item.total_earnings : item.amount;
+
+const getHoursWorked = (item: EarningsBottomSheetItem) =>
+  'activity_date' in item ? item.hours_worked ?? '' : item.hoursWorked;
+
+const getTips = (item: EarningsBottomSheetItem) => item.tips;
+
+const getDeliveriesCount = (item: EarningsBottomSheetItem) =>
+  'activity_date' in item ? item.deliveries : item.deliveriesCount;
+
+const getDeliveriesAmount = (item: EarningsBottomSheetItem) =>
+  'activity_date' in item ? item.deliveries_earnings : item.deliveriesAmount;
 
 export default function EarningsBottomSheet({
   visible,
@@ -66,24 +83,24 @@ export default function EarningsBottomSheet({
                 {t('earnings_total_earnings')}
               </Text>
               <Text variant="body" weight="medium" color={theme.colors.gray700} style={styles.totalAmount} numberOfLines={1}>
-                ${item.amount}
+                ${getTotalEarnings(item)}
               </Text>
             </View>
 
             <View style={styles.details}>
-              <InfoRow label={t('earnings_hours_worked')} value={item.hoursWorked} />
-              <InfoRow label={t('earnings_tips')} value={`$${item.tips}`} />
+              <InfoRow label={t('earnings_hours_worked')} value={getHoursWorked(item)} />
+              <InfoRow label={t('earnings_tips')} value={`$${getTips(item)}`} />
               <Pressable
                 onPress={onPressDeliveries}
                 accessibilityRole="button"
                 style={({ pressed }) => [styles.deliveriesRow, { opacity: pressed ? 0.65 : 1 }]}
               >
                 <Text variant="caption" weight="medium" color={theme.colors.blue500} style={styles.detailText} numberOfLines={1}>
-                  {t('earnings_deliveries_count', { count: item.deliveriesCount })}
+                  {t('earnings_deliveries_count', { count: getDeliveriesCount(item) })}
                 </Text>
                 <View style={styles.deliveryValue}>
                   <Text variant="caption" weight="semiBold" color={theme.colors.blue400} style={styles.detailValue} numberOfLines={1}>
-                    ${item.deliveriesAmount}
+                    ${getDeliveriesAmount(item)}
                   </Text>
                   <ChevronRight color={theme.colors.blue400} />
                 </View>
