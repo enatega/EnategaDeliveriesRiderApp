@@ -8,6 +8,7 @@ import WorkScheduleScreen from '../screens/WorkScheduleScreen';
 import ProcessingOrderDetailScreen from '../screens/ProcessingOrderDetailScreen';
 import EarningsDetailScreen from '../screens/EarningsDetailScreen';
 import DeliveriesDetailScreen from '../screens/DeliveriesDetailScreen';
+import UpdatePasswordScreen from '../screens/profile/UpdatePasswordScreen';
 import { MainStackParamList } from './types';
 
 const Stack = createNativeStackNavigator<MainStackParamList>();
@@ -16,6 +17,7 @@ export default function MainNavigator() {
   return (
     <Stack.Navigator>
       <Stack.Screen name="Home" component={MainTabsNavigator} options={{ headerShown: false }} />
+      <Stack.Screen name="UpdatePassword" component={UpdatePasswordScreen} options={{ headerShown: false }} />
       <Stack.Screen
         name="ProcessingOrderDetail"
         component={ProcessingOrderDetailScreen}
