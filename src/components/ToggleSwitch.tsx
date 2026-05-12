@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { Animated, Pressable, StyleSheet } from 'react-native';
+import { useAppTheme } from '../theme/ThemeProvider';
 
 type Props = {
   value: boolean;
@@ -13,6 +14,7 @@ const THUMB_SIZE = 20;
 const THUMB_TRAVEL = TRACK_WIDTH - THUMB_SIZE - 4;
 
 export default function ToggleSwitch({ value, onValueChange, disabled = false }: Props) {
+  const { theme } = useAppTheme();
   const translateX = useRef(new Animated.Value(value ? THUMB_TRAVEL : 2)).current;
 
   useEffect(() => {
@@ -23,14 +25,21 @@ export default function ToggleSwitch({ value, onValueChange, disabled = false }:
     }).start();
   }, [value, translateX]);
 
-  const trackColor = value ? '#4F46E5' : '#D1D5DB';
+  const trackColor = value ? theme.colors.secondary : theme.colors.gray300;
 
   return (
     <Pressable
       onPress={() => !disabled && onValueChange(!value)}
       accessibilityRole="switch"
       accessibilityState={{ checked: value, disabled }}
-      style={[styles.track, { backgroundColor: trackColor, opacity: disabled ? 0.5 : 1 }]}
+      style={[
+        styles.track,
+        {
+          backgroundColor: trackColor,
+          opacity: disabled ? 0.5 : 1,
+          borderColor: value ? theme.colors.secondary : theme.colors.gray300,
+        },
+      ]}
     >
       <Animated.View style={[styles.thumb, { transform: [{ translateX }] }]} />
     </Pressable>
@@ -38,7 +47,13 @@ export default function ToggleSwitch({ value, onValueChange, disabled = false }:
 }
 
 const styles = StyleSheet.create({
-  track: { width: TRACK_WIDTH, height: TRACK_HEIGHT, borderRadius: 12, justifyContent: 'center' },
+  track: {
+    width: TRACK_WIDTH,
+    height: TRACK_HEIGHT,
+    borderRadius: 12,
+    justifyContent: 'center',
+    borderWidth: 1,
+  },
   thumb: {
     width: THUMB_SIZE,
     height: THUMB_SIZE,

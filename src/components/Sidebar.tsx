@@ -22,7 +22,7 @@ type MenuItemNav = MenuItemBase & { type: 'nav'; onPress: () => void };
 type MenuItemToggle = MenuItemBase & { type: 'toggle'; value: boolean; onToggle: (v: boolean) => void; subLabel?: string };
 type MenuItem = MenuItemNav | MenuItemToggle;
 
-const DRAWER_WIDTH = 300;
+const DRAWER_WIDTH = 332;
 const ANIMATION_DURATION = 280;
 const SIDEBAR_ICONS = {
   availability: require('../assets/images/availability.png'),
@@ -165,27 +165,39 @@ export default function Sidebar({ visible, onClose, availability, onAvailability
   return (
     <View style={[StyleSheet.absoluteFill, styles.container]} pointerEvents="box-none">
       <TouchableWithoutFeedback onPress={onClose}><Animated.View style={[styles.backdrop, { opacity: backdropOpacity }]} /></TouchableWithoutFeedback>
-      <Animated.View style={[styles.drawer, { backgroundColor: theme.colors.background, transform: [{ translateX }] }]}>
-        <View style={[styles.header, { paddingTop: insets.top + 8 }]}>
+      <Animated.View style={[styles.drawer, { backgroundColor: theme.colors.gray50, transform: [{ translateX }] }]}>
+        <View style={[styles.header, { paddingTop: insets.top + 10 }]}>
           <View style={styles.avatarCircle}><Text variant="body" weight="semiBold" color={theme.colors.primary}>{initials}</Text></View>
           <Text variant="subtitle" weight="bold" color={theme.colors.text} style={styles.userName}>{user?.name ?? 'John Smith'}</Text>
-          <Text variant="caption" color={theme.colors.gray600}>ID-7853</Text>
+          <View style={[styles.riderBadge, { backgroundColor: '#D9F8CB' }]}>
+            <Text variant="caption" weight="semiBold" color={theme.colors.gray600}>ID-7853</Text>
+          </View>
         </View>
 
-        <ScrollView style={styles.menuScroll} showsVerticalScrollIndicator={false} contentContainerStyle={[styles.menuContent, { paddingBottom: insets.bottom + 24 }]}> 
+        <ScrollView style={styles.menuScroll} showsVerticalScrollIndicator={false} contentContainerStyle={[styles.menuContent, { paddingBottom: insets.bottom + 24 }]}>
           {items.map((item, idx) => (
-            <View key={item.key} style={[styles.row, { borderBottomColor: theme.colors.gray300, borderBottomWidth: idx < items.length - 1 ? 1 : 0 }]}>
-              <IconBox>{item.icon}</IconBox>
+            <View
+              key={item.key}
+              style={[
+                styles.row,
+                {
+                  backgroundColor: theme.colors.surface,
+                  borderColor: theme.colors.gray200,
+                  marginBottom: idx === items.length - 1 ? 0 : 10,
+                },
+              ]}
+            >
+              <View style={[styles.iconBox, { backgroundColor: '#F0F2F6' }]}>{item.icon}</View>
               <Text variant="body" weight="semiBold" color={theme.colors.text} style={styles.rowLabel}>{item.label}</Text>
               {item.type === 'toggle' ? (
                 <View style={styles.toggleWrapper}>
                   <ToggleSwitch value={item.value} onValueChange={item.onToggle} />
-                  {item.subLabel ? <Text variant="caption" color={theme.colors.mutedText}>{item.subLabel}</Text> : null}
+                  {item.subLabel ? <Text variant="caption" color={theme.colors.gray600}>{item.subLabel}</Text> : null}
                 </View>
               ) : (
                 <Pressable onPress={item.onPress} style={StyleSheet.absoluteFill} accessibilityRole="button" accessibilityLabel={item.label} />
               )}
-              {item.type === 'nav' && <ChevronRight color={theme.colors.text} />}
+              {item.type === 'nav' && <ChevronRight color={theme.colors.gray500} />}
             </View>
           ))}
         </ScrollView>
@@ -196,17 +208,54 @@ export default function Sidebar({ visible, onClose, availability, onAvailability
 
 const styles = StyleSheet.create({
   container: { zIndex: 20 },
-  backdrop: { ...StyleSheet.absoluteFillObject, backgroundColor: '#000', opacity: 0.24 },
-  drawer: { width: DRAWER_WIDTH, height: '100%', overflow: 'hidden', elevation: 10, shadowColor: '#000', shadowOffset: { width: 2, height: 0 }, shadowOpacity: 0.18, shadowRadius: 8 },
-  header: { backgroundColor: '#90E36D', paddingHorizontal: 16, paddingBottom: 16 },
-  avatarCircle: { width: 54, height: 54, borderRadius: 27, backgroundColor: '#FFFFFF', alignItems: 'center', justifyContent: 'center', marginBottom: 8 },
-  userName: { marginBottom: 2 },
+  backdrop: { ...StyleSheet.absoluteFillObject, backgroundColor: '#0B1020', opacity: 0.3 },
+  drawer: {
+    width: DRAWER_WIDTH,
+    height: '100%',
+    overflow: 'hidden',
+    elevation: 14,
+    shadowColor: '#000',
+    shadowOffset: { width: 6, height: 0 },
+    shadowOpacity: 0.2,
+    shadowRadius: 14,
+  },
+  header: {
+    backgroundColor: '#90E36D',
+    paddingHorizontal: 20,
+    paddingBottom: 24,
+    borderBottomLeftRadius: 18,
+    borderBottomRightRadius: 18,
+  },
+  avatarCircle: {
+    width: 62,
+    height: 62,
+    borderRadius: 31,
+    backgroundColor: '#FFFFFF',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 10,
+  },
+  userName: { marginBottom: 6 },
+  riderBadge: {
+    alignSelf: 'flex-start',
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderRadius: 999,
+  },
   menuScroll: { flex: 1 },
-  menuContent: { paddingTop: 0 },
-  row: { minHeight: 56, paddingHorizontal: 16, flexDirection: 'row', alignItems: 'center', gap: 12 },
+  menuContent: { paddingTop: 14, paddingHorizontal: 12 },
+  row: {
+    minHeight: 68,
+    paddingHorizontal: 12,
+    borderRadius: 14,
+    borderWidth: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
   rowLabel: { flex: 1, fontSize: 14, lineHeight: 20 },
-  iconBox: { width: 40, height: 40, borderRadius: 20, backgroundColor: '#E5E7EB', alignItems: 'center', justifyContent: 'center' },
+  iconBox: { width: 42, height: 42, borderRadius: 21, alignItems: 'center', justifyContent: 'center' },
   iconImage: { width: 18, height: 18 },
-  toggleWrapper: { alignItems: 'center', justifyContent: 'center', gap: 2, marginRight: 8 },
+  toggleWrapper: { alignItems: 'center', justifyContent: 'center', gap: 4, marginRight: 8 },
   chevron: { width: 10, height: 10, borderTopWidth: 1.5, borderRightWidth: 1.5, transform: [{ rotate: '45deg' }] },
 });

@@ -5,7 +5,7 @@ import { useAppTheme } from '../../../theme/ThemeProvider';
 import { useTranslations } from '../../../localization/LocalizationProvider';
 import {
   DELIVERY_PROGRESS_ORDER,
-  resolveProgressStatus,
+  resolveProgressStatusFromOrder,
   RiderDeliveryProgressStatus,
 } from '../progress';
 
@@ -36,7 +36,7 @@ export default function DeliveryProgressSection({
 }: Props) {
   const { theme } = useAppTheme();
   const { t } = useTranslations('app');
-  const currentStatus = resolveProgressStatus(riderStatus ?? status);
+  const currentStatus = resolveProgressStatusFromOrder(status, riderStatus);
   const currentIndex = DELIVERY_PROGRESS_ORDER.indexOf(currentStatus);
 
   return (

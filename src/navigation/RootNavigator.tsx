@@ -6,10 +6,12 @@ import { useAuth } from '../auth/AuthProvider';
 import AuthNavigator from './AuthNavigator';
 import MainNavigator from './MainNavigator';
 import { buildNavigationTheme } from './navigationTheme';
+import { useRiderOrderSocketSync } from '../hooks/useRiderOrderSocketSync';
 
 export default function RootNavigator() {
   const { theme } = useAppTheme();
   const { isAuthenticated, isReady } = useAuth();
+  useRiderOrderSocketSync();
 
   if (!isReady) {
     return (
