@@ -1,5 +1,5 @@
-import React, { useMemo, useState } from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { ActivityIndicator, Image, Pressable, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Svg, { Circle, Path, Rect } from 'react-native-svg';
 import { useNavigation } from '@react-navigation/native';
@@ -7,29 +7,61 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import Button from '../components/Button';
 import Sidebar from '../components/Sidebar';
 import Text from '../components/Text';
+import VerticalList from '../components/VerticalList';
 import { useSidebar } from '../hooks/useSidebar';
+import { useUpdateVehicleTypeMutation } from '../hooks/useVehicleTypesMutations';
+import { useVehicleTypesQuery } from '../hooks/useVehicleTypesQuery';
 import { useTranslations } from '../localization/LocalizationProvider';
 import { useAppTheme } from '../theme/ThemeProvider';
 import { MainStackParamList } from '../navigation/types';
-
-type VehicleTypeOption = 'bicycle' | 'motorcycle' | 'car' | 'truck';
+import { VehicleTypeItem } from '../api/vehicleTypesTypes';
 
 export default function VehicleTypeScreen() {
   const { theme } = useAppTheme();
   const { t } = useTranslations('app');
   const sidebar = useSidebar();
   const navigation = useNavigation<NativeStackNavigationProp<MainStackParamList>>();
-  const [selectedType, setSelectedType] = useState<VehicleTypeOption>('motorcycle');
+  const vehicleTypesQuery = useVehicleTypesQuery();
+  const updateVehicleTypeMutation = useUpdateVehicleTypeMutation();
+  const [selectedVehicleTypeId, setSelectedVehicleTypeId] = useState<string>('');
+  const [successMessage, setSuccessMessage] = useState('');
+  const vehicleTypes = vehicleTypesQuery.data?.vehicleTypes ?? [];
 
-  const options = useMemo<Array<{ key: VehicleTypeOption; label: string; Icon: React.ComponentType<{ color: string }> }>>(
-    () => [
-      { key: 'bicycle', label: t('vehicle_type_bicycle'), Icon: BicycleIcon },
-      { key: 'motorcycle', label: t('vehicle_type_motorcycle'), Icon: MotorcycleIcon },
-      { key: 'car', label: t('vehicle_type_car'), Icon: CarIcon },
-      { key: 'truck', label: t('vehicle_type_truck'), Icon: TruckIcon },
-    ],
-    [t],
-  );
+  useEffect(() => {
+    if (selectedVehicleTypeId || !vehicleTypes.length) return;
+
+    const selectedByApi = vehicleTypesQuery.data?.selectedVehicleType?.vehicleTypeId;
+    if (selectedByApi) {
+      setSelectedVehicleTypeId(selectedByApi);
+      return;
+    }
+
+    const selectedByFlag = vehicleTypes.find((item) => item.isSelected);
+    if (selectedByFlag) {
+      setSelectedVehicleTypeId(selectedByFlag.id);
+      return;
+    }
+
+    setSelectedVehicleTypeId(vehicleTypes[0].id);
+  }, [selectedVehicleTypeId, vehicleTypes, vehicleTypesQuery.data?.selectedVehicleType?.vehicleTypeId]);
+
+  const onSelectVehicleType = (vehicleTypeId: string) => {
+    setSelectedVehicleTypeId(vehicleTypeId);
+    setSuccessMessage('');
+  };
+
+  const onConfirmVehicleType = async () => {
+    if (!selectedVehicleTypeId || updateVehicleTypeMutation.isPending) return;
+    try {
+      const response = await updateVehicleTypeMutation.mutateAsync({
+        vehicleTypeId: selectedVehicleTypeId,
+      });
+      setSuccessMessage(response.message);
+      navigation.goBack();
+    } catch {
+      // Mutation error is displayed from hook state.
+    }
+  };
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]} edges={['top', 'bottom']}>
@@ -47,24 +79,56 @@ export default function VehicleTypeScreen() {
       </View>
 
       <View style={styles.optionsSection}>
-        {options.map((option) => (
-          <VehicleTypeRow
-            key={option.key}
-            label={option.label}
-            Icon={option.Icon}
-            selected={selectedType === option.key}
-            onPress={() => setSelectedType(option.key)}
+        {vehicleTypesQuery.isLoading ? (
+          <View style={styles.centerState}>
+            <ActivityIndicator color={theme.colors.primary} />
+          </View>
+        ) : vehicleTypesQuery.isError ? (
+          <View style={styles.centerState}>
+            <Text style={{ color: theme.colors.gray600, textAlign: 'center' }}>{vehicleTypesQuery.errorMessage}</Text>
+          </View>
+        ) : (
+          <VerticalList
+            data={vehicleTypes}
+            keyExtractor={(item) => item.id}
+            renderItem={({ item }) => (
+              <VehicleTypeRow
+                item={item}
+                label={item.name}
+                selected={selectedVehicleTypeId === item.id}
+                onPress={() => onSelectVehicleType(item.id)}
+              />
+            )}
           />
-        ))}
+        )}
       </View>
 
       <View style={styles.footer}>
         <Button
-          label={t('vehicle_type_update_button')}
-          onPress={() => navigation.goBack()}
+          label={
+            updateVehicleTypeMutation.isPending
+              ? t('vehicle_type_updating_button')
+              : t('vehicle_type_update_button')
+          }
+          onPress={onConfirmVehicleType}
+          disabled={
+            updateVehicleTypeMutation.isPending ||
+            vehicleTypesQuery.isLoading ||
+            !selectedVehicleTypeId
+          }
           textColor={theme.colors.gray900}
           containerStyle={styles.updateButton}
         />
+        {updateVehicleTypeMutation.error?.message ? (
+          <Text variant="caption" color={theme.colors.red500} style={styles.feedbackText}>
+            {updateVehicleTypeMutation.error.message}
+          </Text>
+        ) : null}
+        {successMessage ? (
+          <Text variant="caption" color={theme.colors.emerald900} style={styles.feedbackText}>
+            {successMessage}
+          </Text>
+        ) : null}
       </View>
 
       <Sidebar
@@ -80,13 +144,13 @@ export default function VehicleTypeScreen() {
 }
 
 function VehicleTypeRow({
+  item,
   label,
-  Icon,
   selected,
   onPress,
 }: {
+  item: VehicleTypeItem;
   label: string;
-  Icon: React.ComponentType<{ color: string }>;
   selected: boolean;
   onPress: () => void;
 }) {
@@ -94,7 +158,7 @@ function VehicleTypeRow({
   return (
     <Pressable onPress={onPress} style={[styles.row, { borderBottomColor: theme.colors.gray300 }]}>
       <View style={styles.rowLeft}>
-        <Icon color={theme.colors.gray600} />
+        <VehicleImage imageUrl={item.imageUrl} />
         <Text
           weight="semiBold"
           style={[
@@ -136,17 +200,7 @@ function HamburgerIcon({ color }: { color: string }) {
   );
 }
 
-function BicycleIcon({ color }: { color: string }) {
-  return (
-    <Svg width={28} height={28} viewBox="0 0 28 28" fill="none">
-      <Circle cx={7} cy={21} r={4.25} stroke={color} strokeWidth={1.8} />
-      <Circle cx={21} cy={21} r={4.25} stroke={color} strokeWidth={1.8} />
-      <Path d="M7 21L12 12H16L13 21M16 12L21 21M10 8H14" stroke={color} strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" />
-    </Svg>
-  );
-}
-
-function MotorcycleIcon({ color }: { color: string }) {
+function VehicleIcon({ color }: { color: string }) {
   return (
     <Svg width={28} height={28} viewBox="0 0 28 28" fill="none">
       <Circle cx={8} cy={20.5} r={3.75} stroke={color} strokeWidth={1.8} />
@@ -157,25 +211,15 @@ function MotorcycleIcon({ color }: { color: string }) {
   );
 }
 
-function CarIcon({ color }: { color: string }) {
+function VehicleImage({ imageUrl }: { imageUrl: string }) {
   return (
-    <Svg width={32} height={32} viewBox="0 0 32 32" fill="none">
-      <Path d="M5 20L8.5 14H23.5L27 20V24H5V20Z" stroke={color} strokeWidth={1.8} strokeLinejoin="round" />
-      <Circle cx={10} cy={24} r={2} stroke={color} strokeWidth={1.8} />
-      <Circle cx={22} cy={24} r={2} stroke={color} strokeWidth={1.8} />
-      <Path d="M10 14V11H22V14" stroke={color} strokeWidth={1.8} strokeLinejoin="round" />
-    </Svg>
-  );
-}
-
-function TruckIcon({ color }: { color: string }) {
-  return (
-    <Svg width={28} height={28} viewBox="0 0 28 28" fill="none">
-      <Rect x={2.5} y={9} width={12} height={12} stroke={color} strokeWidth={1.8} />
-      <Path d="M14.5 12H20L24.5 16V21H14.5V12Z" stroke={color} strokeWidth={1.8} strokeLinejoin="round" />
-      <Circle cx={8} cy={21} r={2.25} stroke={color} strokeWidth={1.8} />
-      <Circle cx={20} cy={21} r={2.25} stroke={color} strokeWidth={1.8} />
-    </Svg>
+    <View style={styles.imageWrap}>
+      {imageUrl ? (
+        <Image source={{ uri: imageUrl }} style={styles.image} resizeMode="cover" />
+      ) : (
+        <VehicleIcon color="#6B7280" />
+      )}
+    </View>
   );
 }
 
@@ -192,6 +236,7 @@ const styles = StyleSheet.create({
   optionsSection: {
     marginTop: 39,
     marginHorizontal: 21,
+    flex: 1,
   },
   row: {
     minHeight: 62,
@@ -204,6 +249,18 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingRight: 36,
     gap: 16,
+  },
+  imageWrap: {
+    width: 28,
+    height: 28,
+    borderRadius: 4,
+    overflow: 'hidden',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  image: {
+    width: 28,
+    height: 28,
   },
   rowLabel: {
     flex: 1,
@@ -234,5 +291,13 @@ const styles = StyleSheet.create({
   updateButton: {
     height: 54,
     borderRadius: 40,
+  },
+  centerState: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  feedbackText: {
+    marginTop: 8,
   },
 });

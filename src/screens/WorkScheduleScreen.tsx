@@ -1,5 +1,5 @@
-import React, { useMemo, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { ActivityIndicator, Pressable, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Svg, { Circle, Path } from 'react-native-svg';
 import { useNavigation } from '@react-navigation/native';
@@ -7,44 +7,78 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import Button from '../components/Button';
 import Sidebar from '../components/Sidebar';
 import Text from '../components/Text';
+import TextInput from '../components/TextInput';
+import VerticalList from '../components/VerticalList';
 import { useSidebar } from '../hooks/useSidebar';
+import { useUpdateWorkScheduleMutation } from '../hooks/useWorkScheduleMutations';
+import { useWorkScheduleQuery } from '../hooks/useWorkScheduleQuery';
 import { useTranslations } from '../localization/LocalizationProvider';
 import { MainStackParamList } from '../navigation/types';
 import { useAppTheme } from '../theme/ThemeProvider';
-
-type DayKey = 'mon' | 'tue' | 'wed' | 'thu' | 'fri' | 'sat' | 'sun';
+import { WorkScheduleData, WorkScheduleDay } from '../api/workScheduleTypes';
+type WorkScheduleRow = [keyof WorkScheduleData, WorkScheduleDay];
 
 export default function WorkScheduleScreen() {
   const { theme } = useAppTheme();
   const { t } = useTranslations('app');
   const sidebar = useSidebar();
   const navigation = useNavigation<NativeStackNavigationProp<MainStackParamList>>();
+  const workScheduleQuery = useWorkScheduleQuery();
+  const updateWorkScheduleMutation = useUpdateWorkScheduleMutation();
+  const [weeklyShifts, setWeeklyShifts] = useState<WorkScheduleData | null>(null);
+  const [formError, setFormError] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
+  const scheduleRows = (Object.entries(weeklyShifts ?? {}) as WorkScheduleRow[]);
 
-  const [enabledDays, setEnabledDays] = useState<Record<DayKey, boolean>>({
-    mon: true,
-    tue: true,
-    wed: true,
-    thu: true,
-    fri: true,
-    sat: true,
-    sun: true,
-  });
+  useEffect(() => {
+    if (workScheduleQuery.data?.data) {
+      setWeeklyShifts(workScheduleQuery.data.data);
+    }
+  }, [workScheduleQuery.data]);
 
-  const dayItems = useMemo<Array<{ key: DayKey; label: string }>>(
-    () => [
-      { key: 'mon', label: t('work_schedule_mon') },
-      { key: 'tue', label: t('work_schedule_tue') },
-      { key: 'wed', label: t('work_schedule_wed') },
-      { key: 'thu', label: t('work_schedule_thu') },
-      { key: 'fri', label: t('work_schedule_fri') },
-      { key: 'sat', label: t('work_schedule_sat') },
-      { key: 'sun', label: t('work_schedule_sun') },
-    ],
-    [t],
-  );
+  const updateDay = (dayKey: keyof WorkScheduleData, next: WorkScheduleDay) => {
+    setWeeklyShifts((prev) => (prev ? { ...prev, [dayKey]: next } : prev));
+    setFormError('');
+    setSuccessMessage('');
+  };
 
-  const toggleDay = (day: DayKey) => {
-    setEnabledDays((prev) => ({ ...prev, [day]: !prev[day] }));
+  const onToggleDay = (dayKey: keyof WorkScheduleData) => {
+    const dayData = weeklyShifts?.[dayKey];
+    if (!dayData) return;
+    updateDay(dayKey, { ...dayData, is_active: !dayData.is_active });
+  };
+
+  const onChangeTime = (dayKey: keyof WorkScheduleData, field: 'open' | 'close', value: string) => {
+    const dayData = weeklyShifts?.[dayKey];
+    if (!dayData) return;
+    const currentSlot = dayData.slots?.[0] ?? { open: '00:00', close: '23:59' };
+    const nextSlot = { ...currentSlot, [field]: value };
+    updateDay(dayKey, { ...dayData, slots: [nextSlot] });
+  };
+
+  const validate = (): boolean => {
+    if (!weeklyShifts) return false;
+    const hasInvalid = Object.values(weeklyShifts).some((day) => {
+      if (!day.is_active) return false;
+      const slot = day.slots?.[0];
+      return !slot?.open?.trim() || !slot?.close?.trim();
+    });
+    if (hasInvalid) {
+      setFormError(t('work_schedule_required_field'));
+      return false;
+    }
+    setFormError('');
+    return true;
+  };
+
+  const onUpdateSchedule = async () => {
+    if (!weeklyShifts || !validate()) return;
+    try {
+      const response = await updateWorkScheduleMutation.mutateAsync({ weeklyShifts });
+      setSuccessMessage(response.message);
+    } catch {
+      // Mutation error is displayed from hook state.
+    }
   };
 
   return (
@@ -62,29 +96,56 @@ export default function WorkScheduleScreen() {
         <View style={styles.menuButton} />
       </View>
 
-      <ScrollView
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
-      >
-        <View style={styles.cardsWrap}>
-          {dayItems.map((day) => (
-            <DayScheduleCard
-              key={day.key}
-              dayLabel={day.label}
-              enabled={enabledDays[day.key]}
-              onToggle={() => toggleDay(day.key)}
-            />
-          ))}
-        </View>
-      </ScrollView>
+      <View style={styles.listWrap}>
+        {workScheduleQuery.isLoading ? (
+          <View style={styles.centerState}>
+            <ActivityIndicator color={theme.colors.primary} />
+          </View>
+        ) : workScheduleQuery.isError ? (
+          <View style={styles.centerState}>
+            <Text style={{ color: theme.colors.gray600 }}>{t('status_unknown')}</Text>
+          </View>
+        ) : (
+          <VerticalList
+            data={scheduleRows}
+            keyExtractor={(item) => item[0]}
+            contentContainerStyle={styles.cardsWrap}
+            renderItem={({ item }) => (
+              <DayScheduleCard
+                dayKey={item[0]}
+                dayData={item[1]}
+                onToggle={() => onToggleDay(item[0])}
+                onOpenChange={(value) => onChangeTime(item[0], 'open', value)}
+                onCloseChange={(value) => onChangeTime(item[0], 'close', value)}
+              />
+            )}
+          />
+        )}
+      </View>
 
       <View style={styles.footer}>
         <Button
-          label={t('work_schedule_update_button')}
-          onPress={() => navigation.goBack()}
+          label={updateWorkScheduleMutation.isPending ? t('work_schedule_updating_button') : t('work_schedule_update_button')}
+          onPress={onUpdateSchedule}
+          disabled={updateWorkScheduleMutation.isPending || workScheduleQuery.isLoading || !weeklyShifts}
           textColor={theme.colors.gray900}
           containerStyle={styles.updateButton}
         />
+        {formError ? (
+          <Text variant="caption" color={theme.colors.red500} style={styles.feedbackText}>
+            {formError}
+          </Text>
+        ) : null}
+        {updateWorkScheduleMutation.error?.message ? (
+          <Text variant="caption" color={theme.colors.red500} style={styles.feedbackText}>
+            {updateWorkScheduleMutation.error.message}
+          </Text>
+        ) : null}
+        {successMessage ? (
+          <Text variant="caption" color={theme.colors.emerald900} style={styles.feedbackText}>
+            {successMessage}
+          </Text>
+        ) : null}
       </View>
 
       <Sidebar
@@ -100,15 +161,23 @@ export default function WorkScheduleScreen() {
 }
 
 function DayScheduleCard({
-  dayLabel,
-  enabled,
+  dayKey,
+  dayData,
   onToggle,
+  onOpenChange,
+  onCloseChange,
 }: {
-  dayLabel: string;
-  enabled: boolean;
+  dayKey: keyof WorkScheduleData;
+  dayData: WorkScheduleDay;
   onToggle: () => void;
+  onOpenChange: (value: string) => void;
+  onCloseChange: (value: string) => void;
 }) {
   const { theme } = useAppTheme();
+  const dayLabel = dayKey.slice(0, 3).toUpperCase();
+  const slot = dayData.slots?.[0];
+  const openTime = slot?.open ?? '00:00';
+  const closeTime = slot?.close ?? '23:59';
 
   return (
     <View style={[styles.dayCard, { borderColor: theme.colors.gray200 }]}>
@@ -123,7 +192,7 @@ function DayScheduleCard({
           onPress={onToggle}
           style={[
             styles.switchTrack,
-            { backgroundColor: enabled ? theme.colors.primary : theme.colors.gray300 },
+            { backgroundColor: dayData.is_active ? theme.colors.primary : theme.colors.gray300 },
           ]}
         >
           <View
@@ -132,7 +201,7 @@ function DayScheduleCard({
               {
                 backgroundColor: theme.colors.white,
                 shadowColor: theme.colors.black,
-                transform: [{ translateX: enabled ? 0 : -27 }],
+                transform: [{ translateX: dayData.is_active ? 0 : -27 }],
               },
             ]}
           />
@@ -140,9 +209,9 @@ function DayScheduleCard({
       </View>
 
       <View style={styles.timeRow}>
-        <TimeInput value="00:00" />
+        <TimeInput value={openTime} onChangeText={onOpenChange} />
         <View style={[styles.timeDash, { backgroundColor: theme.colors.gray300 }]} />
-        <TimeInput value="23:59" />
+        <TimeInput value={closeTime} onChangeText={onCloseChange} />
         <Pressable style={styles.addButton}>
           <AddIcon color={theme.colors.primary} iconColor={theme.colors.white} />
         </Pressable>
@@ -151,23 +220,15 @@ function DayScheduleCard({
   );
 }
 
-function TimeInput({ value }: { value: string }) {
+function TimeInput({ value, onChangeText }: { value: string; onChangeText: (value: string) => void }) {
   const { theme } = useAppTheme();
   return (
-    <View
-      style={[
-        styles.timeInput,
-        {
-          borderColor: theme.colors.gray300,
-          backgroundColor: theme.colors.surface,
-          shadowColor: theme.colors.black,
-        },
-      ]}
-    >
-      <Text style={{ color: theme.colors.gray800, fontSize: theme.typography.size.sm, lineHeight: 20 }}>
-        {value}
-      </Text>
-    </View>
+    <TextInput
+      value={value}
+      onChangeText={onChangeText}
+      containerStyle={styles.timeInputWrap}
+      style={{ textAlign: 'center', color: theme.colors.gray800, fontSize: theme.typography.size.sm, lineHeight: 20 }}
+    />
   );
 }
 
@@ -198,13 +259,14 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   menuButton: { width: 24, height: 24, alignItems: 'center', justifyContent: 'center' },
-  scrollContent: {
+  listWrap: {
+    flex: 1,
     paddingTop: 32,
-    paddingBottom: 130,
   },
   cardsWrap: {
     paddingHorizontal: 18,
     gap: 12,
+    paddingBottom: 130,
   },
   dayCard: {
     borderWidth: 1,
@@ -245,14 +307,9 @@ const styles = StyleSheet.create({
   timeInput: {
     flex: 1,
     height: 42,
-    borderWidth: 1,
-    borderRadius: 6,
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-    elevation: 1,
+  },
+  timeInputWrap: {
+    flex: 1,
   },
   timeDash: {
     width: 25,
@@ -272,5 +329,14 @@ const styles = StyleSheet.create({
   updateButton: {
     height: 54,
     borderRadius: 40,
+  },
+  feedbackText: {
+    marginTop: 6,
+    textAlign: 'center',
+  },
+  centerState: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });

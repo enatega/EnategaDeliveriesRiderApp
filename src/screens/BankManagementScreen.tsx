@@ -1,5 +1,5 @@
-import React from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { ActivityIndicator, Pressable, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Svg, { Path } from 'react-native-svg';
 import { useNavigation } from '@react-navigation/native';
@@ -7,16 +7,84 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import Button from '../components/Button';
 import Sidebar from '../components/Sidebar';
 import Text from '../components/Text';
+import TextInput from '../components/TextInput';
+import { useUpdateBankDetailsMutation } from '../hooks/useBankDetailsMutations';
+import { useBankDetailsQuery } from '../hooks/useBankDetailsQuery';
 import { useSidebar } from '../hooks/useSidebar';
 import { useTranslations } from '../localization/LocalizationProvider';
 import { MainStackParamList } from '../navigation/types';
 import { useAppTheme } from '../theme/ThemeProvider';
+import { UpdateBankDetailsPayload } from '../api/bankDetailsTypes';
+
+type BankFormState = UpdateBankDetailsPayload;
+type BankFormErrors = Partial<Record<keyof BankFormState, string>>;
 
 export default function BankManagementScreen() {
   const { theme } = useAppTheme();
   const { t } = useTranslations('app');
   const sidebar = useSidebar();
   const navigation = useNavigation<NativeStackNavigationProp<MainStackParamList>>();
+  const bankDetailsQuery = useBankDetailsQuery();
+  const updateBankDetailsMutation = useUpdateBankDetailsMutation();
+  const bankDetails = bankDetailsQuery.data?.data;
+  const [form, setForm] = useState<BankFormState>({
+    bankName: '',
+    accountTitle: '',
+    accountNumber: '',
+    iban: '',
+    currency: '',
+    accountCode: '',
+  });
+  const [errors, setErrors] = useState<BankFormErrors>({});
+  const [successMessage, setSuccessMessage] = useState('');
+
+  useEffect(() => {
+    if (!bankDetails) return;
+    setForm({
+      bankName: bankDetails.bankName,
+      accountTitle: bankDetails.accountTitle,
+      accountNumber: bankDetails.accountNumber,
+      iban: bankDetails.iban,
+      currency: bankDetails.currency,
+      accountCode: bankDetails.accountCode,
+    });
+  }, [bankDetails]);
+
+  const onChangeField = (field: keyof BankFormState, value: string) => {
+    setForm((prev) => ({ ...prev, [field]: value }));
+    setErrors((prev) => ({ ...prev, [field]: '' }));
+    setSuccessMessage('');
+  };
+
+  const validate = (): boolean => {
+    const nextErrors: BankFormErrors = {};
+
+    if (!form.bankName.trim()) nextErrors.bankName = t('bank_required_field');
+    if (!form.accountTitle.trim()) nextErrors.accountTitle = t('bank_required_field');
+    if (!form.accountNumber.trim()) nextErrors.accountNumber = t('bank_required_field');
+    if (!form.iban.trim()) nextErrors.iban = t('bank_required_field');
+    if (!form.currency.trim()) nextErrors.currency = t('bank_required_field');
+
+    setErrors(nextErrors);
+    return Object.keys(nextErrors).length === 0;
+  };
+
+  const onConfirm = async () => {
+    if (!validate()) return;
+    try {
+      const response = await updateBankDetailsMutation.mutateAsync({
+        bankName: form.bankName.trim(),
+        accountTitle: form.accountTitle.trim(),
+        accountNumber: form.accountNumber.trim(),
+        iban: form.iban.trim(),
+        currency: form.currency.trim(),
+        accountCode: form.accountCode.trim(),
+      });
+      setSuccessMessage(response.message);
+    } catch {
+      // Error surfaced through mutation state.
+    }
+  };
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]} edges={['top', 'bottom']}>
@@ -34,83 +102,96 @@ export default function BankManagementScreen() {
       </View>
 
       <View style={styles.content}>
-        <FormField label={t('bank_currency_label')}>
-          <View
-            style={[
-              styles.input,
-              {
-                borderColor: theme.colors.gray300,
-                backgroundColor: theme.colors.surface,
-                shadowColor: theme.colors.black,
-              },
-            ]}
-          >
-            <View style={styles.currencyValueWrap}>
-              <View style={[styles.flagPlaceholder, { backgroundColor: theme.colors.blue500 }]} />
-              <Text style={{ color: theme.colors.gray800, fontSize: theme.typography.size.sm, lineHeight: 20 }}>
-                {t('bank_currency_value')}
-              </Text>
-            </View>
-            <ChevronDownIcon color={theme.colors.gray500} />
+        {bankDetailsQuery.isLoading ? (
+          <View style={styles.centerState}>
+            <ActivityIndicator color={theme.colors.primary} />
           </View>
-        </FormField>
+        ) : bankDetailsQuery.isError ? (
+          <View style={styles.centerState}>
+            <Text style={{ color: theme.colors.gray600 }}>{t('status_unknown')}</Text>
+          </View>
+        ) : (
+          <>
+            <FormField label={t('bank_currency_label')}>
+              <TextInput
+                value={form.currency}
+                onChangeText={(value) => onChangeField('currency', value)}
+                error={errors.currency}
+              />
+            </FormField>
 
-        <FormField label={t('bank_holder_name_label')}>
-          <View
-            style={[
-              styles.input,
-              {
-                borderColor: theme.colors.gray300,
-                backgroundColor: theme.colors.surface,
-                shadowColor: theme.colors.black,
-              },
-            ]}
-          >
-            <Text style={{ color: theme.colors.gray800, fontSize: theme.typography.size.sm, lineHeight: 20 }}>
-              {t('bank_holder_name_value')}
-            </Text>
-          </View>
-        </FormField>
+            <FormField label={t('bank_bank_name_label')}>
+              <TextInput
+                value={form.bankName}
+                onChangeText={(value) => onChangeField('bankName', value)}
+                error={errors.bankName}
+              />
+            </FormField>
 
-        <FormField label={t('bank_iban_label')}>
-          <View
-            style={[
-              styles.input,
-              {
-                borderColor: theme.colors.gray300,
-                backgroundColor: theme.colors.surface,
-                shadowColor: theme.colors.black,
-              },
-            ]}
-          >
-            <Text style={{ color: theme.colors.gray800, fontSize: theme.typography.size.sm, lineHeight: 20 }}>
-              {t('bank_iban_value')}
-            </Text>
-          </View>
-        </FormField>
+            <FormField label={t('bank_holder_name_label')}>
+              <TextInput
+                value={form.accountTitle}
+                onChangeText={(value) => onChangeField('accountTitle', value)}
+                error={errors.accountTitle}
+              />
+            </FormField>
 
-        <FormField label={t('bank_account_number_label')}>
-          <View
-            style={[
-              styles.input,
-              {
-                borderColor: theme.colors.gray300,
-                backgroundColor: theme.colors.surface,
-                shadowColor: theme.colors.black,
-              },
-            ]}
-          >
-            <Text style={{ color: theme.colors.gray800, fontSize: theme.typography.size.sm, lineHeight: 20 }}>
-              {t('bank_account_number_value')}
-            </Text>
-          </View>
-        </FormField>
+            <FormField label={t('bank_iban_label')}>
+              <TextInput
+                value={form.iban}
+                onChangeText={(value) => onChangeField('iban', value)}
+                error={errors.iban}
+                autoCapitalize="characters"
+              />
+            </FormField>
+
+            <FormField label={t('bank_account_number_label')}>
+              <TextInput
+                value={form.accountNumber}
+                onChangeText={(value) => onChangeField('accountNumber', value)}
+                error={errors.accountNumber}
+                keyboardType="number-pad"
+              />
+            </FormField>
+
+            <FormField label={t('bank_account_code_label')}>
+              <TextInput
+                value={form.accountCode}
+                onChangeText={(value) => onChangeField('accountCode', value)}
+              />
+            </FormField>
+
+            {updateBankDetailsMutation.error?.message ? (
+              <View
+                style={[
+                  styles.messageWrap,
+                  {
+                    borderColor: theme.colors.red500,
+                  },
+                ]}
+              >
+                <Text variant="caption" color={theme.colors.red500}>
+                  {updateBankDetailsMutation.error.message}
+                </Text>
+              </View>
+            ) : null}
+
+            {successMessage ? (
+              <View style={[styles.messageWrap, { borderColor: theme.colors.emerald500 }]}>
+                <Text variant="caption" color={theme.colors.emerald900}>
+                  {successMessage}
+                </Text>
+              </View>
+            ) : null}
+          </>
+        )}
       </View>
 
       <View style={styles.footer}>
         <Button
-          label={t('bank_confirm_button')}
-          onPress={() => navigation.goBack()}
+          label={updateBankDetailsMutation.isPending ? t('bank_updating_button') : t('bank_confirm_button')}
+          onPress={onConfirm}
+          disabled={updateBankDetailsMutation.isPending || bankDetailsQuery.isLoading}
           textColor={theme.colors.gray900}
           containerStyle={styles.confirmButton}
         />
@@ -151,14 +232,6 @@ function HamburgerIcon({ color }: { color: string }) {
   );
 }
 
-function ChevronDownIcon({ color }: { color: string }) {
-  return (
-    <Svg width={16} height={16} viewBox="0 0 16 16" fill="none">
-      <Path d="M4 6L8 10L12 6" stroke={color} strokeWidth={1.4} strokeLinecap="round" strokeLinejoin="round" />
-    </Svg>
-  );
-}
-
 const styles = StyleSheet.create({
   container: { flex: 1 },
   header: {
@@ -172,34 +245,11 @@ const styles = StyleSheet.create({
   content: {
     marginTop: 40,
     paddingHorizontal: 16,
-    gap: 16,
+    gap: 10,
   },
   field: {
     gap: 8,
     paddingBottom: 16,
-  },
-  input: {
-    height: 42,
-    borderWidth: 1,
-    borderRadius: 6,
-    paddingHorizontal: 17,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-    elevation: 1,
-  },
-  currencyValueWrap: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-  },
-  flagPlaceholder: {
-    width: 30,
-    height: 18,
-    borderRadius: 2,
   },
   footer: {
     marginTop: 'auto',
@@ -210,5 +260,16 @@ const styles = StyleSheet.create({
   confirmButton: {
     height: 54,
     borderRadius: 40,
+  },
+  centerState: {
+    minHeight: 220,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  messageWrap: {
+    borderWidth: 1,
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
   },
 });

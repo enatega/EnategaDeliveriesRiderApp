@@ -31,3 +31,18 @@ export const riderWalletKeys = {
   history: (transactionType: 'deposit' | 'withdrawal' | 'all') =>
     [...riderWalletKeys.historyAll(), transactionType] as const,
 };
+
+export const vehicleTypesKeys = {
+  all: ['vehicleTypes'] as const,
+  list: () => [...vehicleTypesKeys.all, 'list'] as const,
+};
+
+export const bankDetailsKeys = {
+  all: ['bankDetails'] as const,
+  detail: () => [...bankDetailsKeys.all, 'detail'] as const,
+};
+
+export const workScheduleKeys = {
+  all: ['workSchedule'] as const,
+  detail: () => [...workScheduleKeys.all, 'detail'] as const,
+};
