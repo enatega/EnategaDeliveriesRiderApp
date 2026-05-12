@@ -43,6 +43,25 @@ export function resolveProgressStatus(status?: string | null): RiderDeliveryProg
   return API_STATUS_TO_PROGRESS[status] ?? RiderDeliveryProgressStatus.ASSIGNED;
 }
 
+export function resolveProgressStatusFromOrder(
+  orderStatus?: string | null,
+  riderStatus?: string | null,
+): RiderDeliveryProgressStatus {
+  const finalOrderStatuses = new Set([
+    'picked_up',
+    'out_for_delivery',
+    'arrived',
+    'delivered',
+    'failed',
+  ]);
+
+  if (orderStatus && finalOrderStatuses.has(orderStatus)) {
+    return resolveProgressStatus(orderStatus);
+  }
+
+  return resolveProgressStatus(riderStatus ?? orderStatus);
+}
+
 const PROGRESS_STATUS_TO_API_STATUS: Partial<Record<RiderDeliveryProgressStatus, string>> = {
   [RiderDeliveryProgressStatus.HEADING_TO_STORE]: 'heading_to_store',
   [RiderDeliveryProgressStatus.ARRIVED_AT_STORE]: 'arrived_at_store',

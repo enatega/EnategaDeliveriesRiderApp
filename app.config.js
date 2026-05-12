@@ -28,6 +28,12 @@ module.exports = {
     web: {
       favicon: './assets/favicon.png',
     },
+    updates: {
+      url: 'https://u.expo.dev/dd251847-b122-424b-b7dd-60bd8ddbbe90',
+    },
+    runtimeVersion: {
+      policy: 'appVersion',
+    },
     plugins: [
       'expo-secure-store',
       [
@@ -38,5 +44,10 @@ module.exports = {
         },
       ],
     ],
+    extra: {
+      eas: {
+        projectId: 'dd251847-b122-424b-b7dd-60bd8ddbbe90',
+      },
+    },
   },
 };

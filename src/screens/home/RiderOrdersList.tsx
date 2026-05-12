@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
+import { useQueryClient } from '@tanstack/react-query';
 import Text from '../../components/Text';
 import VerticalList from '../../components/VerticalList';
 import HomeOrderCard from '../../components/HomeOrderCard';
@@ -7,6 +8,7 @@ import { useRiderOrdersInfiniteQuery } from '../../hooks/useRiderHomeQueries';
 import { RiderOrderTab } from '../../api/riderHomeTypes';
 import { useAppTheme } from '../../theme/ThemeProvider';
 import { useTranslations } from '../../localization/LocalizationProvider';
+import { riderHomeKeys } from '../../api/queryKeys';
 
 type Props = {
   tab: RiderOrderTab;
@@ -15,6 +17,7 @@ type Props = {
 export default function RiderOrdersList({ tab }: Props) {
   const { theme } = useAppTheme();
   const { t } = useTranslations('app');
+  const queryClient = useQueryClient();
   const query = useRiderOrdersInfiniteQuery(tab);
 
   const items = useMemo(
@@ -23,6 +26,14 @@ export default function RiderOrdersList({ tab }: Props) {
   );
 
   const isInitialLoading = query.isLoading && items.length === 0;
+  const isRefreshing = query.isRefetching && !query.isFetchingNextPage;
+
+  const handleRefresh = async () => {
+    await Promise.all([
+      query.refetch(),
+      queryClient.invalidateQueries({ queryKey: riderHomeKeys.summary() }),
+    ]);
+  };
 
   if (isInitialLoading) {
     return (
@@ -54,6 +65,8 @@ export default function RiderOrdersList({ tab }: Props) {
       keyExtractor={(item, index) => item.orderId ?? item.orderCode ?? `order-${index}`}
       contentContainerStyle={styles.listContent}
       renderItem={({ item }) => <HomeOrderCard order={item} tab={tab} />}
+      refreshing={isRefreshing}
+      onRefresh={handleRefresh}
       onEndReachedThreshold={0.4}
       onEndReached={() => {
         if (query.hasNextPage && !query.isFetchingNextPage) {

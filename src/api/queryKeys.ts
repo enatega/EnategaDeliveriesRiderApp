@@ -22,3 +22,12 @@ export const earningsKeys = {
   activityDeliveries: (activityDate: string) =>
     [...earningsKeys.all, 'activityDeliveries', activityDate] as const,
 };
+
+
+export const riderWalletKeys = {
+  all: ['riderWallet'] as const,
+  balance: () => [...riderWalletKeys.all, 'balance'] as const,
+  historyAll: () => [...riderWalletKeys.all, 'history'] as const,
+  history: (transactionType: 'deposit' | 'withdrawal' | 'all') =>
+    [...riderWalletKeys.historyAll(), transactionType] as const,
+};

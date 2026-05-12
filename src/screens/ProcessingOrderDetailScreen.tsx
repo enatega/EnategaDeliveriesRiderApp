@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Path } from 'react-native-svg';
 import Map from '../components/Map';
 import SwipeableBottomSheet from '../components/SwipeableBottomSheet';
@@ -28,7 +29,8 @@ import OrderItemsSection from './orderDetail/components/OrderItemsSection';
 import DeliveryProgressSection from './orderDetail/components/DeliveryProgressSection';
 import type { RiderOrderUpdatableStatus } from '../api/riderHomeTypes';
 import {
-  resolveProgressStatus,
+  DELIVERY_PROGRESS_ORDER,
+  resolveProgressStatusFromOrder,
   RiderDeliveryProgressStatus,
   toApiUpdatableStatus,
 } from './orderDetail/progress';
@@ -49,10 +51,29 @@ const STATUS_ACTION_LABELS: Record<RiderOrderUpdatableStatus, string> = {
   failed: 'Mark as Failed',
 };
 
+const RIDER_ONLY_STATUSES = new Set<RiderOrderUpdatableStatus>([
+  'heading_to_store',
+  'arrived_at_store',
+  'waiting_for_order',
+]);
+
+const STATUS_TITLE_KEY: Record<RiderDeliveryProgressStatus, string> = {
+  [RiderDeliveryProgressStatus.ASSIGNED]: 'order_status_assigned',
+  [RiderDeliveryProgressStatus.HEADING_TO_STORE]: 'order_status_heading_to_store',
+  [RiderDeliveryProgressStatus.ARRIVED_AT_STORE]: 'order_status_arrived_at_store',
+  [RiderDeliveryProgressStatus.WAITING_FOR_ORDER]: 'order_status_waiting_for_order',
+  [RiderDeliveryProgressStatus.PICKED_UP]: 'order_status_picked_up',
+  [RiderDeliveryProgressStatus.OUT_FOR_DELIVERY]: 'order_status_out_for_delivery',
+  [RiderDeliveryProgressStatus.ARRIVED_AT_CUSTOMER]: 'order_status_arrived_at_customer',
+  [RiderDeliveryProgressStatus.DELIVERED]: 'order_status_delivered',
+  [RiderDeliveryProgressStatus.FAILED]: 'order_status_failed',
+};
+
 export default function ProcessingOrderDetailScreen({ route, navigation }: Props) {
   const { theme } = useAppTheme();
   const { t } = useTranslations('app');
   const { session } = useAuth();
+  const insets = useSafeAreaInsets();
   const { orderId } = route.params;
   const detailQuery = useRiderOrderDetailQuery(orderId);
   const updateStatusMutation = useUpdateRiderOrderStatusMutation(orderId);
@@ -80,18 +101,44 @@ export default function ProcessingOrderDetailScreen({ route, navigation }: Props
   const [selectedStatus, setSelectedStatus] = useState<RiderDeliveryProgressStatus | null>(null);
 
   const currentProgressStatus = useMemo(
-    () => resolveProgressStatus(detailQuery.data?.riderStatus ?? detailQuery.data?.status),
+    () => resolveProgressStatusFromOrder(detailQuery.data?.status, detailQuery.data?.riderStatus),
     [detailQuery.data?.riderStatus, detailQuery.data?.status],
   );
+  const currentProgressTitle = t(STATUS_TITLE_KEY[currentProgressStatus]);
 
   useEffect(() => {
     setSelectedStatus(currentProgressStatus);
   }, [currentProgressStatus, orderId]);
 
-  const nextStatus = (selectedStatus ? toApiUpdatableStatus(selectedStatus) : null) as RiderOrderUpdatableStatus | null;
+  useEffect(() => {
+    const interval = setInterval(() => {
+      void detailQuery.refetch();
+    }, 3000);
+
+    return () => clearInterval(interval);
+  }, [detailQuery.refetch]);
+
+  const nextStatus = (selectedStatus
+    ? toApiUpdatableStatus(selectedStatus)
+    : null) as RiderOrderUpdatableStatus | null;
+  const currentUpdatableStatus = toApiUpdatableStatus(currentProgressStatus);
+  const selectedStatusIndex = selectedStatus
+    ? DELIVERY_PROGRESS_ORDER.indexOf(selectedStatus)
+    : -1;
+  const currentStatusIndex = DELIVERY_PROGRESS_ORDER.indexOf(currentProgressStatus);
+  const isForwardProgressSelection = selectedStatusIndex > currentStatusIndex;
+  const allowedStatuses = detailQuery.data?.nextAllowedStatuses ?? [];
+  const isNextStatusAllowed = Boolean(nextStatus && allowedStatuses.includes(nextStatus));
+  const canApplyRiderOnlyStatus = Boolean(
+    nextStatus
+    && RIDER_ONLY_STATUSES.has(nextStatus)
+    && isForwardProgressSelection
+    && (detailQuery.data?.status === 'rider_assigned' || detailQuery.data?.status === 'ready'),
+  );
   const canUpdateStatus = Boolean(
-    detailQuery.data?.canUpdateStatus
-    && nextStatus,
+    nextStatus
+    && nextStatus !== currentUpdatableStatus
+    && (isNextStatusAllowed || canApplyRiderOnlyStatus)
   );
   const updateStatusLabel = nextStatus ? STATUS_ACTION_LABELS[nextStatus] : null;
 
@@ -124,7 +171,7 @@ export default function ProcessingOrderDetailScreen({ route, navigation }: Props
         />
         <OrderDetailTopBar
           title={
-            detailQuery.data?.riderStatusLabel
+            currentProgressTitle
             ?? detailQuery.data?.statusLabel
             ?? t('order_assigned_title')
           }
@@ -157,7 +204,10 @@ export default function ProcessingOrderDetailScreen({ route, navigation }: Props
             <Text color={theme.colors.gray600}>{detailQuery.error?.message ?? t('orders_empty')}</Text>
           </View>
         ) : (
-          <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.sheetContent}>
+          <ScrollView
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={[styles.sheetContent, { paddingBottom: insets.bottom + 16 }]}
+          >
             <OrderSummarySection order={detailQuery.data} />
             <OrderPaymentSection order={detailQuery.data} />
             <OrderItemsSection order={detailQuery.data} />
