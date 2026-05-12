@@ -4,6 +4,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Text from './Text';
 import ToggleSwitch from './ToggleSwitch';
 import { useAppTheme } from '../theme/ThemeProvider';
+import { lightColors } from '../theme/colors';
 import { useAuth } from '../auth/AuthProvider';
 import { useLogoutMutation } from '../hooks/useAuthMutations';
 import { useTranslations } from '../localization/LocalizationProvider';
@@ -208,19 +209,25 @@ export default function Sidebar({ visible, onClose, availability, onAvailability
 
 const styles = StyleSheet.create({
   container: { zIndex: 20 },
-  backdrop: { ...StyleSheet.absoluteFillObject, backgroundColor: '#0B1020', opacity: 0.3 },
+  
+  
+  
+  
+  
+  backdrop: { ...StyleSheet.absoluteFillObject,backgroundColor: lightColors.black, opacity: 0.3 },
+  
   drawer: {
     width: DRAWER_WIDTH,
     height: '100%',
     overflow: 'hidden',
     elevation: 14,
-    shadowColor: '#000',
+    shadowColor: lightColors.black,
     shadowOffset: { width: 6, height: 0 },
     shadowOpacity: 0.2,
     shadowRadius: 14,
   },
   header: {
-    backgroundColor: '#90E36D',
+    backgroundColor: lightColors.primary,
     paddingHorizontal: 20,
     paddingBottom: 24,
     borderBottomLeftRadius: 18,
@@ -230,7 +237,7 @@ const styles = StyleSheet.create({
     width: 62,
     height: 62,
     borderRadius: 31,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: lightColors.white,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 10,

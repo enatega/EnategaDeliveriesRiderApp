@@ -37,8 +37,8 @@ export default function Text({
         };
       case 'caption':
         return {
-          fontSize: theme.typography.size.sm,
-          lineHeight: theme.typography.lineHeight.sm,
+          fontSize: theme.typography.size.xs,
+          lineHeight: theme.typography.lineHeight.xs,
         };
       default:
         return {

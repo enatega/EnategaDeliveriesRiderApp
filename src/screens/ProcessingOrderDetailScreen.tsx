@@ -163,7 +163,7 @@ export default function ProcessingOrderDetailScreen({ route, navigation }: Props
             {
               id: 'route',
               coordinates: [FALLBACK_PICKUP, FALLBACK_DELIVERY],
-              strokeColor: '#4F9D2F',
+              strokeColor: theme.colors.mapRoute,
               strokeWidth: 3,
               lineDashPattern: [6, 6],
             },
@@ -184,12 +184,12 @@ export default function ProcessingOrderDetailScreen({ route, navigation }: Props
         defaultHeight={defaultHeight}
         collapsedHeight={collapsedHeight}
         initialState="default"
-        style={[styles.bottomSheet, { backgroundColor: theme.colors.white, borderColor: '#D1D5DB' }]}
-        handle={<View style={[styles.handle, { backgroundColor: '#D1D5DB' }]} />}
+        style={[styles.bottomSheet, { backgroundColor: theme.colors.white, borderColor: theme.colors.gray300 }]}
+        handle={<View style={[styles.handle, { backgroundColor: theme.colors.gray300 }]} />}
         floatingAccessory={
-          <Pressable style={styles.navigateChip} onPress={openNavigation}>
-            <NavigationIcon color="#FFFFFF" />
-            <Text weight="medium" color="#FFFFFF">{t('order_navigate')}</Text>
+          <Pressable style={[styles.navigateChip, { backgroundColor: theme.colors.zinc800 }]} onPress={openNavigation}>
+            <NavigationIcon color={theme.colors.white} />
+            <Text weight="medium" color={theme.colors.white}>{t('order_navigate')}</Text>
           </Pressable>
         }
         floatingAccessoryStyle={styles.floatingAccessory}
@@ -276,7 +276,6 @@ const styles = StyleSheet.create({
     top: -46,
   },
   navigateChip: {
-    backgroundColor: '#27272A',
     borderRadius: 50,
     paddingHorizontal: 16,
     paddingVertical: 6,

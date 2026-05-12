@@ -48,7 +48,7 @@ export default function LoginScreen() {
 
   return (
     <KeyboardAvoidingView
-      style={[styles.flex, { backgroundColor: '#F5F5F5' }]}
+      style={[styles.flex, { backgroundColor: theme.colors.loginBackground }]}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
       <ScrollView
@@ -101,7 +101,7 @@ export default function LoginScreen() {
               onSubmitEditing={handleLogin}
             />
             {loginMutation.error?.message ? (
-              <Text variant="caption" color="#EF4444">
+              <Text variant="caption" color={theme.colors.red500}>
                 {loginMutation.error.message}
               </Text>
             ) : null}

@@ -61,12 +61,12 @@ export default function DeliveryProgressSection({
                 style={[
                   styles.dot,
                   {
-                    borderColor: isSelected || active ? '#10B981' : '#D1D5DB',
-                    backgroundColor: isSelected || active ? '#10B981' : '#FFFFFF',
+                    borderColor: isSelected || active ? theme.colors.emerald500 : theme.colors.gray300,
+                    backgroundColor: isSelected || active ? theme.colors.emerald500 : theme.colors.white,
                   },
                 ]}
               >
-                {isSelected || active ? <View style={styles.dotInner} /> : null}
+                {isSelected || active ? <View style={[styles.dotInner, { backgroundColor: theme.colors.white }]} /> : null}
               </View>
               <Text
                 weight={isSelected || active ? 'medium' : 'regular'}
@@ -108,6 +108,5 @@ const styles = StyleSheet.create({
     width: 10,
     height: 10,
     borderRadius: 999,
-    backgroundColor: '#FFFFFF',
   },
 });
