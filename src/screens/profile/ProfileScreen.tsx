@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import React, { useMemo, useState } from 'react';
+import { ActivityIndicator, Image, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Svg, { Path } from 'react-native-svg';
 import { useNavigation } from '@react-navigation/native';
@@ -12,18 +12,44 @@ import { useSidebar } from '../../hooks/useSidebar';
 import { MainStackParamList } from '../../navigation/types';
 import DrivingLicenseBottomSheet from './components/DrivingLicenseBottomSheet';
 import VehiclePlateBottomSheet from './components/VehiclePlateBottomSheet';
+import { useRiderProfileQuery } from '../../hooks/useRiderProfileQuery';
 
 export default function ProfileScreen() {
   const { t } = useTranslations('app');
   const { theme } = useAppTheme();
   const sidebar = useSidebar();
   const stackNav = useNavigation<NativeStackNavigationProp<MainStackParamList>>();
+  const profileQuery = useRiderProfileQuery();
   const [isDrivingLicenseSheetVisible, setDrivingLicenseSheetVisible] = useState(false);
   const [isVehiclePlateSheetVisible, setVehiclePlateSheetVisible] = useState(false);
+  const [hasProfileImageError, setHasProfileImageError] = useState(false);
+
+  const profile = profileQuery.data;
+  const profileName = profile?.userName?.trim() || t('profile_name');
+  const profileId = profile?.riderId?.trim() || profile?.userId?.trim() || t('profile_id');
+  const profileEmail = profile?.email?.trim() || t('status_unknown');
+  const profileMobile = profile?.mobileNumber?.trim() || t('status_unknown');
+  const drivingLicenseNumber = profile?.drivingLicense?.licenseNo?.trim() || '';
+  const vehiclePlateNumber = profile?.vehiclePlate?.plateNo?.trim() || '';
+
+  const hasDrivingLicenseDocs = Boolean(
+    profile?.drivingLicense?.registrationDocument?.front ||
+      profile?.drivingLicense?.registrationDocument?.back,
+  );
+  const hasVehiclePlateDocs = Boolean(
+    profile?.vehiclePlate?.registrationDocument?.front ||
+      profile?.vehiclePlate?.registrationDocument?.back,
+  );
+
+  const hasDrivingLicenseData = Boolean(drivingLicenseNumber || hasDrivingLicenseDocs);
+  const hasVehiclePlateData = Boolean(vehiclePlateNumber || hasVehiclePlateDocs);
+
+  const profileInitials = useMemo(() => getInitials(profileName), [profileName]);
+  const shouldShowProfileImage = Boolean(profile?.profileImage) && !hasProfileImageError;
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]} edges={['top']}>
-      <View style={[styles.header, { backgroundColor: theme.colors.surface }]}>
+      <View style={[styles.header, { backgroundColor: theme.colors.surface }]}> 
         <Pressable onPress={sidebar.openSidebar} style={styles.menuButton}>
           <HamburgerIcon color={theme.colors.gray900} />
         </Pressable>
@@ -33,23 +59,36 @@ export default function ProfileScreen() {
 
       <ScrollView contentContainerStyle={styles.content}>
         <View style={styles.profileHeader}>
-          <View style={[styles.avatar, { backgroundColor: theme.colors.primary }]}>
-            <Text weight="semiBold" color={theme.colors.white}>JS</Text>
+          <View style={[styles.avatar, { backgroundColor: theme.colors.primary }]}> 
+            {shouldShowProfileImage ? (
+              <Image
+                source={{ uri: profile?.profileImage ?? '' }}
+                style={styles.avatarImage}
+                resizeMode="cover"
+                onError={() => setHasProfileImageError(true)}
+              />
+            ) : (
+              <Text weight="semiBold" color={theme.colors.white}>{profileInitials}</Text>
+            )}
           </View>
           <View style={styles.profileMeta}>
-            <Text weight="semiBold" style={styles.name}>{t('profile_name')}</Text>
-            <Text weight="medium" style={{ color: theme.colors.gray600 }}>{t('profile_id')}</Text>
+            <Text weight="semiBold" style={styles.name}>{profileName}</Text>
+            <Text weight="medium" style={{ color: theme.colors.gray600 }}>{profileId}</Text>
           </View>
         </View>
 
         <ProfileStatusRow
           title={t('profile_driving_license')}
           action={t('profile_add')}
+          hasData={hasDrivingLicenseData}
+          valueText={drivingLicenseNumber}
           onPressAction={() => setDrivingLicenseSheetVisible(true)}
         />
         <ProfileStatusRow
           title={t('profile_vehicle_plate')}
           action={t('profile_add')}
+          hasData={hasVehiclePlateData}
+          valueText={vehiclePlateNumber}
           onPressAction={() => setVehiclePlateSheetVisible(true)}
         />
 
@@ -57,14 +96,26 @@ export default function ProfileScreen() {
           {t('profile_other_information')}
         </Text>
 
-        <InfoCard label={t('profile_email')} value={t('profile_email_value')} />
+        {profileQuery.isLoading ? (
+          <View style={styles.loadingWrap}>
+            <ActivityIndicator color={theme.colors.primary} />
+          </View>
+        ) : null}
+
+        {profileQuery.isError ? (
+          <Text variant="caption" color={theme.colors.red500}>
+            {profileQuery.error?.message || t('status_unknown')}
+          </Text>
+        ) : null}
+
+        <InfoCard label={t('profile_email')} value={profileEmail} />
         <InfoCard
           label={t('profile_password')}
           value={t('profile_password_value')}
           action={t('profile_change')}
           onPressAction={() => stackNav.navigate('UpdatePassword')}
         />
-        <InfoCard label={t('profile_mobile_number')} value={t('profile_mobile_number_value')} />
+        <InfoCard label={t('profile_mobile_number')} value={profileMobile} />
       </ScrollView>
 
       <Sidebar
@@ -91,25 +142,39 @@ export default function ProfileScreen() {
 function ProfileStatusRow({
   title,
   action,
+  hasData,
+  valueText,
   onPressAction,
 }: {
   title: string;
   action: string;
+  hasData: boolean;
+  valueText?: string;
   onPressAction: () => void;
 }) {
   const { theme } = useAppTheme();
   const { t } = useTranslations('app');
 
   return (
-    <View style={[styles.rowBlock, { borderBottomColor: theme.colors.gray300 }]}>
+    <View style={[styles.rowBlock, { borderBottomColor: theme.colors.gray300 }]}> 
       <View style={styles.rowHeader}>
         <Text weight="semiBold">{title}</Text>
         <Pressable onPress={onPressAction}>
           <Text weight="medium" style={{ color: theme.colors.blue400 }}>{action}</Text>
         </Pressable>
       </View>
-      <View style={[styles.badge, { backgroundColor: theme.colors.red100 }]}>
-        <Text weight="medium" style={{ color: theme.colors.red800 }}>{t('profile_missing_data')}</Text>
+      <View
+        style={[
+          styles.badge,
+          { backgroundColor: hasData ? theme.colors.emerald100 : theme.colors.red100 },
+        ]}
+      >
+        <Text
+          weight="medium"
+          style={{ color: hasData ? theme.colors.emerald900 : theme.colors.red800 }}
+        >
+          {hasData ? valueText || t('profile_add') : t('profile_missing_data')}
+        </Text>
       </View>
     </View>
   );
@@ -129,7 +194,7 @@ function InfoCard({
   const { theme } = useAppTheme();
 
   return (
-    <View style={[styles.infoCard, { backgroundColor: theme.colors.gray100, borderColor: theme.colors.gray200 }]}>
+    <View style={[styles.infoCard, { backgroundColor: theme.colors.gray100, borderColor: theme.colors.gray200 }]}> 
       <View style={styles.infoHeader}>
         <Text>{label}</Text>
         {action ? (
@@ -151,6 +216,20 @@ function HamburgerIcon({ color }: { color: string }) {
   );
 }
 
+function getInitials(name: string): string {
+  const parts = name
+    .split(' ')
+    .map((part) => part.trim())
+    .filter(Boolean);
+
+  if (!parts.length) return 'NA';
+
+  return parts
+    .slice(0, 2)
+    .map((part) => part[0].toUpperCase())
+    .join('');
+}
+
 const styles = StyleSheet.create({
   container: { flex: 1 },
   header: {
@@ -164,7 +243,18 @@ const styles = StyleSheet.create({
   headerTitle: { fontSize: 16, lineHeight: 24 },
   content: { padding: 16, paddingTop: 16, paddingBottom: 24, gap: 16 },
   profileHeader: { flexDirection: 'row', alignItems: 'center', gap: 16, paddingBottom: 8 },
-  avatar: { width: 54, height: 54, borderRadius: 27, alignItems: 'center', justifyContent: 'center' },
+  avatar: {
+    width: 54,
+    height: 54,
+    borderRadius: 27,
+    alignItems: 'center',
+    justifyContent: 'center',
+    overflow: 'hidden',
+  },
+  avatarImage: {
+    width: 54,
+    height: 54,
+  },
   profileMeta: { gap: 4 },
   name: { fontSize: 16, lineHeight: 24 },
   rowBlock: { borderBottomWidth: 1, paddingVertical: 8, gap: 16 },
@@ -173,4 +263,8 @@ const styles = StyleSheet.create({
   sectionTitle: { marginTop: 8, fontSize: 18, lineHeight: 28 },
   infoCard: { borderWidth: 1, borderRadius: 8, paddingHorizontal: 17, paddingVertical: 9, gap: 6 },
   infoHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  loadingWrap: {
+    paddingVertical: 8,
+    alignItems: 'center',
+  },
 });

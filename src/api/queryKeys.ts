@@ -46,3 +46,13 @@ export const workScheduleKeys = {
   all: ['workSchedule'] as const,
   detail: () => [...workScheduleKeys.all, 'detail'] as const,
 };
+
+export const languageKeys = {
+  all: ['languageSettings'] as const,
+  detail: () => [...languageKeys.all, 'detail'] as const,
+};
+
+export const riderProfileKeys = {
+  all: ['riderProfile'] as const,
+  detail: () => [...riderProfileKeys.all, 'detail'] as const,
+};
