@@ -130,10 +130,16 @@ export default function ProfileScreen() {
       <DrivingLicenseBottomSheet
         visible={isDrivingLicenseSheetVisible}
         onClose={() => setDrivingLicenseSheetVisible(false)}
+        initialLicenseNumber={drivingLicenseNumber}
+        initialFrontImageUri={profile?.drivingLicense?.registrationDocument?.front ?? null}
+        initialBackImageUri={profile?.drivingLicense?.registrationDocument?.back ?? null}
       />
       <VehiclePlateBottomSheet
         visible={isVehiclePlateSheetVisible}
         onClose={() => setVehiclePlateSheetVisible(false)}
+        initialVehicleNo={vehiclePlateNumber}
+        initialFrontImageUri={profile?.vehiclePlate?.registrationDocument?.front ?? null}
+        initialBackImageUri={profile?.vehiclePlate?.registrationDocument?.back ?? null}
       />
     </SafeAreaView>
   );

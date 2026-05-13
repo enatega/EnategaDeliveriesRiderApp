@@ -37,6 +37,14 @@ module.exports = {
     plugins: [
       'expo-secure-store',
       [
+        'expo-image-picker',
+        {
+          photosPermission: 'Allow $(PRODUCT_NAME) to access your photos to upload documents.',
+          cameraPermission: 'Allow $(PRODUCT_NAME) to use your camera to capture documents.',
+          microphonePermission: false,
+        },
+      ],
+      [
         'react-native-maps',
         {
           androidGoogleMapsApiKey: googleMapsApiKey,
