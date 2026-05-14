@@ -2,9 +2,9 @@ const googleMapsApiKey = process.env.GOOGLE_MAPS_API_KEY ?? 'DUMMY_GOOGLE_MAPS_A
 
 module.exports = {
   expo: {
-    name: 'EnategaDeliveriesRiderApp',
-    slug: 'enatega-deliveries-rider-app',
-    version: '1.0.0',
+    name: 'Shaaneiol Driver',
+    slug: 'shaaneiol-rider',
+    version: '1.0.5',
     orientation: 'portrait',
     icon: './assets/icon.png',
     userInterfaceStyle: 'automatic',
@@ -15,14 +15,14 @@ module.exports = {
     },
     ios: {
       supportsTablet: true,
-      bundleIdentifier: 'com.enatega.deliveries.rider',
+      bundleIdentifier: 'com.shaaneiol.rider',
     },
     android: {
       adaptiveIcon: {
         foregroundImage: './assets/adaptive-icon.png',
         backgroundColor: '#ffffff',
       },
-      package: 'com.enatega.deliveries.rider',
+      package: 'com.shaaneiol.rider',
       edgeToEdgeEnabled: true,
     },
     web: {
@@ -46,7 +46,7 @@ module.exports = {
     ],
     extra: {
       eas: {
-        projectId: 'dd251847-b122-424b-b7dd-60bd8ddbbe90',
+        projectId: "240e4a10-4d4b-43cc-96c7-989e35396a4b"
       },
     },
   },
