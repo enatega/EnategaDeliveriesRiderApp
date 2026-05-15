@@ -12,6 +12,7 @@ import {
 import Button from '../../../components/Button';
 import Text from '../../../components/Text';
 import { useAppTheme } from '../../../theme/ThemeProvider';
+import { useAppCurrency } from '../../../hooks/useCurrency';
 
 type Props = {
   visible: boolean;
@@ -27,12 +28,6 @@ type Props = {
   bottomInset?: number;
 };
 
-const currency = new Intl.NumberFormat('en-US', {
-  style: 'currency',
-  currency: 'USD',
-  maximumFractionDigits: 0,
-});
-
 export default function WithdrawBottomSheet({
   visible,
   availableAmount,
@@ -47,6 +42,7 @@ export default function WithdrawBottomSheet({
   bottomInset = 0,
 }: Props) {
   const { theme } = useAppTheme();
+  const { formatCurrency, symbol } = useAppCurrency();
 
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
@@ -67,7 +63,7 @@ export default function WithdrawBottomSheet({
           >
             <View style={styles.rowBetween}>
               <Text style={[styles.rowLabel, { color: theme.colors.gray600 }]}>{availableLabel}</Text>
-              <Text weight="bold" style={styles.rowAmount}>{currency.format(availableAmount)}</Text>
+              <Text weight="bold" style={styles.rowAmount}>{formatCurrency(availableAmount)}</Text>
             </View>
 
             <View style={[styles.separator, { backgroundColor: theme.colors.gray300 }]} />
@@ -80,7 +76,7 @@ export default function WithdrawBottomSheet({
                 value={amountInput}
                 onChangeText={onAmountInputChange}
                 keyboardType="decimal-pad"
-                placeholder="$0.00"
+                placeholder={`${symbol}0.00`}
                 placeholderTextColor={theme.colors.gray500}
                 style={[
                   styles.input,

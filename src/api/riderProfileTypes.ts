@@ -17,6 +17,7 @@ export type RiderFullProfileResponse = {
   userName: string;
   userId: string;
   riderId: string;
+  riderCode?: string | null;
   profileImage: string | null;
   drivingLicense: DrivingLicenseProfile | null;
   vehiclePlate: VehiclePlateProfile | null;

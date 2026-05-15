@@ -8,6 +8,7 @@ type Props = {
   label: string;
   imageUri: string | null;
   onPress: () => void;
+  onPreview?: () => void;
   uploadedLabel: string;
   missingLabel: string;
 };
@@ -16,6 +17,7 @@ export default function DocumentUploadRow({
   label,
   imageUri,
   onPress,
+  onPreview,
   uploadedLabel,
   missingLabel,
 }: Props) {
@@ -33,7 +35,7 @@ export default function DocumentUploadRow({
           {imageUri ? uploadedLabel : missingLabel}
         </Text>
       </View>
-      <DocumentUploadBox imageUri={imageUri} onPress={onPress} />
+      <DocumentUploadBox imageUri={imageUri} onPress={onPress} onPreview={onPreview} />
     </View>
   );
 }

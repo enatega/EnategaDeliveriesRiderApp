@@ -6,18 +6,28 @@ import { useAppTheme } from '../../../theme/ThemeProvider';
 type Props = {
   imageUri: string | null;
   onPress: () => void;
+  onPreview?: () => void;
 };
 
-export default function DocumentUploadBox({ imageUri, onPress }: Props) {
+export default function DocumentUploadBox({ imageUri, onPress, onPreview }: Props) {
   const { theme } = useAppTheme();
+  const canPreview = Boolean(imageUri && onPreview);
 
   return (
     <Pressable
       style={[styles.uploadBox, { borderColor: theme.colors.gray300 }]}
-      onPress={onPress}
+      onPress={canPreview ? onPreview : onPress}
     >
       {imageUri ? (
-        <Image source={{ uri: imageUri }} style={styles.uploadPreview} resizeMode="cover" />
+        <>
+          <Image source={{ uri: imageUri }} style={styles.uploadPreview} resizeMode="cover" />
+          <Pressable
+            onPress={onPress}
+            style={[styles.editBadge, { backgroundColor: theme.colors.surface }]}
+          >
+            <EditIcon color={theme.colors.gray900} />
+          </Pressable>
+        </>
       ) : (
         <UploadIcon color={theme.colors.gray400} />
       )}
@@ -40,6 +50,20 @@ function UploadIcon({ color }: { color: string }) {
   );
 }
 
+function EditIcon({ color }: { color: string }) {
+  return (
+    <Svg width={14} height={14} viewBox="0 0 14 14" fill="none">
+      <Path
+        d="M8.083 2.042L11.958 5.917M1.75 12.25L5.029 11.521C5.203 11.482 5.363 11.397 5.493 11.276L12.802 3.968C13.258 3.511 13.258 2.772 12.802 2.316L11.684 1.198C11.228 0.742 10.489 0.742 10.032 1.198L2.724 8.507C2.603 8.637 2.518 8.797 2.479 8.971L1.75 12.25Z"
+        stroke={color}
+        strokeWidth={1.2}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </Svg>
+  );
+}
+
 const styles = StyleSheet.create({
   uploadBox: {
     height: 108,
@@ -54,5 +78,15 @@ const styles = StyleSheet.create({
   uploadPreview: {
     width: '100%',
     height: '100%',
+  },
+  editBadge: {
+    position: 'absolute',
+    right: 8,
+    top: 8,
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });

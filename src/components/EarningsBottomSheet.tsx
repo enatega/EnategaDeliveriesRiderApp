@@ -8,6 +8,7 @@ import { useTranslations } from '../localization/LocalizationProvider';
 import { lightColors } from '../theme/colors';
 import { useAppTheme } from '../theme/ThemeProvider';
 import { typography } from '../theme/typography';
+import { useAppCurrency } from '../hooks/useCurrency';
 
 type LegacyEarningsBottomSheetItem = {
   amount: number;
@@ -48,6 +49,7 @@ export default function EarningsBottomSheet({
 }: Props) {
   const { theme } = useAppTheme();
   const { t } = useTranslations('app');
+  const { formatCurrency } = useAppCurrency();
   const { height } = useWindowDimensions();
   const sheetHeight = Math.min(height * 0.42, 304);
 
@@ -83,13 +85,13 @@ export default function EarningsBottomSheet({
                 {t('earnings_total_earnings')}
               </Text>
               <Text variant="body" weight="medium" color={theme.colors.gray700} style={styles.totalAmount} numberOfLines={1}>
-                ${getTotalEarnings(item)}
+                {formatCurrency(getTotalEarnings(item))}
               </Text>
             </View>
 
             <View style={styles.details}>
               <InfoRow label={t('earnings_hours_worked')} value={getHoursWorked(item)} />
-              <InfoRow label={t('earnings_tips')} value={`$${getTips(item)}`} />
+              <InfoRow label={t('earnings_tips')} value={formatCurrency(getTips(item))} />
               <Pressable
                 onPress={onPressDeliveries}
                 accessibilityRole="button"
@@ -100,7 +102,7 @@ export default function EarningsBottomSheet({
                 </Text>
                 <View style={styles.deliveryValue}>
                   <Text variant="caption" weight="semiBold" color={theme.colors.blue400} style={styles.detailValue} numberOfLines={1}>
-                    ${getDeliveriesAmount(item)}
+                    {formatCurrency(getDeliveriesAmount(item))}
                   </Text>
                   <ChevronRight color={theme.colors.blue400} />
                 </View>

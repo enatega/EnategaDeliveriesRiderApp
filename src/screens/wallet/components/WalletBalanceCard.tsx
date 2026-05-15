@@ -3,6 +3,7 @@ import { StyleSheet, View } from 'react-native';
 import Button from '../../../components/Button';
 import Text from '../../../components/Text';
 import { useAppTheme } from '../../../theme/ThemeProvider';
+import { useAppCurrency } from '../../../hooks/useCurrency';
 
 type Props = {
   currentBalance: number;
@@ -11,12 +12,6 @@ type Props = {
   balanceLabel: string;
 };
 
-const currency = new Intl.NumberFormat('en-US', {
-  style: 'currency',
-  currency: 'USD',
-  maximumFractionDigits: 0,
-});
-
 export default function WalletBalanceCard({
   currentBalance,
   onWithdrawPress,
@@ -24,6 +19,7 @@ export default function WalletBalanceCard({
   balanceLabel,
 }: Props) {
   const { theme } = useAppTheme();
+  const { formatCurrency } = useAppCurrency();
 
   return (
     <View style={[styles.card, { backgroundColor: theme.colors.gray50, borderColor: theme.colors.gray100 }]}>
@@ -32,7 +28,7 @@ export default function WalletBalanceCard({
           {balanceLabel}
         </Text>
         <Text weight="bold" style={[styles.balanceValue, { color: theme.colors.gray900 }]}>
-          {currency.format(currentBalance)}
+          {formatCurrency(currentBalance)}
         </Text>
       </View>
 

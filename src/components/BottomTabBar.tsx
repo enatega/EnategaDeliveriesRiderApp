@@ -9,6 +9,7 @@ import ProfileIcon from './icons/ProfileIcon';
 import { useTranslations } from '../localization/LocalizationProvider';
 import { lightColors } from '../theme/colors';
 import { typography } from '../theme/typography';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const TAB_META = {
   HomeTab: { key: 'nav_home', Icon: HomeIcon },
@@ -19,9 +20,10 @@ const TAB_META = {
 
 export default function BottomTabBar({ state, navigation }: BottomTabBarProps) {
   const { t } = useTranslations('app');
+  const insets = useSafeAreaInsets();
 
   return (
-    <View style={styles.container}> 
+    <View style={[styles.container, { paddingBottom: Math.max(insets.bottom, 10) }]}> 
       {state.routes.map((route, index) => {
         const focused = state.index === index;
         const meta = TAB_META[route.name as keyof typeof TAB_META];
@@ -52,7 +54,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     backgroundColor: lightColors.gray800,
     paddingHorizontal: 16,
-    paddingVertical: 10,
+    paddingTop: 10,
     borderTopLeftRadius: 12,
     borderTopRightRadius: 12,
   },

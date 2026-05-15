@@ -6,6 +6,7 @@ import { useTranslations } from '../localization/LocalizationProvider';
 import { lightColors } from '../theme/colors';
 import { typography } from '../theme/typography';
 import { RiderEarningsActivity } from '../api/earningsTypes';
+import { useAppCurrency } from '../hooks/useCurrency';
 
 export type EarningsActivityRowItem = {
   id: string;
@@ -36,6 +37,7 @@ export default function EarningsActivityRow<T extends EarningsActivityRenderable
   onPress,
 }: Props<T>) {
   const { t } = useTranslations('app');
+  const { formatCurrency } = useAppCurrency();
 
   return (
     <Pressable
@@ -59,7 +61,7 @@ export default function EarningsActivityRow<T extends EarningsActivityRenderable
           </Text>
         </View>
         <Text variant="caption" weight="semiBold" color={lightColors.gray900} style={styles.amount} numberOfLines={1}>
-          ${getActivityAmount(item)}
+          {formatCurrency(getActivityAmount(item))}
         </Text>
       </View>
       <ChevronRight color={lightColors.gray900} />
