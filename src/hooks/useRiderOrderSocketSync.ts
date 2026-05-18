@@ -7,6 +7,7 @@ import { riderHomeKeys } from '../api/queryKeys';
 import type { RiderOrderDetail } from '../api/riderOrderDetailTypes';
 import {
   riderOrdersSocketClient,
+  type RiderOrderAvailablePayload,
   type RiderOrderStatusUpdatedPayload,
   type RiderStatusUpdatedPayload,
 } from '../socket/riderOrdersSocket';
@@ -76,9 +77,18 @@ export function useRiderOrderSocketSync() {
       },
     );
 
+    const unsubscribeRiderOrderAvailable = riderOrdersSocketClient.subscribeRiderOrderAvailable(
+      (payload: RiderOrderAvailablePayload) => {
+        console.log("[rider][socket] rider-order-available received", payload);
+        if (!payload?.orderId) return;
+        invalidateRiderOrderCaches(payload.orderId);
+      },
+    );
+
     return () => {
       unsubscribeOrderStatus();
       unsubscribeRiderStatus();
+      unsubscribeRiderOrderAvailable();
     };
   }, [isAuthenticated, queryClient, token]);
 
