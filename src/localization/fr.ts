@@ -137,6 +137,10 @@ const fr = {
   order_status_desc_failed: 'La livraison a echoue',
   order_status_update_to: 'Mettre a jour vers',
   order_status_updating: 'Mise a jour...',
+  order_chat_default_name: 'Client',
+  chat_no_messages: 'Aucun message pour le moment',
+  chat_enter_concern: 'Saisissez votre message',
+  chat_send: 'Envoyer',
 
   menu_availability: 'Disponibilite',
   menu_available: 'Disponible',
@@ -179,6 +183,7 @@ const fr = {
   work_schedule_update_button: 'Mettre a jour le planning',
   work_schedule_updating_button: 'Mise a jour...',
   work_schedule_required_field: 'Veuillez saisir les heures d ouverture et de fermeture pour les jours actifs.',
+  work_schedule_add_slot: 'Ajouter un slot',
   language_option_english: 'English',
   language_option_francais: 'Francais',
   language_option_japanese: 'Japanese',

@@ -16,6 +16,7 @@ import Map from '../components/Map';
 import SwipeableBottomSheet from '../components/SwipeableBottomSheet';
 import Text from '../components/Text';
 import Button from '../components/Button';
+import ContactActionButtons from '../components/ContactActionButtons';
 import { MainStackParamList } from '../navigation/types';
 import { useAppTheme } from '../theme/ThemeProvider';
 import { useTranslations } from '../localization/LocalizationProvider';
@@ -96,6 +97,20 @@ export default function ProcessingOrderDetailScreen({ route, navigation }: Props
   const openNavigation = async () => {
     const url = `https://www.google.com/maps/dir/?api=1&origin=${FALLBACK_PICKUP.latitude},${FALLBACK_PICKUP.longitude}&destination=${FALLBACK_DELIVERY.latitude},${FALLBACK_DELIVERY.longitude}&travelmode=driving`;
     await Linking.openURL(url);
+  };
+
+  const openDialer = async () => {
+    const phone = detailQuery.data?.customerPhone?.trim();
+    if (!phone) return;
+    await Linking.openURL(`tel:${phone}`);
+  };
+
+  const openChat = () => {
+    navigation.navigate('OrderChat', {
+      orderId,
+      name: detailQuery.data?.customerName?.trim() || t('order_chat_default_name'),
+      phone: detailQuery.data?.customerPhone ?? null,
+    });
   };
 
   const [selectedStatus, setSelectedStatus] = useState<RiderDeliveryProgressStatus | null>(null);
@@ -209,6 +224,11 @@ export default function ProcessingOrderDetailScreen({ route, navigation }: Props
             contentContainerStyle={[styles.sheetContent, { paddingBottom: insets.bottom + 16 }]}
           >
             <OrderSummarySection order={detailQuery.data} />
+            <ContactActionButtons
+              onPressCall={() => void openDialer()}
+              onPressChat={openChat}
+              callDisabled={!detailQuery.data.customerPhone}
+            />
             <OrderPaymentSection order={detailQuery.data} />
             <OrderItemsSection order={detailQuery.data} />
             <DeliveryProgressSection

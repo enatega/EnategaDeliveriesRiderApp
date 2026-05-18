@@ -137,6 +137,10 @@ const en = {
   order_status_desc_failed: 'Order delivery failed',
   order_status_update_to: 'Update to',
   order_status_updating: 'Updating...',
+  order_chat_default_name: 'Customer',
+  chat_no_messages: 'No messages yet',
+  chat_enter_concern: 'Enter your concern',
+  chat_send: 'Send',
 
   menu_availability: 'Availability',
   menu_available: 'Available',
@@ -179,6 +183,7 @@ const en = {
   work_schedule_update_button: 'Update Schedule',
   work_schedule_updating_button: 'Updating...',
   work_schedule_required_field: 'Please enter open and close time for active days.',
+  work_schedule_add_slot: 'Add slot',
   language_option_english: 'English',
   language_option_francais: 'Francais',
   language_option_japanese: 'Japanese',
