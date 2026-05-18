@@ -9,7 +9,18 @@ type ApiErrorResponseData = {
   message?: string | string[];
   code?: string;
   error?: string;
+  shouldLogout?: boolean;
+  statusCode?: number;
 };
+
+type SessionExpiredHandler = () => void | Promise<void>;
+
+let onSessionExpired: SessionExpiredHandler | null = null;
+let isHandlingSessionExpiry = false;
+
+export function setSessionExpiredHandler(handler: SessionExpiredHandler | null) {
+  onSessionExpired = handler;
+}
 
 export class ApiError extends Error {
   status: number;
@@ -48,6 +59,14 @@ const httpClient: AxiosInstance = axios.create({
 });
 
 const ENABLE_API_DEBUG_LOGS = true;
+
+const shouldForceLogout = (error: AxiosError<ApiErrorResponseData>): boolean => {
+  const status = error.response?.status;
+  const data = error.response?.data;
+  if (status !== 403 || !data) return false;
+
+  return Boolean(data.shouldLogout) || data.error === 'TOKEN_EXPIRED';
+};
 
 const getRequestPath = (config: AxiosRequestConfig): string => {
   const base = (config.baseURL ?? '').replace(/\/$/, '');
@@ -135,6 +154,24 @@ httpClient.interceptors.request.use(async (config) => {
 
   return config;
 });
+
+httpClient.interceptors.response.use(
+  (response) => response,
+  async (error: unknown) => {
+    if (axios.isAxiosError<ApiErrorResponseData>(error) && shouldForceLogout(error)) {
+      if (!isHandlingSessionExpiry) {
+        isHandlingSessionExpiry = true;
+        try {
+          await onSessionExpired?.();
+        } finally {
+          isHandlingSessionExpiry = false;
+        }
+      }
+    }
+
+    return Promise.reject(error);
+  }
+);
 
 function toApiError(error: unknown): ApiError {
   if (axios.isAxiosError(error)) {

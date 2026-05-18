@@ -26,7 +26,11 @@ export default function ProfileScreen() {
 
   const profile = profileQuery.data;
   const profileName = profile?.userName?.trim() || t('profile_name');
-  const profileId = profile?.riderId?.trim() || profile?.userId?.trim() || t('profile_id');
+  const profileId =
+    profile?.riderCode?.trim() ||
+    profile?.riderId?.trim() ||
+    profile?.userId?.trim() ||
+    t('profile_id');
   const profileEmail = profile?.email?.trim() || t('status_unknown');
   const profileMobile = profile?.mobileNumber?.trim() || t('status_unknown');
   const drivingLicenseNumber = profile?.drivingLicense?.licenseNo?.trim() || '';
@@ -73,7 +77,7 @@ export default function ProfileScreen() {
           </View>
           <View style={styles.profileMeta}>
             <Text weight="semiBold" style={styles.name}>{profileName}</Text>
-            <Text weight="medium" style={{ color: theme.colors.gray600 }}>{profileId}</Text>
+            <Text weight="medium" style={{ color: theme.colors.gray600 }}>{`id:: ${profileId}`}</Text>
           </View>
         </View>
 

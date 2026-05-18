@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Circle, Path } from 'react-native-svg';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -25,6 +25,7 @@ export default function WorkScheduleScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<MainStackParamList>>();
   const workScheduleQuery = useWorkScheduleQuery();
   const updateWorkScheduleMutation = useUpdateWorkScheduleMutation();
+  const insets = useSafeAreaInsets();
   const [weeklyShifts, setWeeklyShifts] = useState<WorkScheduleData | null>(null);
   const [formError, setFormError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
@@ -109,7 +110,7 @@ export default function WorkScheduleScreen() {
           <VerticalList
             data={scheduleRows}
             keyExtractor={(item) => item[0]}
-            contentContainerStyle={styles.cardsWrap}
+            contentContainerStyle={[styles.cardsWrap, { paddingBottom: insets.bottom + 98 }]}
             renderItem={({ item }) => (
               <DayScheduleCard
                 dayKey={item[0]}
@@ -123,7 +124,14 @@ export default function WorkScheduleScreen() {
         )}
       </View>
 
-      <View style={styles.footer}>
+      <View
+        style={[
+          styles.footer,
+          {
+            bottom: insets.bottom + 12,
+          },
+        ]}
+      >
         <Button
           label={updateWorkScheduleMutation.isPending ? t('work_schedule_updating_button') : t('work_schedule_update_button')}
           onPress={onUpdateSchedule}
@@ -180,10 +188,10 @@ function DayScheduleCard({
   const closeTime = slot?.close ?? '23:59';
 
   return (
-    <View style={[styles.dayCard, { borderColor: theme.colors.gray200 }]}>
+    <View style={[styles.dayCard, { borderColor: theme.colors.gray200, backgroundColor: theme.colors.surface }]}>
       <View style={styles.dayHeaderRow}>
         <Text
-          weight="semiBold"
+          weight="bold"
           style={{ color: theme.colors.black, fontSize: theme.typography.size.sm, lineHeight: 20 }}
         >
           {dayLabel}
@@ -209,10 +217,12 @@ function DayScheduleCard({
       </View>
 
       <View style={styles.timeRow}>
-        <TimeInput value={openTime} onChangeText={onOpenChange} />
-        <View style={[styles.timeDash, { backgroundColor: theme.colors.gray300 }]} />
-        <TimeInput value={closeTime} onChangeText={onCloseChange} />
-        <Pressable style={styles.addButton}>
+        <View style={styles.timeInputsGroup}>
+          <TimeInput value={openTime} onChangeText={onOpenChange} />
+          <View style={[styles.timeDash, { backgroundColor: theme.colors.gray300 }]} />
+          <TimeInput value={closeTime} onChangeText={onCloseChange} />
+        </View>
+        <Pressable style={styles.addButton} hitSlop={6}>
           <AddIcon color={theme.colors.primary} iconColor={theme.colors.white} />
         </Pressable>
       </View>
@@ -227,7 +237,7 @@ function TimeInput({ value, onChangeText }: { value: string; onChangeText: (valu
       value={value}
       onChangeText={onChangeText}
       containerStyle={styles.timeInputWrap}
-      style={{ textAlign: 'center', color: theme.colors.gray800, fontSize: theme.typography.size.sm, lineHeight: 20 }}
+      style={{ textAlign: 'center', color: theme.colors.gray900, fontSize: 16, lineHeight: 24 }}
     />
   );
 }
@@ -264,17 +274,16 @@ const styles = StyleSheet.create({
     paddingTop: 32,
   },
   cardsWrap: {
-    paddingHorizontal: 18,
-    gap: 12,
-    paddingBottom: 130,
+    paddingHorizontal: 16,
+    gap: 16,
   },
   dayCard: {
     borderWidth: 1,
     borderRadius: 8,
     paddingHorizontal: 8,
     paddingTop: 12,
-    paddingBottom: 12,
-    gap: 18,
+    paddingBottom: 10,
+    gap: 14,
   },
   dayHeaderRow: {
     flexDirection: 'row',
@@ -302,6 +311,12 @@ const styles = StyleSheet.create({
   timeRow: {
     flexDirection: 'row',
     alignItems: 'center',
+    gap: 12,
+  },
+  timeInputsGroup: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
     gap: 8,
   },
   timeInput: {
@@ -309,7 +324,9 @@ const styles = StyleSheet.create({
     height: 42,
   },
   timeInputWrap: {
-    flex: 1,
+    height: 42,
+    minWidth: 104,
+    maxWidth: 124,
   },
   timeDash: {
     width: 25,
@@ -318,13 +335,15 @@ const styles = StyleSheet.create({
   addButton: {
     width: 28,
     height: 28,
-    marginLeft: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   footer: {
     position: 'absolute',
-    left: 14,
-    right: 14,
-    bottom: 12,
+    left: 16,
+    right: 16,
+    paddingHorizontal: 0,
+    paddingTop: 0,
   },
   updateButton: {
     height: 54,

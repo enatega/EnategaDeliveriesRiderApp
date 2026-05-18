@@ -10,6 +10,7 @@ import Text from '../components/Text';
 import VerticalList from '../components/VerticalList';
 import type { RiderEarningsActivity } from '../api/earningsTypes';
 import { useRiderEarningsActivitiesQuery } from '../hooks/useEarningsQueries';
+import { useAppCurrency } from '../hooks/useCurrency';
 import { useTranslations } from '../localization/LocalizationProvider';
 import { MainStackParamList } from '../navigation/types';
 import { lightColors } from '../theme/colors';
@@ -23,6 +24,7 @@ const ACTIVITIES_LIMIT = 10;
 export default function EarningsDetailScreen({ navigation }: Props) {
   const { theme } = useAppTheme();
   const { t } = useTranslations('app');
+  const { formatCurrency } = useAppCurrency();
   const [selectedActivity, setSelectedActivity] = useState<RiderEarningsActivity | null>(null);
   const { data: activitiesData } = useRiderEarningsActivitiesQuery(
     ACTIVITIES_PAGE,
@@ -35,10 +37,10 @@ export default function EarningsDetailScreen({ navigation }: Props) {
       { label: t('earnings_deliveries'), value: `${activitiesData?.summary.deliveries ?? ''}` },
       {
         label: t('earnings_total_earnings'),
-        value: activitiesData ? `$${activitiesData.summary.total_earnings}` : '',
+        value: activitiesData ? formatCurrency(activitiesData.summary.total_earnings) : '',
       },
     ],
-    [activitiesData, t],
+    [activitiesData, t, formatCurrency],
   );
 
   const dateRangeTitle = activitiesData

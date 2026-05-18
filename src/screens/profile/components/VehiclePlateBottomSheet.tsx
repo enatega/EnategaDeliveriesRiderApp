@@ -10,6 +10,7 @@ import { useUpdateRiderDocumentsMutation } from '../../../hooks/useRiderDocument
 import ProfileBottomSheetBase from './ProfileBottomSheetBase';
 import DocumentImagePickerModal from './DocumentImagePickerModal';
 import DocumentUploadRow from './DocumentUploadRow';
+import DocumentImageViewerModal from './DocumentImageViewerModal';
 
 type Props = {
   visible: boolean;
@@ -30,6 +31,8 @@ export default function VehiclePlateBottomSheet({
   const { t } = useTranslations('app');
   const [vehicleNo, setVehicleNo] = useState(initialVehicleNo ?? '');
   const [successMessage, setSuccessMessage] = useState('');
+  const [previewImageUri, setPreviewImageUri] = useState<string | null>(null);
+  const [isViewerVisible, setViewerVisible] = useState(false);
   const picker = useDualDocumentImagePicker({
     initialFrontUri: initialFrontImageUri,
     initialBackUri: initialBackImageUri,
@@ -64,6 +67,12 @@ export default function VehiclePlateBottomSheet({
     }
   };
 
+  const openPreview = (uri: string | null) => {
+    if (!uri) return;
+    setPreviewImageUri(uri);
+    setViewerVisible(true);
+  };
+
   return (
     <ProfileBottomSheetBase visible={visible} onClose={onClose} title={t('profile_vehicle_plate')}>
       <View style={styles.content}>
@@ -85,6 +94,7 @@ export default function VehiclePlateBottomSheet({
           label={t('profile_front_image')}
           imageUri={picker.frontUri}
           onPress={() => picker.openPickerModalFor('front')}
+          onPreview={() => openPreview(picker.frontUri)}
           uploadedLabel={t('profile_uploaded')}
           missingLabel={t('profile_missing_data')}
         />
@@ -92,6 +102,7 @@ export default function VehiclePlateBottomSheet({
           label={t('profile_back_image')}
           imageUri={picker.backUri}
           onPress={() => picker.openPickerModalFor('back')}
+          onPreview={() => openPreview(picker.backUri)}
           uploadedLabel={t('profile_uploaded')}
           missingLabel={t('profile_missing_data')}
         />
@@ -126,6 +137,11 @@ export default function VehiclePlateBottomSheet({
         onClose={picker.closePickerModal}
         onPickFromCamera={picker.pickFromCamera}
         onPickFromGallery={picker.pickFromGallery}
+      />
+      <DocumentImageViewerModal
+        visible={isViewerVisible}
+        imageUri={previewImageUri}
+        onClose={() => setViewerVisible(false)}
       />
     </ProfileBottomSheetBase>
   );

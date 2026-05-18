@@ -56,3 +56,8 @@ export const riderProfileKeys = {
   all: ['riderProfile'] as const,
   detail: () => [...riderProfileKeys.all, 'detail'] as const,
 };
+
+export const appCurrencyKeys = {
+  all: ['appCurrency'] as const,
+  detail: () => [...appCurrencyKeys.all, 'detail'] as const,
+};

@@ -63,7 +63,6 @@ export default function BankManagementScreen() {
     if (!form.accountTitle.trim()) nextErrors.accountTitle = t('bank_required_field');
     if (!form.accountNumber.trim()) nextErrors.accountNumber = t('bank_required_field');
     if (!form.iban.trim()) nextErrors.iban = t('bank_required_field');
-    if (!form.currency.trim()) nextErrors.currency = t('bank_required_field');
 
     setErrors(nextErrors);
     return Object.keys(nextErrors).length === 0;
@@ -77,7 +76,7 @@ export default function BankManagementScreen() {
         accountTitle: form.accountTitle.trim(),
         accountNumber: form.accountNumber.trim(),
         iban: form.iban.trim(),
-        currency: form.currency.trim(),
+        currency: form.currency.trim() || bankDetails?.currency || '',
         accountCode: form.accountCode.trim(),
       });
       setSuccessMessage(response.message);
@@ -112,14 +111,6 @@ export default function BankManagementScreen() {
           </View>
         ) : (
           <>
-            <FormField label={t('bank_currency_label')}>
-              <TextInput
-                value={form.currency}
-                onChangeText={(value) => onChangeField('currency', value)}
-                error={errors.currency}
-              />
-            </FormField>
-
             <FormField label={t('bank_bank_name_label')}>
               <TextInput
                 value={form.bankName}
