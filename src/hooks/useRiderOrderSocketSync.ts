@@ -11,6 +11,9 @@ import {
   type RiderOrderStatusUpdatedPayload,
   type RiderStatusUpdatedPayload,
 } from '../socket/riderOrdersSocket';
+import { riderHomeService } from '../api/riderHomeService';
+import type { RiderHomeSummary } from '../api/riderHomeTypes';
+import { newOrderBeepManager } from '../sound/newOrderBeep';
 
 export function useRiderOrderSocketSync() {
   const queryClient = useQueryClient();
@@ -19,11 +22,27 @@ export function useRiderOrderSocketSync() {
   const token = session.token ?? null;
   const userId = session.user?.id ?? null;
 
+  const syncNewOrderBeepFromSummary = async () => {
+    const summary = await queryClient.fetchQuery<RiderHomeSummary>({
+      queryKey: riderHomeKeys.summary(),
+      queryFn: riderHomeService.getSummary,
+      staleTime: 0,
+    });
+
+    if ((summary.newOrders ?? 0) > 0) {
+      await newOrderBeepManager.start();
+      return;
+    }
+
+    await newOrderBeepManager.stop();
+  };
+
   useEffect(() => {
     riderOrdersSocketClient.updateSession({ token, userId });
 
     if (!isAuthenticated || !token) {
       riderOrdersSocketClient.disconnect();
+      void newOrderBeepManager.stop();
       return;
     }
 
@@ -31,6 +50,7 @@ export function useRiderOrderSocketSync() {
 
     return () => {
       riderOrdersSocketClient.disconnect();
+      void newOrderBeepManager.stop();
     };
   }, [isAuthenticated, token, userId]);
 
@@ -38,6 +58,8 @@ export function useRiderOrderSocketSync() {
     if (!isAuthenticated || !token) {
       return undefined;
     }
+
+    void syncNewOrderBeepFromSummary();
 
     const invalidateRiderOrderCaches = (orderId?: string) => {
       queryClient.invalidateQueries({ queryKey: riderHomeKeys.summary() });
@@ -66,6 +88,7 @@ export function useRiderOrderSocketSync() {
         queryClient.refetchQueries({ queryKey: riderHomeKeys.orderDetail(payload.orderId) });
 
         invalidateRiderOrderCaches(payload.orderId);
+        void syncNewOrderBeepFromSummary();
       },
     );
 
@@ -74,6 +97,7 @@ export function useRiderOrderSocketSync() {
         console.log("[rider][socket] rider-status-updated received", payload);
         if (!payload?.orderId) return;
         invalidateRiderOrderCaches(payload.orderId);
+        void syncNewOrderBeepFromSummary();
       },
     );
 
@@ -82,6 +106,7 @@ export function useRiderOrderSocketSync() {
         console.log("[rider][socket] rider-order-available received", payload);
         if (!payload?.orderId) return;
         invalidateRiderOrderCaches(payload.orderId);
+        void syncNewOrderBeepFromSummary();
       },
     );
 
@@ -109,6 +134,7 @@ export function useRiderOrderSocketSync() {
 
       if (nextState === 'active') {
         riderOrdersSocketClient.connect();
+        void syncNewOrderBeepFromSummary();
       }
     });
 
@@ -116,6 +142,7 @@ export function useRiderOrderSocketSync() {
       const isReachable = state.isConnected && state.isInternetReachable !== false;
       if (!isReachable || appState !== 'active') return;
       riderOrdersSocketClient.connect();
+      void syncNewOrderBeepFromSummary();
     });
 
     return () => {
