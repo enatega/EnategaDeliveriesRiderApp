@@ -24,6 +24,7 @@ module.exports = {
       },
       package: 'com.enatega.deliveries.rider',
       edgeToEdgeEnabled: true,
+      softwareKeyboardLayoutMode: 'resize',
     },
     web: {
       favicon: './assets/favicon.png',

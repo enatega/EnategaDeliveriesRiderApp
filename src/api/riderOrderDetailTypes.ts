@@ -16,6 +16,8 @@ export type RiderOrderDetail = {
   riderStatus: string | null;
   riderStatusLabel: string | null;
   orderType: string | null;
+  storeId: string | null;
+  storeUserId: string | null;
   storeName: string | null;
   storeImage: string | null;
   pickupAddress: string | null;
@@ -27,6 +29,8 @@ export type RiderOrderDetail = {
   customerComment: string | null;
   customerName: string | null;
   customerPhone: string | null;
+  customerId: string | null;
+  chatBoxId: string | null;
   items: RiderOrderItem[];
   createdAt: string | null;
   canAssignMe: boolean | null;

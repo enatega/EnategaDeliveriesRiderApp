@@ -9,6 +9,7 @@ import {
   View,
 } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { useIsFocused } from '@react-navigation/native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Path } from 'react-native-svg';
@@ -74,9 +75,10 @@ export default function ProcessingOrderDetailScreen({ route, navigation }: Props
   const { theme } = useAppTheme();
   const { t } = useTranslations('app');
   const { session } = useAuth();
+  const isFocused = useIsFocused();
   const insets = useSafeAreaInsets();
   const { orderId } = route.params;
-  const detailQuery = useRiderOrderDetailQuery(orderId);
+  const detailQuery = useRiderOrderDetailQuery(orderId, isFocused);
   const updateStatusMutation = useUpdateRiderOrderStatusMutation(orderId);
   const screenHeight = Dimensions.get('window').height;
   const collapsedHeight = 220;
@@ -108,8 +110,10 @@ export default function ProcessingOrderDetailScreen({ route, navigation }: Props
   const openChat = () => {
     navigation.navigate('OrderChat', {
       orderId,
-      name: detailQuery.data?.customerName?.trim() || t('order_chat_default_name'),
+      name: detailQuery.data?.storeName?.trim() || t('order_chat_default_name'),
       phone: detailQuery.data?.customerPhone ?? null,
+      chatBoxId: detailQuery.data?.chatBoxId ?? null,
+      receiverId: detailQuery.data?.storeUserId ?? null,
     });
   };
 
@@ -124,14 +128,6 @@ export default function ProcessingOrderDetailScreen({ route, navigation }: Props
   useEffect(() => {
     setSelectedStatus(currentProgressStatus);
   }, [currentProgressStatus, orderId]);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      void detailQuery.refetch();
-    }, 3000);
-
-    return () => clearInterval(interval);
-  }, [detailQuery.refetch]);
 
   const nextStatus = (selectedStatus
     ? toApiUpdatableStatus(selectedStatus)

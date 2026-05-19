@@ -61,3 +61,8 @@ export const appCurrencyKeys = {
   all: ['appCurrency'] as const,
   detail: () => [...appCurrencyKeys.all, 'detail'] as const,
 };
+
+export const supportChatKeys = {
+  all: ['supportChat'] as const,
+  messages: (chatBoxId: string) => [...supportChatKeys.all, 'messages', chatBoxId] as const,
+};
