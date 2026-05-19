@@ -34,6 +34,13 @@ export const lightColors = {
   zinc800: '#27272A',
   splashBackground: '#020B2B',
   modalBackdrop: 'rgba(17, 24, 39, 0.28)',
+  sky100: '#E0F2FE',
+  sky600: '#0284C7',
+  green600: '#059669',
+  green50: '#ECFDF5',
+  gray150: '#E5E7EB',
+  gray250: '#D1D5DB',
+  shadow: 'rgba(17, 24, 39, 0.12)',
 };
 
 export const darkColors: typeof lightColors = {
@@ -72,6 +79,13 @@ export const darkColors: typeof lightColors = {
   zinc800: '#27272A',
   splashBackground: '#020B2B',
   modalBackdrop: 'rgba(17, 24, 39, 0.28)',
+  sky100: '#082F49',
+  sky600: '#38BDF8',
+  green600: '#34D399',
+  green50: '#052E24',
+  gray150: '#1F2937',
+  gray250: '#374151',
+  shadow: 'rgba(2, 6, 23, 0.45)',
 };
 
 export type ThemeColors = typeof lightColors;
