@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { ActivityIndicator, Linking, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { useIsFocused } from '@react-navigation/native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Path } from 'react-native-svg';
 import Map from '../components/Map';
@@ -89,9 +90,10 @@ export default function ProcessingOrderDetailScreen({ route, navigation }: Props
   const { theme } = useAppTheme();
   const { t } = useTranslations('app');
   const { session } = useAuth();
+  const isFocused = useIsFocused();
   const insets = useSafeAreaInsets();
   const { orderId } = route.params;
-  const detailQuery = useRiderOrderDetailQuery(orderId);
+  const detailQuery = useRiderOrderDetailQuery(orderId, isFocused);
   const updateStatusMutation = useUpdateRiderOrderStatusMutation(orderId);
   const [timelineOpen, setTimelineOpen] = useState(false);
   const [headerHeight, setHeaderHeight] = useState(56);
@@ -133,8 +135,10 @@ export default function ProcessingOrderDetailScreen({ route, navigation }: Props
   const openChat = () => {
     navigation.navigate('OrderChat', {
       orderId,
-      name: detailQuery.data?.customerName?.trim() || t('order_chat_default_name'),
+      name: detailQuery.data?.storeName?.trim() || t('order_chat_default_name'),
       phone: detailQuery.data?.customerPhone ?? null,
+      chatBoxId: detailQuery.data?.chatBoxId ?? null,
+      receiverId: detailQuery.data?.storeUserId ?? null,
     });
   };
 
@@ -351,7 +355,7 @@ export default function ProcessingOrderDetailScreen({ route, navigation }: Props
         </View>
       </View>
 
-      <View style={[styles.bottomControls]}> 
+      <View style={[styles.bottomControls]}>
         <View style={styles.floatingRow}>
           <Pressable style={[styles.navigateChip, { backgroundColor: theme.colors.zinc800 }]} onPress={openNavigation}>
             <NavigationIcon color={theme.colors.white} />
@@ -378,18 +382,18 @@ export default function ProcessingOrderDetailScreen({ route, navigation }: Props
           </View>
         </View>
 
-      <View style={[styles.ctaWrap, { backgroundColor: theme.colors.gray100 }]}>
-        <Button
-          label={updateStatusMutation.isPending ? t('order_status_updating') : primaryButtonLabel}
-          onPress={handlePrimaryAction}
-          disabled={isPrimaryActionDisabled}
-          containerStyle={[
-            styles.primaryButton,
-            waitingForStoreReadyToPickup ? { backgroundColor: theme.colors.gray250 } : null,
-          ]}
-          textColor={waitingForStoreReadyToPickup ? theme.colors.white : theme.colors.gray900}
+        <View style={[styles.ctaWrap, { backgroundColor: theme.colors.gray100 }]}>
+          <Button
+            label={updateStatusMutation.isPending ? t('order_status_updating') : primaryButtonLabel}
+            onPress={handlePrimaryAction}
+            disabled={isPrimaryActionDisabled}
+            containerStyle={[
+              styles.primaryButton,
+              waitingForStoreReadyToPickup ? { backgroundColor: theme.colors.gray250 } : null,
+            ]}
+            textColor={waitingForStoreReadyToPickup ? theme.colors.white : theme.colors.gray900}
           />
-          </View>
+        </View>
       </View>
 
       {isDelivered ? (
@@ -624,7 +628,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal:16
+    paddingHorizontal: 16
   },
   navigateChip: {
     borderRadius: 50,
