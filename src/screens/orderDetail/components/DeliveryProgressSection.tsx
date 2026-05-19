@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo, useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 import Text from '../../../components/Text';
@@ -41,8 +41,6 @@ const STATUS_DESC_KEY: Record<RiderDeliveryProgressStatus, string> = {
   [RiderDeliveryProgressStatus.FAILED]: 'order_status_desc_failed',
 };
 
-const ACTIVE_GREEN = '#52B260';
-
 export default function DeliveryProgressSection({
   status,
   riderStatus,
@@ -51,87 +49,147 @@ export default function DeliveryProgressSection({
 }: Props) {
   const { theme } = useAppTheme();
   const { t } = useTranslations('app');
+  const [timelineOpen, setTimelineOpen] = useState(false);
+
   const currentStatus = resolveProgressStatusFromOrder(status, riderStatus);
   const currentIndex = DELIVERY_PROGRESS_ORDER.indexOf(currentStatus);
+  const activeStatus = selectedStatus ?? currentStatus;
+  const activeIndex = DELIVERY_PROGRESS_ORDER.indexOf(activeStatus);
+  const nextStatus = DELIVERY_PROGRESS_ORDER[Math.min(currentIndex + 1, DELIVERY_PROGRESS_ORDER.length - 1)];
+
+  const timelineRows = useMemo(
+    () => DELIVERY_PROGRESS_ORDER.map((item, index) => ({
+      item,
+      index,
+      isCompleted: index <= currentIndex,
+      isCurrent: index === currentIndex,
+      isSelected: selectedStatus === item,
+      time: index <= currentIndex ? '--:--' : '--:--',
+    })),
+    [currentIndex, selectedStatus],
+  );
 
   return (
-    <View style={[styles.wrapper, { borderTopColor: theme.colors.gray200 }]}>
-      <Text weight="medium" color={theme.colors.gray600}>{t('order_delivery_progress')}</Text>
-
-      <View style={styles.listWrap}>
-        {DELIVERY_PROGRESS_ORDER.map((item, index) => {
-          const isCurrent = index === currentIndex;
-          const isCompleted = index < currentIndex;
-          const isSelected = selectedStatus === item;
-          const isActive = isSelected || isCurrent;
-          const dotBorderColor = isActive
-            ? ACTIVE_GREEN
-            : isCompleted
-              ? theme.colors.emerald900
-              : theme.colors.gray300;
-          const dotBackgroundColor = isCompleted ? theme.colors.emerald900 : theme.colors.white;
-          const textColor = isActive
-            ? ACTIVE_GREEN
-            : isCompleted
-              ? theme.colors.gray700
-              : theme.colors.gray600;
-          const textWeight = isActive ? 'semiBold' : 'regular';
-          const descriptionColor = theme.colors.gray500;
-          const showConnector = index < DELIVERY_PROGRESS_ORDER.length - 1;
-          const connectorColor = isCompleted || isActive ? theme.colors.emerald100 : theme.colors.gray300;
-
-          return (
-            <Pressable
-              key={item}
-              style={styles.row}
-              onPress={() => {
-                if (!onSelectStatus) return;
-                onSelectStatus(item);
-              }}
-              disabled={!onSelectStatus}
-            >
-              <View style={styles.indicatorColumn}>
-                <View
-                  style={[
-                    styles.dot,
-                    {
-                      borderColor: dotBorderColor,
-                      backgroundColor: dotBackgroundColor,
-                    },
-                  ]}
-                >
-                  {isCompleted ? <CheckIcon color={theme.colors.white} /> : null}
-                  {isActive && !isCompleted ? <View style={styles.activeInnerDot} /> : null}
-                </View>
-                {showConnector ? <View style={[styles.connector, { backgroundColor: connectorColor }]} /> : null}
-              </View>
-              <View style={styles.textWrap}>
-                <Text
-                  weight={textWeight}
-                  color={textColor}
-                  style={isActive ? styles.activeHeading : null}
-                >
-                  {t(STATUS_LABEL_KEY[item])}
-                </Text>
-                <Text variant="caption" color={descriptionColor}>
-                  {t(STATUS_DESC_KEY[item])}
-                </Text>
-              </View>
-            </Pressable>
-          );
-        })}
+    <View
+      style={[
+        styles.card,
+        {
+          backgroundColor: theme.colors.gray100,
+          borderColor: theme.colors.gray200,
+          shadowColor: theme.colors.shadow,
+        },
+      ]}
+    >
+      <View style={styles.headerRow}>
+        <Text color={theme.colors.gray600}>{t('order_delivery_progress')}</Text>
+        <View style={styles.stepWrap}>
+          <Text color={theme.colors.gray500}>{t('order_step')}</Text>
+          <Text weight="semiBold" color={theme.colors.gray700}>{`${Math.max(1, currentIndex + 2)}/8`}</Text>
+        </View>
       </View>
+
+      <View style={styles.currentRow}>
+        <View style={[styles.currentDot, { backgroundColor: theme.colors.primary }]} />
+        <Text variant="subtitle" weight="semiBold" color={theme.colors.gray900}>{t(STATUS_LABEL_KEY[activeStatus])}</Text>
+      </View>
+
+      <Text color={theme.colors.gray500}>{t('order_next', { status: t(STATUS_LABEL_KEY[nextStatus]) })}</Text>
+
+      <View style={styles.segmentsWrap}>
+        {DELIVERY_PROGRESS_ORDER.slice(0, 8).map((item, index) => (
+          <View
+            key={item}
+            style={[
+              styles.segment,
+              { backgroundColor: index <= activeIndex ? theme.colors.primary : theme.colors.gray250 },
+            ]}
+          />
+        ))}
+      </View>
+
+      <Pressable
+        onPress={() => setTimelineOpen((value) => !value)}
+        style={[styles.toggleRow, { backgroundColor: theme.colors.gray150 }]}
+      >
+        <Text weight="medium" color={theme.colors.gray700}>
+          {timelineOpen ? t('order_hide_timeline') : t('order_view_timeline')}
+        </Text>
+        <ChevronIcon up={timelineOpen} color={theme.colors.gray600} />
+      </Pressable>
+
+      {timelineOpen ? (
+        <View style={styles.timelineList}>
+          {timelineRows.map((row, index) => {
+            const isPending = index > currentIndex;
+            const isSelected = row.isSelected || (!selectedStatus && row.isCurrent);
+
+            return (
+              <Pressable
+                key={row.item}
+                style={styles.timelineRow}
+                onPress={() => onSelectStatus?.(row.item)}
+                disabled={!onSelectStatus}
+              >
+                <View style={styles.timelineRail}>
+                  <View
+                    style={[
+                      styles.timelineDot,
+                      {
+                        backgroundColor: row.isCompleted ? theme.colors.emerald500 : theme.colors.gray100,
+                        borderColor: row.isCompleted ? theme.colors.emerald500 : theme.colors.gray250,
+                      },
+                    ]}
+                  >
+                    {row.isCompleted ? <CheckIcon color={theme.colors.white} /> : null}
+                  </View>
+                  {index < timelineRows.length - 1 ? (
+                    <View
+                      style={[
+                        styles.timelineConnector,
+                        { backgroundColor: index < currentIndex ? theme.colors.emerald500 : theme.colors.gray250 },
+                      ]}
+                    />
+                  ) : null}
+                </View>
+
+                <View style={styles.timelineTextWrap}>
+                  <Text weight={isSelected ? 'semiBold' : 'medium'} color={theme.colors.gray900}>
+                    {t(STATUS_LABEL_KEY[row.item])}
+                  </Text>
+                  <Text color={theme.colors.gray600}>{t(STATUS_DESC_KEY[row.item])}</Text>
+                </View>
+
+                <Text weight="medium" color={isPending ? theme.colors.gray500 : theme.colors.gray700}>{row.time}</Text>
+              </Pressable>
+            );
+          })}
+        </View>
+      ) : null}
     </View>
+  );
+}
+
+function ChevronIcon({ up, color }: { up: boolean; color: string }) {
+  return (
+    <Svg width={16} height={16} viewBox="0 0 16 16" fill="none" style={up ? undefined : styles.chevronDown}>
+      <Path
+        d="M4 10L8 6L12 10"
+        stroke={color}
+        strokeWidth={1.5}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </Svg>
   );
 }
 
 function CheckIcon({ color }: { color: string }) {
   return (
-    <Svg width={12} height={12} viewBox="0 0 12 12" fill="none">
+    <Svg width={10} height={10} viewBox="0 0 10 10" fill="none">
       <Path
-        d="M2.5 6.3L4.9 8.7L9.5 3.9"
+        d="M2 5.2L4 7.2L8 3"
         stroke={color}
-        strokeWidth={1.8}
+        strokeWidth={1.4}
         strokeLinecap="round"
         strokeLinejoin="round"
       />
@@ -140,51 +198,82 @@ function CheckIcon({ color }: { color: string }) {
 }
 
 const styles = StyleSheet.create({
-  wrapper: {
-    borderTopWidth: 1,
-    paddingTop: 16,
-    gap: 16,
-  },
-  listWrap: {
-    gap: 0,
-  },
-  row: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
+  card: {
+    borderWidth: 1,
+    borderRadius: 16,
+    padding: 16,
     gap: 12,
-    paddingVertical: 6,
-    paddingHorizontal: 8,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 1,
+    shadowRadius: 6,
+    elevation: 2,
   },
-  indicatorColumn: {
-    width: 24,
+  headerRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
   },
-  connector: {
-    width: 2,
-    height: 40,
-    marginTop: 0
+  stepWrap: {
+    alignItems: 'flex-end',
+    gap: 2,
   },
-  dot: {
-    width: 22,
-    height: 22,
+  currentRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  currentDot: {
+    width: 10,
+    height: 10,
+    borderRadius: 999,
+  },
+  segmentsWrap: {
+    flexDirection: 'row',
+    gap: 6,
+  },
+  segment: {
+    height: 6,
+    flex: 1,
+    borderRadius: 999,
+  },
+  toggleRow: {
+    borderRadius: 8,
+    paddingVertical: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexDirection: 'row',
+    gap: 6,
+  },
+  chevronDown: {
+    transform: [{ rotate: '180deg' }],
+  },
+  timelineList: {
+    gap: 10,
+    paddingTop: 4,
+  },
+  timelineRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 10,
+  },
+  timelineRail: {
+    width: 18,
+    alignItems: 'center',
+  },
+  timelineDot: {
+    width: 18,
+    height: 18,
     borderRadius: 999,
     borderWidth: 1,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  activeInnerDot: {
-    width: 10,
-    height: 10,
-    borderRadius: 999,
-    backgroundColor: ACTIVE_GREEN,
+  timelineConnector: {
+    width: 2,
+    height: 34,
   },
-  textWrap: {
+  timelineTextWrap: {
     flex: 1,
     gap: 2,
-    paddingTop: 0,
-    marginTop: -2,
-  },
-  activeHeading: {
-    fontWeight: '600',
   },
 });
