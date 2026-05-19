@@ -6,6 +6,7 @@ import VehicleTypeScreen from '../screens/VehicleTypeScreen';
 import BankManagementScreen from '../screens/BankManagementScreen';
 import WorkScheduleScreen from '../screens/WorkScheduleScreen';
 import ProcessingOrderDetailScreen from '../screens/ProcessingOrderDetailScreen';
+import OrderChatScreen from '../screens/OrderChatScreen';
 import EarningsDetailScreen from '../screens/EarningsDetailScreen';
 import DeliveriesDetailScreen from '../screens/DeliveriesDetailScreen';
 import UpdatePasswordScreen from '../screens/profile/UpdatePasswordScreen';
@@ -23,6 +24,7 @@ export default function MainNavigator() {
         component={ProcessingOrderDetailScreen}
         options={{ headerShown: false }}
       />
+      <Stack.Screen name="OrderChat" component={OrderChatScreen} options={{ headerShown: false }} />
       <Stack.Screen name="EarningsDetail" component={EarningsDetailScreen} options={{ headerShown: false }} />
       <Stack.Screen name="DeliveriesDetail" component={DeliveriesDetailScreen} options={{ headerShown: false }} />
       <Stack.Screen name="Language" component={LanguageScreen} options={{ headerShown: false }} />

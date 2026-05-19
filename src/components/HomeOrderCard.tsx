@@ -2,6 +2,7 @@ import React from 'react';
 import { Image, Pressable, StyleSheet, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import Svg, { Path } from 'react-native-svg';
 import Text from './Text';
 import Button from './Button';
 import { useAppTheme } from '../theme/ThemeProvider';
@@ -122,6 +123,15 @@ export default function HomeOrderCard({ order, tab }: Props) {
         <Text color={theme.colors.gray500}>{safeDistanceKm.toFixed(1)} Km</Text>
       </View>
 
+      <View style={styles.contactRow}>
+        <View style={[styles.contactIconWrap, { backgroundColor: theme.colors.primary }]}>
+          <CallIcon color={theme.colors.white} />
+        </View>
+        <View style={[styles.contactIconWrap, { backgroundColor: theme.colors.primary }]}>
+          <ChatIcon color={theme.colors.white} />
+        </View>
+      </View>
+
       <View style={styles.rowBetween}>
         <Text weight="medium" color={theme.colors.gray600}>{tab === 'delivered' ? t('home_order_amount') : t('home_payment_method')}</Text>
         <Text weight="semiBold" color={theme.colors.gray900}>
@@ -150,6 +160,28 @@ export default function HomeOrderCard({ order, tab }: Props) {
       ) : null}
     </View>
     </Pressable>
+  );
+}
+
+function CallIcon({ color }: { color: string }) {
+  return (
+    <Svg width={16} height={16} viewBox="0 0 24 24" fill="none">
+      <Path
+        d="M6.62 10.79a15.06 15.06 0 0 0 6.59 6.59l2.2-2.2a1 1 0 0 1 1.02-.24 11.31 11.31 0 0 0 3.57.57 1 1 0 0 1 1 1V20a1 1 0 0 1-1 1C10.3 21 3 13.7 3 4a1 1 0 0 1 1-1h3.49a1 1 0 0 1 1 1 11.31 11.31 0 0 0 .57 3.57 1 1 0 0 1-.24 1.02l-2.2 2.2Z"
+        fill={color}
+      />
+    </Svg>
+  );
+}
+
+function ChatIcon({ color }: { color: string }) {
+  return (
+    <Svg width={16} height={16} viewBox="0 0 24 24" fill="none">
+      <Path
+        d="M4 5a3 3 0 0 1 3-3h10a3 3 0 0 1 3 3v7a3 3 0 0 1-3 3H9l-4.5 4v-4H7a3 3 0 0 1-3-3V5Z"
+        fill={color}
+      />
+    </Svg>
   );
 }
 
@@ -188,6 +220,18 @@ const styles = StyleSheet.create({
   metaRow: {
     flexDirection: 'row',
     gap: 20,
+  },
+  contactRow: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    gap: 10,
+  },
+  contactIconWrap: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   italic: {
     fontStyle: 'italic',

@@ -10,6 +10,7 @@ export type MainStackParamList = {
   Home: NavigatorScreenParams<RiderTabParamList> | undefined;
   UpdatePassword: undefined;
   ProcessingOrderDetail: { orderId: string };
+  OrderChat: { orderId: string; name: string; phone: string | null };
   EarningsDetail: undefined;
   DeliveriesDetail: { earningId?: string };
   Language: undefined;
