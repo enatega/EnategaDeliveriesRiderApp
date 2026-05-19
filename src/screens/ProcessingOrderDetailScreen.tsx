@@ -12,6 +12,8 @@ import { MainStackParamList } from '../navigation/types';
 import { useAppTheme } from '../theme/ThemeProvider';
 import { useTranslations } from '../localization/LocalizationProvider';
 import { useRiderOrderDetailQuery } from '../hooks/useRiderOrderDetailQuery';
+import { useUpdateRiderOrderStatusMutation } from '../hooks/useRiderHomeMutations';
+import { useAuth } from '../auth/AuthProvider';
 import OrderDetailTopBar from './orderDetail/components/OrderDetailTopBar';
 import {
   DELIVERY_PROGRESS_ORDER,
@@ -19,6 +21,7 @@ import {
   RiderDeliveryProgressStatus,
 } from './orderDetail/progress';
 import { StatusBar } from 'expo-status-bar';
+import type { RiderOrderUpdatableStatus } from '../api/riderHomeTypes';
 
 type Props = NativeStackScreenProps<MainStackParamList, 'ProcessingOrderDetail'>;
 
@@ -38,7 +41,7 @@ const STATUS_TITLE_KEY: Record<RiderDeliveryProgressStatus, string> = {
 };
 
 const NEXT_STATUS_KEY: Record<RiderDeliveryProgressStatus, string> = {
-  [RiderDeliveryProgressStatus.ASSIGNED]: 'order_status_arrived_at_store',
+  [RiderDeliveryProgressStatus.ASSIGNED]: 'order_status_heading_to_store',
   [RiderDeliveryProgressStatus.HEADING_TO_STORE]: 'order_status_arrived_at_store',
   [RiderDeliveryProgressStatus.ARRIVED_AT_STORE]: 'order_status_waiting_for_order',
   [RiderDeliveryProgressStatus.WAITING_FOR_ORDER]: 'order_status_picked_up',
@@ -61,12 +64,35 @@ const STEP_VALUE: Record<RiderDeliveryProgressStatus, number> = {
   [RiderDeliveryProgressStatus.FAILED]: 8,
 };
 
+const NEXT_UPDATE_STATUS: Partial<Record<RiderDeliveryProgressStatus, RiderOrderUpdatableStatus>> = {
+  [RiderDeliveryProgressStatus.ASSIGNED]: 'heading_to_store',
+  [RiderDeliveryProgressStatus.HEADING_TO_STORE]: 'arrived_at_store',
+  [RiderDeliveryProgressStatus.ARRIVED_AT_STORE]: 'waiting_for_order',
+  [RiderDeliveryProgressStatus.WAITING_FOR_ORDER]: 'picked_up',
+  [RiderDeliveryProgressStatus.PICKED_UP]: 'out_for_delivery',
+  [RiderDeliveryProgressStatus.OUT_FOR_DELIVERY]: 'arrived',
+  [RiderDeliveryProgressStatus.ARRIVED_AT_CUSTOMER]: 'delivered',
+};
+
+const STATUS_BUTTON_LABEL_KEY: Record<RiderOrderUpdatableStatus, string> = {
+  heading_to_store: 'order_start_navigation',
+  arrived_at_store: 'order_status_arrived_at_store',
+  waiting_for_order: 'order_status_waiting_for_order',
+  picked_up: 'order_status_picked_up',
+  out_for_delivery: 'order_status_out_for_delivery',
+  arrived: 'order_status_arrived_at_customer',
+  delivered: 'order_status_delivered',
+  failed: 'order_status_failed',
+};
+
 export default function ProcessingOrderDetailScreen({ route, navigation }: Props) {
   const { theme } = useAppTheme();
   const { t } = useTranslations('app');
+  const { session } = useAuth();
   const insets = useSafeAreaInsets();
   const { orderId } = route.params;
   const detailQuery = useRiderOrderDetailQuery(orderId);
+  const updateStatusMutation = useUpdateRiderOrderStatusMutation(orderId);
   const [timelineOpen, setTimelineOpen] = useState(false);
   const [headerHeight, setHeaderHeight] = useState(56);
 
@@ -116,6 +142,34 @@ export default function ProcessingOrderDetailScreen({ route, navigation }: Props
   const nextTitle = t(NEXT_STATUS_KEY[currentProgressStatus]);
   const step = STEP_VALUE[currentProgressStatus];
   const currentIndex = DELIVERY_PROGRESS_ORDER.indexOf(currentProgressStatus);
+  const nextUpdateStatus = NEXT_UPDATE_STATUS[currentProgressStatus] ?? null;
+  const isDelivered = currentProgressStatus === RiderDeliveryProgressStatus.DELIVERED;
+  const showStorePreparingAlert = currentProgressStatus === RiderDeliveryProgressStatus.ARRIVED_AT_STORE;
+  const showReadyForPickupAlert = currentProgressStatus === RiderDeliveryProgressStatus.WAITING_FOR_ORDER;
+  const waitingForStoreReadyToPickup = Boolean(
+    nextUpdateStatus === 'picked_up' && detailQuery.data?.status !== 'ready',
+  );
+  const primaryButtonLabel = nextUpdateStatus
+    ? t(STATUS_BUTTON_LABEL_KEY[nextUpdateStatus])
+    : t('order_start_navigation');
+  const isPrimaryActionDisabled = updateStatusMutation.isPending || waitingForStoreReadyToPickup;
+
+  const handlePrimaryAction = () => {
+    if (waitingForStoreReadyToPickup) return;
+
+    const riderId = session.user?.id;
+
+    if (nextUpdateStatus && riderId) {
+      updateStatusMutation.mutate({ status: nextUpdateStatus, riderId });
+      return;
+    }
+
+    void openNavigation();
+  };
+
+  const closeDeliveredModal = () => {
+    navigation.goBack();
+  };
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.white }]} edges={['top']}>
@@ -153,6 +207,41 @@ export default function ProcessingOrderDetailScreen({ route, navigation }: Props
       </View>
 
       <View style={styles.progressCardWrap}>
+        {showStorePreparingAlert ? (
+          <View
+            style={[
+              styles.alertCard,
+              { backgroundColor: theme.colors.sky100, borderColor: theme.colors.sky600 },
+            ]}
+          >
+            <View style={styles.alertTitleRow}>
+              <InfoCircleIcon color={theme.colors.sky600} />
+              <Text variant="subtitle" weight="medium" color={theme.colors.sky600}>
+                {t('order_alert_store_preparing_title')}
+              </Text>
+            </View>
+            <Text variant="subtitle" color={theme.colors.gray600}>
+              {t('order_alert_store_preparing_desc')}
+            </Text>
+          </View>
+        ) : null}
+
+        {showReadyForPickupAlert ? (
+          <View
+            style={[
+              styles.alertCard,
+              { backgroundColor: theme.colors.green50, borderColor: theme.colors.green600 },
+            ]}
+          >
+            <View style={styles.alertTitleRow}>
+              <CheckCircleIcon color={theme.colors.green600} />
+              <Text variant="subtitle" weight="medium" color={theme.colors.green600}>
+                {t('order_alert_ready_pickup_title')}
+              </Text>
+            </View>
+          </View>
+        ) : null}
+
         <View
           style={[
             styles.progressCard,
@@ -289,15 +378,46 @@ export default function ProcessingOrderDetailScreen({ route, navigation }: Props
           </View>
         </View>
 
-      <View style={{backgroundColor: theme.colors.gray100,paddingHorizontal:16,paddingVertical:30}}>
+      <View style={[styles.ctaWrap, { backgroundColor: theme.colors.gray100 }]}>
         <Button
-          label={t('order_start_navigation')}
-          onPress={openNavigation}
-          containerStyle={styles.primaryButton}
-          textColor={theme.colors.gray900}
+          label={updateStatusMutation.isPending ? t('order_status_updating') : primaryButtonLabel}
+          onPress={handlePrimaryAction}
+          disabled={isPrimaryActionDisabled}
+          containerStyle={[
+            styles.primaryButton,
+            waitingForStoreReadyToPickup ? { backgroundColor: theme.colors.gray250 } : null,
+          ]}
+          textColor={waitingForStoreReadyToPickup ? theme.colors.white : theme.colors.gray900}
           />
           </View>
       </View>
+
+      {isDelivered ? (
+        <View style={[styles.modalOverlay, { backgroundColor: theme.colors.modalBackdrop }]}>
+          <View style={[styles.successCard, { backgroundColor: theme.colors.white, shadowColor: theme.colors.shadow }]}>
+            <Text style={styles.emoji}>🎉</Text>
+            <Text variant="title" weight="semiBold" color={theme.colors.gray900} style={styles.centerText}>
+              {t('order_well_done_rider')}
+            </Text>
+            <Text color={theme.colors.gray600} style={styles.centerText}>
+              {t('order_delivered_message', { code: detailQuery.data?.orderCode ?? '—' })}
+            </Text>
+          </View>
+
+          <View style={[styles.modalBottom, { backgroundColor: theme.colors.white }]}>
+            <Text variant="title" color={theme.colors.gray600} style={styles.centerText}>{t('order_ready_next_job')}</Text>
+            <Button
+              label={t('order_pick_next_order')}
+              onPress={closeDeliveredModal}
+              containerStyle={styles.primaryButton}
+              textColor={theme.colors.gray900}
+            />
+            <Pressable onPress={closeDeliveredModal} style={[styles.outlineBtn, { borderColor: theme.colors.gray900 }]}>
+              <Text variant="subtitle" weight="medium" color={theme.colors.gray900}>{t('order_done_for_today')}</Text>
+            </Pressable>
+          </View>
+        </View>
+      ) : null}
     </SafeAreaView>
   );
 }
@@ -333,6 +453,34 @@ function CheckIcon({ color }: { color: string }) {
   );
 }
 
+function InfoCircleIcon({ color }: { color: string }) {
+  return (
+    <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
+      <Path
+        d="M12 22C17.523 22 22 17.523 22 12S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10Zm0-7v-4m0-3h.01"
+        stroke={color}
+        strokeWidth={1.8}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </Svg>
+  );
+}
+
+function CheckCircleIcon({ color }: { color: string }) {
+  return (
+    <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
+      <Path
+        d="M22 11.08V12a10 10 0 1 1-5.93-9.14M22 4 12 14.01l-3-3"
+        stroke={color}
+        strokeWidth={1.8}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </Svg>
+  );
+}
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -360,6 +508,19 @@ const styles = StyleSheet.create({
   progressCardWrap: {
     paddingHorizontal: 16,
     paddingTop: 16,
+    gap: 10,
+  },
+  alertCard: {
+    borderWidth: 1,
+    borderRadius: 12,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    gap: 6,
+  },
+  alertTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
   },
   progressCard: {
     borderWidth: 1,
@@ -495,8 +656,57 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  ctaWrap: {
+    paddingHorizontal: 16,
+    paddingVertical: 30,
+  },
   primaryButton: {
     height: 54,
     borderRadius: 40,
+  },
+  modalOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  successCard: {
+    width: '88%',
+    maxWidth: 360,
+    borderRadius: 16,
+    paddingHorizontal: 20,
+    paddingVertical: 20,
+    alignItems: 'center',
+    gap: 6,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 1,
+    shadowRadius: 8,
+    elevation: 2,
+  },
+  emoji: {
+    fontSize: 44,
+    lineHeight: 52,
+  },
+  modalBottom: {
+    width: '100%',
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: 0,
+    borderTopLeftRadius: 16,
+    borderTopRightRadius: 16,
+    paddingHorizontal: 16,
+    paddingTop: 20,
+    paddingBottom: 24,
+    gap: 14,
+  },
+  outlineBtn: {
+    height: 54,
+    borderRadius: 40,
+    borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  centerText: {
+    textAlign: 'center',
   },
 });
