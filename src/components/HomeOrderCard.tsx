@@ -103,15 +103,15 @@ export default function HomeOrderCard({ order, tab }: Props) {
                 <ListIcon width={20} height={20}/>
               </View>
               <View style={styles.textBlock}>
-                <Text weight="medium" color={theme.colors.gray600}>{t('home_order_id')}</Text>
-                <Text weight="semiBold" color={theme.colors.gray900}>#{safeOrderCode}</Text>
+                <Text variant="caption" weight="medium" color={theme.colors.gray600}>{t('home_order_id')}</Text>
+                <Text variant="label" weight="semiBold" color={theme.colors.gray900}>#{safeOrderCode}</Text>
               </View>
             </View>
           </View>
           <View style={styles.topCell}>
-            <Text weight="medium" color={theme.colors.gray600}>{t('home_order_status')}</Text>
+            <Text variant="caption" weight="medium" color={theme.colors.gray600}>{t('home_order_status')}</Text>
             <View style={[styles.badge, { backgroundColor: badge.bg }]}>
-              <Text weight="medium" color={badge.text}>{safeStatusLabel}</Text>
+              <Text variant="caption" weight="medium" color={badge.text}>{safeStatusLabel}</Text>
             </View>
           </View>
         </View>
@@ -126,8 +126,8 @@ export default function HomeOrderCard({ order, tab }: Props) {
               <View style={[styles.storeImage, { borderColor: theme.colors.gray200, backgroundColor: theme.colors.gray100 }]} />
             )}
             <View style={styles.textBlock}>
-              <Text weight="medium" color={theme.colors.gray600}>{t('home_store_name')}</Text>
-              <Text weight="semiBold" color={theme.colors.gray900}>{safeStoreName}</Text>
+              <Text variant="caption" weight="medium" color={theme.colors.gray600}>{t('home_store_name')}</Text>
+              <Text variant="label" weight="semiBold" color={theme.colors.gray900}>{safeStoreName}</Text>
             </View>
           </View>
           {tab === 'processing' ? (
@@ -156,7 +156,7 @@ export default function HomeOrderCard({ order, tab }: Props) {
 
         <View style={styles.distanceRow}>
           <Image source={locationIcon} style={styles.distanceIcon} resizeMode="contain" />
-          <Text weight="medium" color={theme.colors.gray500}>{safeDistanceLabel}</Text>
+          <Text variant="caption" weight="medium" color={theme.colors.gray500}>{safeDistanceLabel}</Text>
         </View>
 
         <View style={styles.divider} />
@@ -168,8 +168,8 @@ export default function HomeOrderCard({ order, tab }: Props) {
                 <DollarIcon width={20} height={20} />
               </View>
               <View style={styles.textBlock}>
-                <Text weight="medium" color={theme.colors.gray600}>{t('home_order_amount')}</Text>
-                <Text weight="semiBold" color={theme.colors.gray900}>${safeOrderAmount.toFixed(2)}</Text>
+                <Text variant="caption" weight="medium" color={theme.colors.gray600}>{t('home_order_amount')}</Text>
+                <Text variant="label" weight="semiBold" color={theme.colors.gray900}>${safeOrderAmount.toFixed(2)}</Text>
               </View>
             </View>
           </View>
@@ -179,8 +179,8 @@ export default function HomeOrderCard({ order, tab }: Props) {
                 <ClockIcon width={20} height={20} />
               </View>
               <View style={styles.textBlock}>
-                <Text weight="medium" color={theme.colors.gray600}>{t('order_time')}</Text>
-                <Text weight="semiBold" color={theme.colors.gray900}>{safeTime}</Text>
+                <Text variant="caption" weight="medium" color={theme.colors.gray600}>{t('order_time')}</Text>
+                <Text variant="label" weight="semiBold" color={theme.colors.gray900}>{safeTime}</Text>
               </View>
             </View>
           </View>
@@ -190,13 +190,13 @@ export default function HomeOrderCard({ order, tab }: Props) {
 
         <View style={styles.row}>
           <View style={styles.topCell}>
-            <Text weight="medium" color={theme.colors.gray600}>{t('home_payment_status')}</Text>
-            <Text weight="semiBold" color={theme.colors.gray900}>{safePaymentMethod}</Text>
+            <Text variant="caption" weight="medium" color={theme.colors.gray600}>{t('home_payment_status')}</Text>
+            <Text variant="label" weight="semiBold" color={theme.colors.gray900}>{safePaymentMethod}</Text>
           </View>
           <View style={styles.topCell}>
-            <Text weight="medium" color={theme.colors.gray600}>{t('home_payment_status')}</Text>
+            <Text variant="caption" weight="medium" color={theme.colors.gray600}>{t('home_payment_status')}</Text>
             <View style={[styles.badge, { backgroundColor: paymentBadge.bg }]}>
-              <Text weight="medium" color={paymentBadge.text}>{safePaymentStatus}</Text>
+              <Text variant="caption" weight="medium" color={paymentBadge.text}>{safePaymentStatus}</Text>
             </View>
           </View>
         </View>
@@ -205,8 +205,8 @@ export default function HomeOrderCard({ order, tab }: Props) {
           <>
             <View style={styles.divider} />
             <View style={[styles.commentCard, { backgroundColor: theme.colors.gray100 }]}>
-              <Text weight="medium" color={theme.colors.gray600}>{t('home_comment')}</Text>
-              <Text style={styles.italic} weight="semiBold" color={theme.colors.gray900}>{safeComment}</Text>
+              <Text variant="caption" weight="medium" color={theme.colors.gray600}>{t('home_comment')}</Text>
+              <Text variant="label" style={styles.italic} weight="semiBold" color={theme.colors.gray900}>{safeComment}</Text>
             </View>
           </>
         ) : null}
@@ -241,8 +241,8 @@ function LocationRow({ kind, label, value, mapLabel, themeColor }: LocationRowPr
           {kind === 'pickup' ? <PickupLocationIcon width={20} height={20} /> : <HomeIcon width={20} height={20} />}
         </View>
         <View style={styles.textBlock}>
-          <Text weight="medium" color={themeColor.gray600}>{label}</Text>
-          <Text weight="semiBold" color={themeColor.gray900}>{value}</Text>
+          <Text variant="caption" weight="medium" color={themeColor.gray600}>{label}</Text>
+          <Text variant="label" weight="semiBold" color={themeColor.gray900}>{value}</Text>
         </View>
       </View>
       <View style={[styles.mapButton, { borderColor: themeColor.gray200 }]}>
@@ -269,7 +269,7 @@ const styles = StyleSheet.create({
   },
   topCell: {
     flex: 1,
-    gap: 2,
+    gap: 1,
     alignItems: 'flex-start',
   },
   iconTextRow: {
@@ -279,7 +279,7 @@ const styles = StyleSheet.create({
   },
   badge: {
     borderRadius: 12,
-    paddingHorizontal: 12,
+    paddingHorizontal: 10,
     paddingVertical: 2,
   },
   divider: {
@@ -294,7 +294,7 @@ const styles = StyleSheet.create({
   },
   textBlock: {
     flex: 1,
-    gap: 2,
+    gap: 1,
   },
   storeImage: {
     width: 48,
@@ -359,7 +359,7 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   button: {
-    height: 54,
+    height: 44,
     borderRadius: 40,
     marginTop: 4,
   },

@@ -40,6 +40,8 @@ export const lightColors = {
   green50: '#ECFDF5',
   gray150: '#E5E7EB',
   gray250: '#D1D5DB',
+  lime500: '#72D13D',
+  lime600: '#67C933',
   shadow: 'rgba(17, 24, 39, 0.12)',
 };
 
@@ -85,6 +87,8 @@ export const darkColors: typeof lightColors = {
   green50: '#052E24',
   gray150: '#1F2937',
   gray250: '#374151',
+  lime500: '#72D13D',
+  lime600: '#67C933',
   shadow: 'rgba(2, 6, 23, 0.45)',
 };
 
