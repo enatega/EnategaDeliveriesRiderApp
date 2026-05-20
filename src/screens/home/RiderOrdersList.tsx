@@ -19,7 +19,7 @@ export default function RiderOrdersList({ tab }: Props) {
   const { t } = useTranslations('app');
   const queryClient = useQueryClient();
   const query = useRiderOrdersInfiniteQuery(tab);
-
+  console.log('list_Data_New_orders',JSON.stringify(query?.data,null,2));
   const items = useMemo(
     () => query.data?.pages.flatMap((page) => page.items) ?? [],
     [query.data?.pages],

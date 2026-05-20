@@ -20,7 +20,7 @@ class NewOrderBeepManager {
       });
 
       const { sound } = await Audio.Sound.createAsync(
-        require('../../assets/sound/new-order-beep.wav'),
+        require('../../assets/sound/beep3.mp3'),
         {
           shouldPlay: false,
           isLooping: true,
