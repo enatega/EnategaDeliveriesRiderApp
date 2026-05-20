@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   FlatList,
@@ -40,6 +40,8 @@ const formatTime = (value: string | null): string => {
   return date.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
 };
 
+const normalizeParticipantId = (value: string | null | undefined) => value?.trim() ?? null;
+
 export default function OrderChatScreen({ navigation, route }: Props) {
   const { theme } = useAppTheme();
   const { t } = useTranslations('app');
@@ -48,9 +50,10 @@ export default function OrderChatScreen({ navigation, route }: Props) {
   const { session } = useAuth();
   const [message, setMessage] = useState('');
   const [localError, setLocalError] = useState<string | null>(null);
+  const listRef = useRef<FlatList<SupportChatMessage> | null>(null);
 
-  const senderId = session.user?.id ?? null;
-  const receiverId = route.params?.receiverId ?? null;
+  const senderId = normalizeParticipantId(session.user?.id);
+  const receiverId = normalizeParticipantId(route.params?.receiverId);
   const [activeChatBoxId, setActiveChatBoxId] = useState<string | null>(route.params?.chatBoxId ?? null);
   const title = route.params?.name?.trim() || t('order_chat_default_name');
   const phone = route.params?.phone?.trim() || null;
@@ -62,6 +65,11 @@ export default function OrderChatScreen({ navigation, route }: Props) {
     () => messagesQuery.data?.messages ?? [],
     [messagesQuery.data?.messages],
   );
+  const scrollToLatest = useCallback((animated = true) => {
+    requestAnimationFrame(() => {
+      listRef.current?.scrollToEnd({ animated });
+    });
+  }, []);
 
   useEffect(() => {
     const token = session.token ?? null;
@@ -84,8 +92,8 @@ export default function OrderChatScreen({ navigation, route }: Props) {
     const unsubscribe = supportChatSocketClient.onReceiveMessage((socketMessage: SocketReceivedMessage) => {
       const incomingChatBoxId = socketMessage.chatBoxId ?? socketMessage.chat_box_id ?? null;
       const incomingText = socketMessage.text?.trim();
-      const incomingSender = socketMessage.senderId ?? socketMessage.sender ?? null;
-      const incomingReceiver = socketMessage.receiverId ?? socketMessage.receiver ?? null;
+      const incomingSender = normalizeParticipantId(socketMessage.senderId ?? socketMessage.sender);
+      const incomingReceiver = normalizeParticipantId(socketMessage.receiverId ?? socketMessage.receiver);
 
       if (!incomingText) return;
 
@@ -126,9 +134,21 @@ export default function OrderChatScreen({ navigation, route }: Props) {
     };
   }, [activeChatBoxId, queryClient]);
 
+  useEffect(() => {
+    if (!messages.length) return;
+    scrollToLatest(true);
+  }, [messages.length, scrollToLatest]);
+
   const handleSend = () => {
     const text = message.trim();
     if (!text) return;
+
+    console.log('[SUPPORT CHAT][SEND][INITIATED]', {
+      senderId,
+      receiverId,
+      text,
+      activeChatBoxId,
+    });
 
     if (!senderId || !receiverId) {
       console.log('[SUPPORT CHAT][SEND][SKIPPED]', {
@@ -174,13 +194,14 @@ export default function OrderChatScreen({ navigation, route }: Props) {
             );
           }
 
-          if (nextChatBoxId && response?.detail?.text) {
+          if (nextChatBoxId) {
+            const resolvedText = response?.detail?.text?.trim() || text;
             const sentMessage: SupportChatMessage = {
-              id: response.detail.id ?? `${Date.now()}-${Math.random().toString(36).slice(2)}`,
-              text: response.detail.text,
-              senderId: response.detail.sender_id ?? senderId,
-              receiverId: response.detail.receiver_id ?? receiverId,
-              createdAt: response.detail.createdAt ?? response.detail.updatedAt ?? new Date().toISOString(),
+              id: response.detail?.id ?? `${Date.now()}-${Math.random().toString(36).slice(2)}`,
+              text: resolvedText,
+              senderId,
+              receiverId,
+              createdAt: response.detail?.createdAt ?? response.detail?.updatedAt ?? new Date().toISOString(),
             };
 
             queryClient.setQueryData<SupportChatMessagesResponse>(
@@ -197,6 +218,7 @@ export default function OrderChatScreen({ navigation, route }: Props) {
           }
 
           setMessage('');
+          scrollToLatest(true);
         },
         onError: (error) => {
           console.log('[SUPPORT CHAT][SEND][ERROR]', {
@@ -220,37 +242,40 @@ export default function OrderChatScreen({ navigation, route }: Props) {
     : '—';
 
   const renderMessage = ({ item }: { item: SupportChatMessage }) => {
-    const isMine = Boolean(senderId && item.senderId === senderId);
+    const isMine = Boolean(
+      senderId &&
+      normalizeParticipantId(item.senderId) === senderId,
+    );
 
     return (
-      <View style={styles.messageWrap}>
+      <View style={[styles.messageWrap, isMine ? styles.messageWrapMine : styles.messageWrapOther]}>
         {!isMine ? (
-          <Text variant="caption" color={theme.colors.black} style={styles.senderName}>
+          <Text variant="caption" color={theme.colors.gray700} style={styles.senderName}>
             {title}
           </Text>
         ) : null}
         <View style={[styles.bubbleRow, isMine ? styles.myRow : styles.otherRow]}>
-        <View
-          style={[
-            styles.bubble,
-            isMine
-              ? { backgroundColor: theme.colors.gray100 }
-              : { backgroundColor: theme.colors.emerald100 },
-          ]}
-        >
-          <Text
-            style={styles.messageText}
-            color={theme.colors.gray800}
+          <View
+            style={[
+              styles.bubble,
+              isMine
+                ? { backgroundColor: theme.colors.gray100, borderColor: theme.colors.gray200 }
+                : { backgroundColor: theme.colors.emerald100, borderColor: theme.colors.green50 },
+            ]}
           >
-            {item.text}
-          </Text>
+            <Text
+              style={styles.messageText}
+              color={theme.colors.gray800}
+            >
+              {item.text}
+            </Text>
+          </View>
         </View>
-      </View>
         <View style={[styles.timeRow, isMine ? styles.myRow : styles.otherRow]}>
-          <Text variant="caption" color={theme.colors.black}>
+          <Text variant="caption" color={theme.colors.gray700}>
             {formatTime(item.createdAt)}
           </Text>
-          {isMine ? <Text variant="caption" color={theme.colors.black}>✓</Text> : null}
+          {isMine ? <Text variant="caption" color={theme.colors.gray700}>✓</Text> : null}
         </View>
       </View>
     );
@@ -263,7 +288,7 @@ export default function OrderChatScreen({ navigation, route }: Props) {
       <KeyboardAvoidingView
         style={styles.flex}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        keyboardVerticalOffset={Platform.OS === 'ios' ? 6 : 0}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? insets.bottom : 0}
       >
         <View style={[styles.header, { backgroundColor: theme.colors.surface }]}>
           <Pressable onPress={() => navigation.goBack()} style={styles.backButton}>
@@ -304,9 +329,6 @@ export default function OrderChatScreen({ navigation, route }: Props) {
                 </Text>
               </View>
             </View>
-            <Text variant="caption" weight="medium" color={theme.colors.gray900}>
-              —
-            </Text>
           </View>
           <View style={[styles.divider, { backgroundColor: theme.colors.gray300 }]} />
         </View>
@@ -327,12 +349,14 @@ export default function OrderChatScreen({ navigation, route }: Props) {
             </View>
           ) : (
             <FlatList
+              ref={listRef}
               data={messages}
               keyExtractor={(item, index) => item.id || `${item.createdAt ?? 'message'}-${index}`}
               renderItem={renderMessage}
               showsVerticalScrollIndicator={false}
               keyboardShouldPersistTaps="handled"
               contentContainerStyle={styles.messagesContent}
+              onContentSizeChange={() => scrollToLatest(false)}
             />
           )}
         </View>
@@ -398,12 +422,12 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   header: {
-    minHeight: 52,
+    minHeight: 56,
     paddingHorizontal: 16,
-    paddingVertical: 4,
+    paddingVertical: 8,
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 39,
+    gap: 16,
   },
   backButton: {
     width: 24,
@@ -416,8 +440,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   headerTitle: {
-    fontSize: 14,
-    lineHeight: 20,
+    fontSize: 18,
+    lineHeight: 24,
   },
   callButton: {
     width: 24,
@@ -434,7 +458,7 @@ const styles = StyleSheet.create({
   },
   orderMetaWrap: {
     paddingHorizontal: 16,
-    paddingTop: 12,
+    paddingTop: 10,
     gap: 12,
   },
   orderMetaRow: {
@@ -445,7 +469,7 @@ const styles = StyleSheet.create({
   orderLeft: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 4,
+    gap: 8,
   },
   orderChip: {
     borderRadius: 16,
@@ -474,15 +498,22 @@ const styles = StyleSheet.create({
   },
   messagesContent: {
     paddingHorizontal: 16,
-    paddingTop: 16,
-    paddingBottom: 16,
-    gap: 14,
+    paddingTop: 18,
+    paddingBottom: 18,
   },
   messageWrap: {
     gap: 4,
+    maxWidth: '100%',
+    marginBottom: 12,
+  },
+  messageWrapMine: {
+    alignItems: 'flex-end',
+  },
+  messageWrapOther: {
+    alignItems: 'flex-start',
   },
   senderName: {
-    marginBottom: 2,
+    marginBottom: 1,
   },
   bubbleRow: {
     width: '100%',
@@ -495,11 +526,11 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-start',
   },
   bubble: {
-    maxWidth: '82%',
-    borderRadius: 4,
-    paddingHorizontal: 10,
-    paddingTop: 10,
-    paddingBottom: 10,
+    maxWidth: '80%',
+    borderRadius: 8,
+    borderWidth: 1,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
   },
   messageText: {
     fontSize: 14,
@@ -508,23 +539,23 @@ const styles = StyleSheet.create({
   timeRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 2,
+    gap: 4,
   },
   composerBar: {
     paddingHorizontal: 12,
-    paddingTop: 18,
+    paddingTop: 12,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.1,
     shadowRadius: 6,
     elevation: 4,
   },
   composerInputWrap: {
-    borderRadius: 12,
-    minHeight: 56,
-    paddingHorizontal: 12,
+    borderRadius: 20,
+    minHeight: 58,
+    paddingHorizontal: 16,
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    gap: 10,
   },
   plusButton: {
     width: 24,
@@ -534,9 +565,9 @@ const styles = StyleSheet.create({
   },
   input: {
     flex: 1,
-    fontSize: 14,
-    lineHeight: 20,
-    minHeight: 20,
+    fontSize: 16,
+    lineHeight: 22,
+    minHeight: 22,
     paddingVertical: 0,
   },
   sendIconButton: {

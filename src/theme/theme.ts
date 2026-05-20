@@ -1,10 +1,12 @@
 import { darkColors, lightColors, ThemeColors } from './colors';
+import { layout } from './layout';
 import { typography } from './typography';
 
 export type Theme = {
   isDark: boolean;
   colors: ThemeColors;
   typography: typeof typography;
+  layout: typeof layout;
 };
 
 export const buildTheme = (scheme: 'light' | 'dark' | null): Theme => {
@@ -14,5 +16,6 @@ export const buildTheme = (scheme: 'light' | 'dark' | null): Theme => {
     isDark,
     colors: isDark ? darkColors : lightColors,
     typography,
+    layout,
   };
 };

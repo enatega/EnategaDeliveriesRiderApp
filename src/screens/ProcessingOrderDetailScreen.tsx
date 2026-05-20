@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { ActivityIndicator, Linking, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useIsFocused } from '@react-navigation/native';
@@ -113,14 +113,6 @@ export default function ProcessingOrderDetailScreen({ route, navigation }: Props
     [detailQuery.data?.riderStatus, detailQuery.data?.status],
   );
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      void detailQuery.refetch();
-    }, 3000);
-
-    return () => clearInterval(interval);
-  }, [detailQuery.refetch]);
-
   const openNavigation = async () => {
     const url = `https://www.google.com/maps/dir/?api=1&origin=${FALLBACK_PICKUP.latitude},${FALLBACK_PICKUP.longitude}&destination=${FALLBACK_DELIVERY.latitude},${FALLBACK_DELIVERY.longitude}&travelmode=driving`;
     await Linking.openURL(url);
@@ -224,7 +216,7 @@ export default function ProcessingOrderDetailScreen({ route, navigation }: Props
                 {t('order_alert_store_preparing_title')}
               </Text>
             </View>
-            <Text variant="subtitle" color={theme.colors.gray600}>
+            <Text variant="label" color={theme.colors.gray600}>
               {t('order_alert_store_preparing_desc')}
             </Text>
           </View>
@@ -257,23 +249,23 @@ export default function ProcessingOrderDetailScreen({ route, navigation }: Props
               <ActivityIndicator color={theme.colors.primary} />
             </View>
           ) : detailQuery.isError ? (
-            <Text color={theme.colors.gray600}>{detailQuery.error?.message ?? t('orders_empty')}</Text>
+            <Text variant="label" color={theme.colors.gray600}>{detailQuery.error?.message ?? t('orders_empty')}</Text>
           ) : (
             <>
               <View style={styles.rowBetween}>
-                <Text color={theme.colors.gray600}>{t('order_delivery_progress')}</Text>
+                <Text variant="label" weight="medium" color={theme.colors.gray600}>{t('order_delivery_progress')}</Text>
                 <View style={styles.stepWrap}>
-                  <Text color={theme.colors.gray500}>{t('order_step')}</Text>
-                  <Text weight="semiBold" color={theme.colors.gray700}>{`${step}/8`}</Text>
+                  <Text variant="caption" color={theme.colors.gray500}>{t('order_step')}</Text>
+                  <Text variant="label" weight="semiBold" color={theme.colors.gray700}>{`${step}/8`}</Text>
                 </View>
               </View>
 
               <View style={styles.currentRow}>
                 <View style={[styles.currentDot, { backgroundColor: theme.colors.primary }]} />
-                <Text variant="subtitle" weight="semiBold" color={theme.colors.gray900}>{currentTitle}</Text>
+                <Text variant="label" weight="semiBold" color={theme.colors.gray900}>{currentTitle}</Text>
               </View>
 
-              <Text color={theme.colors.gray500}>{t('order_next', { status: nextTitle })}</Text>
+              <Text variant="caption" color={theme.colors.gray500}>{t('order_next', { status: nextTitle })}</Text>
 
               <View style={styles.segmentsWrap}>
                 {Array.from({ length: 8 }).map((_, index) => (
@@ -281,9 +273,19 @@ export default function ProcessingOrderDetailScreen({ route, navigation }: Props
                     key={index}
                     style={[
                       styles.segment,
-                      { backgroundColor: index < step ? theme.colors.primary : theme.colors.gray250 },
+                      { backgroundColor: theme.colors.gray250 },
                     ]}
-                  />
+                  >
+                    <View
+                      style={[
+                        styles.segmentFill,
+                        {
+                          width: index < step - 1 ? '100%' : index === step - 1 ? '50%' : '0%',
+                          backgroundColor: theme.colors.primary,
+                        },
+                      ]}
+                    />
+                  </View>
                 ))}
               </View>
 
@@ -291,7 +293,7 @@ export default function ProcessingOrderDetailScreen({ route, navigation }: Props
                 onPress={() => setTimelineOpen((value) => !value)}
                 style={[styles.timelineButton, { backgroundColor: theme.colors.gray150 }]}
               >
-                <Text weight="medium" color={theme.colors.gray700}>
+                <Text variant="label" weight="medium" color={theme.colors.gray700}>
                   {timelineOpen ? t('order_hide_timeline') : t('order_view_timeline')}
                 </Text>
                 <ChevronIcon up={timelineOpen} color={theme.colors.gray600} />
@@ -339,12 +341,12 @@ export default function ProcessingOrderDetailScreen({ route, navigation }: Props
                           ) : null}
                         </View>
                         <View style={styles.timelineText}>
-                          <Text variant="subtitle" weight={isCurrent ? 'semiBold' : 'medium'} color={theme.colors.gray900}>
+                          <Text variant="label" weight={isCurrent ? 'semiBold' : 'medium'} color={theme.colors.gray900}>
                             {itemTitle}
                           </Text>
-                          <Text color={theme.colors.gray600}>{itemDesc}</Text>
+                          <Text variant="caption" color={theme.colors.gray600}>{itemDesc}</Text>
                         </View>
-                        <Text weight="medium" color={theme.colors.gray500}>--:--</Text>
+                        <Text variant="caption" weight="medium" color={theme.colors.gray500}>--:--</Text>
                       </View>
                     );
                   })}
@@ -359,7 +361,7 @@ export default function ProcessingOrderDetailScreen({ route, navigation }: Props
         <View style={styles.floatingRow}>
           <Pressable style={[styles.navigateChip, { backgroundColor: theme.colors.zinc800 }]} onPress={openNavigation}>
             <NavigationIcon color={theme.colors.white} />
-            <Text weight="medium" color={theme.colors.white}>{t('order_navigate')}</Text>
+            <Text variant="label" weight="medium" color={theme.colors.white}>{t('order_navigate')}</Text>
           </Pressable>
 
           <View style={styles.actionsRow}>
@@ -403,13 +405,13 @@ export default function ProcessingOrderDetailScreen({ route, navigation }: Props
             <Text variant="title" weight="semiBold" color={theme.colors.gray900} style={styles.centerText}>
               {t('order_well_done_rider')}
             </Text>
-            <Text color={theme.colors.gray600} style={styles.centerText}>
+            <Text variant="label" color={theme.colors.gray600} style={styles.centerText}>
               {t('order_delivered_message', { code: detailQuery.data?.orderCode ?? '—' })}
             </Text>
           </View>
 
           <View style={[styles.modalBottom, { backgroundColor: theme.colors.white }]}>
-            <Text variant="title" color={theme.colors.gray600} style={styles.centerText}>{t('order_ready_next_job')}</Text>
+            <Text variant="subtitle" color={theme.colors.gray600} style={styles.centerText}>{t('order_ready_next_job')}</Text>
             <Button
               label={t('order_pick_next_order')}
               onPress={closeDeliveredModal}
@@ -565,6 +567,11 @@ const styles = StyleSheet.create({
   segment: {
     flex: 1,
     height: 6,
+    borderRadius: 999,
+    overflow: 'hidden',
+  },
+  segmentFill: {
+    height: '100%',
     borderRadius: 999,
   },
   timelineButton: {

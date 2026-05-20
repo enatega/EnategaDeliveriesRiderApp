@@ -2,7 +2,7 @@ import React from 'react';
 import { StyleProp, Text as RNText, TextStyle } from 'react-native';
 import { useAppTheme } from '../theme/ThemeProvider';
 
-export type TextVariant = 'title' | 'subtitle' | 'body' | 'caption';
+export type TextVariant = 'title' | 'subtitle' | 'body' | 'label' | 'caption';
 
 type Props = {
   children: React.ReactNode;
@@ -39,6 +39,11 @@ export default function Text({
         return {
           fontSize: theme.typography.size.xs,
           lineHeight: theme.typography.lineHeight.xs,
+        };
+      case 'label':
+        return {
+          fontSize: theme.typography.size.sm,
+          lineHeight: theme.typography.lineHeight.sm,
         };
       default:
         return {

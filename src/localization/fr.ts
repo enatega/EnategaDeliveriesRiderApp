@@ -153,7 +153,7 @@ const fr = {
   order_pick_next_order: 'Prendre la prochaine commande',
   order_done_for_today: 'J ai termine pour aujourd hui',
   order_well_done_rider: 'Bravo Rider',
-  order_delivered_message: 'Commande #{{code}} livree',
+  order_delivered_message: 'Commande {{code}} livree',
   order_chat_default_name: 'Client',
   chat_no_messages: 'Aucun message pour le moment',
   chat_empty_hint: 'Commencez la conversation quand vous etes pret.',

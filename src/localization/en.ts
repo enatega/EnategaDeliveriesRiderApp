@@ -153,7 +153,7 @@ const en = {
   order_pick_next_order: 'Pick Next Order',
   order_done_for_today: 'I’m done for today',
   order_well_done_rider: 'Well Done Rider',
-  order_delivered_message: 'Order number #{{code}} Delivered',
+  order_delivered_message: 'Order number {{code}} Delivered',
   order_chat_default_name: 'Customer',
   chat_no_messages: 'No messages yet',
   chat_empty_hint: 'Start the conversation when you are ready.',
