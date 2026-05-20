@@ -10,27 +10,42 @@ import { useTranslations } from '../localization/LocalizationProvider';
 import { RiderHomeOrder, RiderOrderTab } from '../api/riderHomeTypes';
 import { useAssignOrderMutation } from '../hooks/useRiderHomeMutations';
 import { MainStackParamList } from '../navigation/types';
+import ChatBubbleOvalIcon from '../assets/svgs/chat-bubble-oval.svg';
+import MapSvgIcon from '../assets/svgs/map.svg';
+import PickupLocationIcon from '../assets/svgs/pickUpLocaton.svg';
+import HomeIcon from '../assets/svgs/homeIcon.svg';
+import DollarIcon from '../assets/svgs/circle-dollar-sign.svg';
+import ClockIcon from '../assets/svgs/Clock.svg';
+import locationIcon from '../assets/images/locationIcon.png';
+import ListIcon from '../assets/svgs/list-ordered.svg';
 
 type Props = {
   order: RiderHomeOrder;
   tab: RiderOrderTab;
 };
 
-function statusColors(colors: ThemeColors, label?: string | null) {
+type BadgeTone = {
+  bg: string;
+  text: string;
+};
+
+type LocationKind = 'pickup' | 'dropoff';
+
+function statusColors(colors: ThemeColors, label?: string | null): BadgeTone {
   const lower = (label ?? '').toLowerCase();
 
-  if (lower.includes('deliver')) {
+  if (lower.includes('deliver') || lower.includes('paid')) {
     return { bg: colors.emerald100, text: colors.emerald500 };
   }
 
-  if (lower.includes('assign')) {
-    return { bg: colors.amber100, text: colors.amber800 };
+  if (lower.includes('assign') || lower.includes('arriv') || lower.includes('wait') || lower.includes('pending')) {
+  return { bg: colors.red100, text: colors.red500 };
   }
 
-  return { bg: colors.red100, text: colors.red800 };
+  return { bg: '#FFEDD5', text: '#F97316' };
 }
 
-function getActionLabel(tab: RiderOrderTab, order: RiderHomeOrder, t: (key: string) => string) {
+function getActionLabel(tab: RiderOrderTab, t: (key: string) => string) {
   if (tab === 'new') return t('order_assign_me');
   if (tab === 'processing') return t('order_pick_order');
   return t('order_delivered');
@@ -52,29 +67,25 @@ export default function HomeOrderCard({ order, tab }: Props) {
   const safePickupAddress = order.pickupAddress ?? '—';
   const safeDeliveryAddress = order.deliveryAddress ?? '—';
   const safeOrderAmount = Number(order.orderAmount ?? 0);
-  const safeDistanceKm = Number(order.distanceKm ?? 0);
+  const safeDistanceLabel = order.distanceKm == null ? '—' : `${order.distanceKm.toFixed(1)} Km`;
+  const safePaymentMethod = order.paymentMethod ?? '—';
   const safePaymentStatus = order.paymentStatus ?? '—';
-  const safeComment = order.customerComment ?? '';
+  const safeComment = order.customerComment;
   const safeStoreImage = order.storeImage ?? '';
   const safeCreatedAt = order.createdAt ? new Date(order.createdAt) : null;
   const safeTime = safeCreatedAt && !Number.isNaN(safeCreatedAt.getTime())
     ? safeCreatedAt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     : '—';
-  const canAssignMe = Boolean(order.canAssignMe);
 
   const badge = statusColors(theme.colors, safeStatusLabel);
-  const actionLabel = getActionLabel(tab, order, t);
-  const showAction = tab === 'new' && canAssignMe;
+  const paymentBadge = statusColors(theme.colors, safePaymentStatus);
+  const showAction = tab === 'new' && Boolean(order.canAssignMe);
   const isAssigning = tab === 'new' && assignOrderMutation.isPending;
-  const buttonLabel = isAssigning ? t('order_assigning') : actionLabel;
-  const hasOrderId = Boolean(order.orderId);
+  const buttonLabel = isAssigning ? t('order_assigning') : getActionLabel(tab, t);
 
   const handleActionPress = () => {
-    if (tab === 'new') {
-      if (!order.orderId) return;
-      assignOrderMutation.mutate(order.orderId);
-      return;
-    }
+    if (tab !== 'new' || !order.orderId) return;
+    assignOrderMutation.mutate(order.orderId);
   };
 
   const handleCardPress = () => {
@@ -84,72 +95,161 @@ export default function HomeOrderCard({ order, tab }: Props) {
 
   return (
     <Pressable onPress={handleCardPress} disabled={tab !== 'processing' || !order.orderId}>
-    <View style={[styles.card, { borderColor: theme.colors.gray100, backgroundColor: theme.colors.gray50 }]}> 
-      <View style={styles.rowBetween}>
-        <Text weight="semiBold" color={theme.colors.gray600}>{t('home_status')}</Text>
-        <View style={[styles.badge, { backgroundColor: badge.bg }]}>
-          <Text variant="caption" weight="medium" color={badge.text}>{safeStatusLabel}</Text>
+      <View style={[styles.card, { borderColor: theme.colors.gray100, backgroundColor: theme.colors.gray50 }]}>
+        <View style={styles.row}>
+          <View style={styles.topCell}>
+            <View style={styles.iconTextRow}>
+              <View style={styles.greenIconWrap}>
+                <ListIcon width={20} height={20}/>
+              </View>
+              <View style={styles.textBlock}>
+                <Text weight="medium" color={theme.colors.gray600}>{t('home_order_id')}</Text>
+                <Text weight="semiBold" color={theme.colors.gray900}>#{safeOrderCode}</Text>
+              </View>
+            </View>
+          </View>
+          <View style={styles.topCell}>
+            <Text weight="medium" color={theme.colors.gray600}>{t('home_order_status')}</Text>
+            <View style={[styles.badge, { backgroundColor: badge.bg }]}>
+              <Text weight="medium" color={badge.text}>{safeStatusLabel}</Text>
+            </View>
+          </View>
+        </View>
+
+        <View style={styles.divider} />
+
+        <View style={styles.row}>
+          <View style={styles.storeBlock}>
+            {safeStoreImage ? (
+              <Image source={{ uri: safeStoreImage }} style={[styles.storeImage, { borderColor: theme.colors.gray200 }]} />
+            ) : (
+              <View style={[styles.storeImage, { borderColor: theme.colors.gray200, backgroundColor: theme.colors.gray100 }]} />
+            )}
+            <View style={styles.textBlock}>
+              <Text weight="medium" color={theme.colors.gray600}>{t('home_store_name')}</Text>
+              <Text weight="semiBold" color={theme.colors.gray900}>{safeStoreName}</Text>
+            </View>
+          </View>
+          {tab === 'processing' ? (
+            <View style={styles.chatButton}>
+              <ChatBubbleOvalIcon width={24} height={24} />
+            </View>
+          ) : null}
+        </View>
+
+        <View style={styles.divider} />
+
+        <LocationRow
+          kind="pickup"
+          label={t('home_pickup')}
+          value={safePickupAddress}
+          mapLabel={t('home_view_on_map')}
+          themeColor={theme.colors}
+        />
+        <LocationRow
+          kind="dropoff"
+          label={t('home_deliver')}
+          value={safeDeliveryAddress}
+          mapLabel={t('home_view_on_map')}
+          themeColor={theme.colors}
+        />
+
+        <View style={styles.distanceRow}>
+          <Image source={locationIcon} style={styles.distanceIcon} resizeMode="contain" />
+          <Text weight="medium" color={theme.colors.gray500}>{safeDistanceLabel}</Text>
+        </View>
+
+        <View style={styles.divider} />
+
+        <View style={styles.row}>
+          <View style={styles.metaCell}>
+            <View style={styles.iconTextRow}>
+              <View style={styles.greenIconWrap}>
+                <DollarIcon width={20} height={20} />
+              </View>
+              <View style={styles.textBlock}>
+                <Text weight="medium" color={theme.colors.gray600}>{t('home_order_amount')}</Text>
+                <Text weight="semiBold" color={theme.colors.gray900}>${safeOrderAmount.toFixed(2)}</Text>
+              </View>
+            </View>
+          </View>
+          <View style={styles.metaCell}>
+            <View style={styles.iconTextRow}>
+              <View style={styles.greenIconWrap}>
+                <ClockIcon width={20} height={20} />
+              </View>
+              <View style={styles.textBlock}>
+                <Text weight="medium" color={theme.colors.gray600}>{t('order_time')}</Text>
+                <Text weight="semiBold" color={theme.colors.gray900}>{safeTime}</Text>
+              </View>
+            </View>
+          </View>
+        </View>
+
+        <View style={styles.divider} />
+
+        <View style={styles.row}>
+          <View style={styles.topCell}>
+            <Text weight="medium" color={theme.colors.gray600}>{t('home_payment_status')}</Text>
+            <Text weight="semiBold" color={theme.colors.gray900}>{safePaymentMethod}</Text>
+          </View>
+          <View style={styles.topCell}>
+            <Text weight="medium" color={theme.colors.gray600}>{t('home_payment_status')}</Text>
+            <View style={[styles.badge, { backgroundColor: paymentBadge.bg }]}>
+              <Text weight="medium" color={paymentBadge.text}>{safePaymentStatus}</Text>
+            </View>
+          </View>
+        </View>
+
+        {safeComment ? (
+          <>
+            <View style={styles.divider} />
+            <View style={[styles.commentCard, { backgroundColor: theme.colors.gray100 }]}>
+              <Text weight="medium" color={theme.colors.gray600}>{t('home_comment')}</Text>
+              <Text style={styles.italic} weight="semiBold" color={theme.colors.gray900}>{safeComment}</Text>
+            </View>
+          </>
+        ) : null}
+
+        {showAction ? (
+          <Button
+            label={buttonLabel}
+            onPress={handleActionPress}
+            disabled={isAssigning || !order.orderId}
+            containerStyle={styles.button}
+            textColor={theme.colors.gray900}
+          />
+        ) : null}
+      </View>
+    </Pressable>
+  );
+}
+
+type LocationRowProps = {
+  kind: LocationKind;
+  label: string;
+  value: string;
+  mapLabel: string;
+  themeColor: ThemeColors;
+};
+
+function LocationRow({ kind, label, value, mapLabel, themeColor }: LocationRowProps) {
+  return (
+    <View style={styles.row}>
+      <View style={styles.locationBlock}>
+        <View style={styles.greenIconWrap}>
+          {kind === 'pickup' ? <PickupLocationIcon width={20} height={20} /> : <HomeIcon width={20} height={20} />}
+        </View>
+        <View style={styles.textBlock}>
+          <Text weight="medium" color={themeColor.gray600}>{label}</Text>
+          <Text weight="semiBold" color={themeColor.gray900}>{value}</Text>
         </View>
       </View>
-
-      <View style={styles.rowBetween}>
-        <Text weight="semiBold" color={theme.colors.gray600}>{t('home_order_id')}</Text>
-        <Text weight="bold" color={theme.colors.gray900}>#{safeOrderCode}</Text>
+      <View style={[styles.mapButton, { borderColor: themeColor.gray200 }]}>
+        <MapSvgIcon width={16} height={16} />
+        <Text variant="caption" color={themeColor.gray600}>{mapLabel}</Text>
       </View>
-
-      <View style={styles.storeRow}>
-        {safeStoreImage ? (
-          <Image source={{ uri: safeStoreImage }} style={styles.storeImage} />
-        ) : (
-          <View style={[styles.storeImage, { backgroundColor: theme.colors.gray200 }]} />
-        )}
-        <Text variant="subtitle" weight="bold" color={theme.colors.gray900}>{safeStoreName}</Text>
-      </View>
-
-      <View style={styles.addressSection}>
-        <Text weight="semiBold" color={theme.colors.gray500}>{t('home_pickup')}</Text>
-        <Text weight="bold" color={theme.colors.gray900}>{safePickupAddress}</Text>
-      </View>
-
-      <View style={styles.addressSection}>
-        <Text weight="semiBold" color={theme.colors.gray500}>{t('home_deliver')}</Text>
-        <Text weight="bold" color={theme.colors.gray900}>{safeDeliveryAddress}</Text>
-      </View>
-
-      <View style={styles.metaRow}>
-        <Text color={theme.colors.gray500}>${safeOrderAmount.toFixed(2)}</Text>
-        <Text color={theme.colors.gray500}>{safeTime}</Text>
-        <Text color={theme.colors.gray500}>{safeDistanceKm.toFixed(1)} Km</Text>
-      </View>
-
-      <View style={styles.rowBetween}>
-        <Text weight="medium" color={theme.colors.gray600}>{tab === 'delivered' ? t('home_order_amount') : t('home_payment_method')}</Text>
-        <Text weight="semiBold" color={theme.colors.gray900}>
-          ${safeOrderAmount.toFixed(1)}{' '}
-          {tab !== 'delivered' ? (
-            <Text color={theme.colors.gray500}>({safePaymentStatus})</Text>
-          ) : null}
-        </Text>
-      </View>
-
-      {!!safeComment ? (
-        <>
-          <Text weight="medium" color={theme.colors.gray600}>{t('home_comment')}</Text>
-          <Text style={styles.italic} color={theme.colors.gray900}>{safeComment}</Text>
-        </>
-      ) : null}
-
-      {showAction ? (
-        <Button
-          label={buttonLabel}
-          onPress={handleActionPress}
-          disabled={isAssigning || (tab === 'new' && !hasOrderId)}
-          containerStyle={styles.button}
-          textColor={theme.colors.gray900}
-        />
-      ) : null}
     </View>
-    </Pressable>
   );
 }
 
@@ -158,42 +258,109 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: 8,
     padding: 16,
-    gap: 14,
+    gap: 10,
     marginBottom: 12,
   },
-  rowBetween: {
+  row: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
+    justifyContent: 'space-between',
     gap: 8,
+  },
+  topCell: {
+    flex: 1,
+    gap: 2,
+    alignItems: 'flex-start',
+  },
+  iconTextRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
   },
   badge: {
     borderRadius: 12,
     paddingHorizontal: 12,
     paddingVertical: 2,
   },
-  storeRow: {
+  divider: {
+    borderTopWidth: 1,
+    borderTopColor: '#E5E7EB',
+  },
+  storeBlock: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 16,
+    flex: 1,
+    gap: 10,
   },
-  storeImage: {
-    width: 32,
-    height: 32,
-    borderRadius: 8,
-  },
-  addressSection: {
+  textBlock: {
+    flex: 1,
     gap: 2,
   },
-  metaRow: {
+  storeImage: {
+    width: 48,
+    height: 48,
+    borderRadius: 8,
+    borderWidth: 1,
+  },
+  chatButton: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  locationBlock: {
     flexDirection: 'row',
-    gap: 20,
+    alignItems: 'center',
+    gap: 10,
+    flex: 1,
+  },
+  greenIconWrap: {
+    padding: 8,
+    borderRadius: 6,
+    backgroundColor: 'rgba(144, 227, 109, 0.20)',
+  },
+  mapButton: {
+    flexDirection: 'row',
+    gap: 6,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderRadius: 6,
+    paddingHorizontal: 6,
+    paddingVertical: 4,
+  },
+  distanceRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: '#E5E7EB',
+    borderRadius: 6,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    alignSelf: 'flex-end',
+  },
+  distanceIcon: {
+    width: 14,
+    height: 14,
+  },
+  metaCell: {
+    flex: 1,
+    gap: 2,
   },
   italic: {
     fontStyle: 'italic',
   },
+  commentCard: {
+    borderRadius: 8,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    gap: 8,
+  },
   button: {
     height: 54,
     borderRadius: 40,
+    marginTop: 4,
   },
 });

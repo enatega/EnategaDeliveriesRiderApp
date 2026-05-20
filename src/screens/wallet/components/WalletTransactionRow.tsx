@@ -3,19 +3,15 @@ import { StyleSheet, View } from 'react-native';
 import Text from '../../../components/Text';
 import { RiderWalletHistoryItem } from '../../../api/riderWalletTypes';
 import { useAppTheme } from '../../../theme/ThemeProvider';
+import { useAppCurrency } from '../../../hooks/useCurrency';
 
 type Props = {
   item: RiderWalletHistoryItem;
 };
 
-const amountCurrency = new Intl.NumberFormat('en-US', {
-  style: 'currency',
-  currency: 'USD',
-  maximumFractionDigits: 0,
-});
-
 export default function WalletTransactionRow({ item }: Props) {
   const { theme } = useAppTheme();
+  const { formatCurrency } = useAppCurrency();
 
   const date = new Date(item.created_at);
   const dateLabel = Number.isNaN(date.getTime())
@@ -33,7 +29,7 @@ export default function WalletTransactionRow({ item }: Props) {
           <Text style={[styles.date, { color: theme.colors.gray900 }]}>{dateLabel}</Text>
         </View>
         <Text weight="bold" style={[styles.amount, { color: theme.colors.gray600 }]}>
-          {amountCurrency.format(item.amount)}
+          {formatCurrency(item.amount)}
         </Text>
       </View>
     </View>

@@ -3,6 +3,7 @@ import { StyleSheet, View } from 'react-native';
 import Text from './Text';
 import type { RiderEarningsActivityDelivery } from '../api/earningsTypes';
 import { useAppTheme } from '../theme/ThemeProvider';
+import { useAppCurrency } from '../hooks/useCurrency';
 
 export type DeliveryItemRowData = {
   id: string;
@@ -27,6 +28,7 @@ const getPayment = (item: DeliveryItemRenderable) =>
 
 export default function DeliveryItemRow({ item }: Props) {
   const { theme } = useAppTheme();
+  const { formatCurrency } = useAppCurrency();
 
   return (
     <View style={[styles.row, { borderBottomColor: theme.colors.gray300 }]}>
@@ -46,7 +48,7 @@ export default function DeliveryItemRow({ item }: Props) {
             Payment
           </Text>
           <Text variant="body" weight="semiBold" color={theme.colors.gray800} style={styles.paymentAmount}>
-            ${getPayment(item)}
+            {formatCurrency(getPayment(item))}
           </Text>
         </View>
       </View>

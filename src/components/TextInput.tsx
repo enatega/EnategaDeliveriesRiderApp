@@ -23,6 +23,7 @@ export default function TextInput({
   containerStyle,
   isPassword = false,
   secureTextEntry,
+  style,
   ...rest
 }: Props) {
   const { theme } = useAppTheme();
@@ -42,7 +43,7 @@ export default function TextInput({
         ]}
       >
         <RNTextInput
-          style={[styles.input, { color: theme.colors.text }]}
+          style={[styles.input, { color: theme.colors.text }, style]}
           placeholderTextColor={theme.colors.mutedText}
           secureTextEntry={isSecure}
           {...rest}

@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Animated, Image, Pressable, ScrollView, StyleSheet, TouchableWithoutFeedback, View } from 'react-native';
+import { Linking } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Text from './Text';
 import ToggleSwitch from './ToggleSwitch';
@@ -36,6 +37,9 @@ const SIDEBAR_ICONS = {
   help: require('../assets/images/help.png'),
   logout: require('../assets/images/logout.png'),
 } as const;
+const ABOUT_URL = 'https://multivendor.enatega.com/about';
+const PRIVACY_URL = 'https://multivendor.enatega.com/privacy';
+const HELP_URL = 'https://ninjascode.com/';
 
 function IconBox({ children }: { children: React.ReactNode }) { return <View style={styles.iconBox}>{children}</View>; }
 function ChevronRight({ color }: { color: string }) { return <View style={[styles.chevron, { borderColor: color }]} />; }
@@ -69,6 +73,11 @@ export default function Sidebar({ visible, onClose, availability, onAvailability
 
   useEffect(() => { if (visible) animateOpen(); else animateClose(); }, [visible, animateOpen, animateClose]);
   if (!mounted) return null;
+
+  const openExternalUrl = async (url: string) => {
+    onClose();
+    await Linking.openURL(url);
+  };
 
   const user = session.user;
   const initials = user?.name ? user.name.split(' ').slice(0, 2).map((w) => w[0]).join('').toUpperCase() : 'JS';
@@ -138,21 +147,27 @@ export default function Sidebar({ visible, onClose, availability, onAvailability
       type: 'nav',
       label: t('menu_privacy_policy'),
       icon: <Image source={SIDEBAR_ICONS.vehicleType} style={styles.iconImage} resizeMode="contain" />,
-      onPress: onClose,
+      onPress: () => {
+        void openExternalUrl(PRIVACY_URL);
+      },
     },
     {
       key: 'about',
       type: 'nav',
       label: t('menu_about_us'),
       icon: <Image source={SIDEBAR_ICONS.aboutUs} style={styles.iconImage} resizeMode="contain" />,
-      onPress: onClose,
+      onPress: () => {
+        void openExternalUrl(ABOUT_URL);
+      },
     },
     {
       key: 'help',
       type: 'nav',
       label: t('menu_help'),
       icon: <Image source={SIDEBAR_ICONS.help} style={styles.iconImage} resizeMode="contain" />,
-      onPress: onClose,
+      onPress: () => {
+        void openExternalUrl(HELP_URL);
+      },
     },
     {
       key: 'logout',

@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import type { AuthSessionResponse } from '../api/authTypes';
 import { authSession, AuthSession } from './authSession';
+import { setSessionExpiredHandler } from '../api/apiClient';
 
 type AuthContextValue = {
   session: AuthSession;
@@ -50,6 +51,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     await authSession.clearSession();
     setSession(emptySession);
   };
+
+  useEffect(() => {
+    setSessionExpiredHandler(async () => {
+      await authSession.clearSession();
+      setSession(emptySession);
+    });
+
+    return () => {
+      setSessionExpiredHandler(null);
+    };
+  }, []);
 
   const isAuthenticated = Boolean(session.token);
 

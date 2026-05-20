@@ -4,6 +4,7 @@ import Text from './Text';
 import { lightColors } from '../theme/colors';
 import { typography } from '../theme/typography';
 import { RiderEarningsChartPoint } from '../api/earningsTypes';
+import { useAppCurrency } from '../hooks/useCurrency';
 
 export type EarningsChartDataPoint = {
   label: string;
@@ -22,7 +23,8 @@ const getChartKey = (item: EarningsChartDataPoint | RiderEarningsChartPoint) =>
   'bucket_start' in item ? `${item.bucket_start}-${item.total_earnings}` : `${item.label}-${item.amount}`;
 
 export default function EarningsChart({ data }: Props) {
-  const chartData = data ?? [];  
+  const chartData = data ?? [];
+  const { formatCurrency } = useAppCurrency();
   const maxAmount = Math.max(...chartData.map(getChartAmount), 1);
 
   return (
@@ -36,7 +38,7 @@ export default function EarningsChart({ data }: Props) {
         return (
           <View key={getChartKey(item)} style={styles.column}>
             <Text variant="caption" color={lightColors.gray600} style={styles.amount}>
-              ${amount}
+              {formatCurrency(amount)}
             </Text>
             <View
               style={[

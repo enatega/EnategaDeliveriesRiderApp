@@ -31,3 +31,38 @@ export const riderWalletKeys = {
   history: (transactionType: 'deposit' | 'withdrawal' | 'all') =>
     [...riderWalletKeys.historyAll(), transactionType] as const,
 };
+
+export const vehicleTypesKeys = {
+  all: ['vehicleTypes'] as const,
+  list: () => [...vehicleTypesKeys.all, 'list'] as const,
+};
+
+export const bankDetailsKeys = {
+  all: ['bankDetails'] as const,
+  detail: () => [...bankDetailsKeys.all, 'detail'] as const,
+};
+
+export const workScheduleKeys = {
+  all: ['workSchedule'] as const,
+  detail: () => [...workScheduleKeys.all, 'detail'] as const,
+};
+
+export const languageKeys = {
+  all: ['languageSettings'] as const,
+  detail: () => [...languageKeys.all, 'detail'] as const,
+};
+
+export const riderProfileKeys = {
+  all: ['riderProfile'] as const,
+  detail: () => [...riderProfileKeys.all, 'detail'] as const,
+};
+
+export const appCurrencyKeys = {
+  all: ['appCurrency'] as const,
+  detail: () => [...appCurrencyKeys.all, 'detail'] as const,
+};
+
+export const supportChatKeys = {
+  all: ['supportChat'] as const,
+  messages: (chatBoxId: string) => [...supportChatKeys.all, 'messages', chatBoxId] as const,
+};

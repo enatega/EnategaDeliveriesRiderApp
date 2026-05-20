@@ -19,6 +19,14 @@ export type RiderStatusUpdatedPayload = {
   updatedAt: string;
 };
 
+export type RiderOrderAvailablePayload = {
+  orderId: string;
+  storeId: string;
+  zoneId: string;
+  status: string;
+  updatedAt: string;
+};
+
 type RiderSocketSession = {
   token: string | null;
   userId: string | null;
@@ -130,6 +138,15 @@ class RiderOrdersSocketClient {
 
     return () => {
       socket.off('rider-status-updated', handler);
+    };
+  }
+
+  subscribeRiderOrderAvailable(handler: (payload: RiderOrderAvailablePayload) => void) {
+    const socket = this.ensureSocket();
+    socket.on('rider-order-available', handler);
+
+    return () => {
+      socket.off('rider-order-available', handler);
     };
   }
 }
