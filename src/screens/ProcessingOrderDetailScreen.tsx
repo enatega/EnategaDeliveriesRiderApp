@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { ActivityIndicator, Linking, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useIsFocused } from '@react-navigation/native';
@@ -112,14 +112,6 @@ export default function ProcessingOrderDetailScreen({ route, navigation }: Props
     () => resolveProgressStatusFromOrder(detailQuery.data?.status, detailQuery.data?.riderStatus),
     [detailQuery.data?.riderStatus, detailQuery.data?.status],
   );
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      void detailQuery.refetch();
-    }, 3000);
-
-    return () => clearInterval(interval);
-  }, [detailQuery.refetch]);
 
   const openNavigation = async () => {
     const url = `https://www.google.com/maps/dir/?api=1&origin=${FALLBACK_PICKUP.latitude},${FALLBACK_PICKUP.longitude}&destination=${FALLBACK_DELIVERY.latitude},${FALLBACK_DELIVERY.longitude}&travelmode=driving`;
@@ -281,9 +273,19 @@ export default function ProcessingOrderDetailScreen({ route, navigation }: Props
                     key={index}
                     style={[
                       styles.segment,
-                      { backgroundColor: index < step ? theme.colors.primary : theme.colors.gray250 },
+                      { backgroundColor: theme.colors.gray250 },
                     ]}
-                  />
+                  >
+                    <View
+                      style={[
+                        styles.segmentFill,
+                        {
+                          width: index < step - 1 ? '100%' : index === step - 1 ? '50%' : '0%',
+                          backgroundColor: theme.colors.primary,
+                        },
+                      ]}
+                    />
+                  </View>
                 ))}
               </View>
 
@@ -565,6 +567,11 @@ const styles = StyleSheet.create({
   segment: {
     flex: 1,
     height: 6,
+    borderRadius: 999,
+    overflow: 'hidden',
+  },
+  segmentFill: {
+    height: '100%',
     borderRadius: 999,
   },
   timelineButton: {

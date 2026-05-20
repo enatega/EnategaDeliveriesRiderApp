@@ -51,7 +51,15 @@ class RiderOrdersSocketClient {
   }
 
   private emitAddUser(socket: Socket) {
-    if (!this.userId) return;
+    if (!this.userId) {
+      console.log('[rider][socket] add-user skipped: missing userId');
+      return;
+    }
+    console.log('[rider][socket] emitting add-user', {
+      userId: this.userId,
+      socketId: socket.id,
+      connected: socket.connected,
+    });
     socket.emit('add-user', this.userId);
   }
 
@@ -61,9 +69,16 @@ class RiderOrdersSocketClient {
       return this.socket;
     }
 
-    this.socket = io(buildSocketUrl(), {
+    const socketUrl = buildSocketUrl();
+    const socketPath = process.env.EXPO_PUBLIC_SOCKET_PATH ?? '/socket.io';
+    console.log('[rider][socket] creating connection', {
+      socketUrl,
+      socketPath,
+    });
+
+    this.socket = io(socketUrl, {
       autoConnect: false,
-      path: process.env.EXPO_PUBLIC_SOCKET_PATH ?? '/socket.io',
+      path: socketPath,
       transports: ['websocket'],
       reconnection: true,
       reconnectionAttempts: Infinity,
@@ -76,7 +91,28 @@ class RiderOrdersSocketClient {
     });
 
     this.socket.on('connect', () => {
+      console.log('[rider][socket] connected', {
+        socketId: this.socket?.id,
+        hasToken: Boolean(this.token),
+        userId: this.userId,
+      });
       this.emitAddUser(this.socket as Socket);
+    });
+
+    this.socket.on('connect_error', (error) => {
+      console.log('[rider][socket] connect_error', {
+        message: error.message,
+        name: error.name,
+        hasToken: Boolean(this.token),
+        userId: this.userId,
+      });
+    });
+
+    this.socket.on('disconnect', (reason) => {
+      console.log('[rider][socket] disconnected', {
+        reason,
+        userId: this.userId,
+      });
     });
 
     return this.socket;
@@ -103,6 +139,13 @@ class RiderOrdersSocketClient {
     const tokenChanged = this.token !== session.token;
     this.token = session.token;
     this.userId = session.userId;
+    console.log('[rider][socket] session updated', {
+      tokenChanged,
+      hasToken: Boolean(this.token),
+      userId: this.userId,
+      socketExists: Boolean(this.socket),
+      socketConnected: Boolean(this.socket?.connected),
+    });
 
     if (!this.socket) return;
 

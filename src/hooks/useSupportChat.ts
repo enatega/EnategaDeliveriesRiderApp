@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import type { ApiError } from '../api/apiClient';
 import { supportChatKeys } from '../api/queryKeys';
 import { supportChatService } from '../api/supportChatService';
@@ -17,16 +17,8 @@ export function useSupportChatMessagesQuery(chatBoxId?: string | null) {
   });
 }
 
-export function useSendSupportChatMessageMutation(chatBoxId?: string | null) {
-  const queryClient = useQueryClient();
-
+export function useSendSupportChatMessageMutation(_chatBoxId?: string | null) {
   return useMutation<SendSupportChatMessageResponse, ApiError, SendSupportChatMessagePayload>({
     mutationFn: supportChatService.sendMessage,
-    onSuccess: async () => {
-      if (!chatBoxId) return;
-      await queryClient.invalidateQueries({
-        queryKey: supportChatKeys.messages(chatBoxId),
-      });
-    },
   });
 }
