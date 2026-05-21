@@ -2,8 +2,8 @@ const googleMapsApiKey = process.env.GOOGLE_MAPS_API_KEY ?? 'DUMMY_GOOGLE_MAPS_A
 
 module.exports = {
   expo: {
-    name: 'EnategaDeliveriesRiderApp',
-    slug: 'enatega-deliveries-rider-app',
+    name: 'Cylia Rider',
+    slug: 'cylia-rider',
     version: '1.0.0',
     orientation: 'portrait',
     icon: './assets/icon.png',
@@ -15,14 +15,14 @@ module.exports = {
     },
     ios: {
       supportsTablet: true,
-      bundleIdentifier: 'com.enatega.deliveries.rider',
+      bundleIdentifier: 'com.cyliaplatform.rider',
     },
     android: {
       adaptiveIcon: {
         foregroundImage: './assets/adaptive-icon.png',
         backgroundColor: '#ffffff',
       },
-      package: 'com.enatega.deliveries.rider',
+      package: 'com.cyliaplatform.rider',
       edgeToEdgeEnabled: true,
       softwareKeyboardLayoutMode: 'resize',
     },
@@ -30,7 +30,7 @@ module.exports = {
       favicon: './assets/favicon.png',
     },
     updates: {
-      url: 'https://u.expo.dev/dd251847-b122-424b-b7dd-60bd8ddbbe90',
+      url: 'https://u.expo.dev/55e36cb0-125a-4fa5-ab30-bd821d08c104',
     },
     runtimeVersion: {
       policy: 'appVersion',
@@ -55,7 +55,7 @@ module.exports = {
     ],
     extra: {
       eas: {
-        projectId: 'dd251847-b122-424b-b7dd-60bd8ddbbe90',
+        projectId: '55e36cb0-125a-4fa5-ab30-bd821d08c104',
       },
     },
   },

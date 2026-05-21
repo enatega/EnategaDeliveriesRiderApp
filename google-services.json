@@ -1,0 +1,118 @@
+{
+  "project_info": {
+    "project_number": "413592405411",
+    "project_id": "cylia-1ccd9",
+    "storage_bucket": "cylia-1ccd9.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:413592405411:android:003f3b19e9ba4ef1690616",
+        "android_client_info": {
+          "package_name": "com.cyliaplatform.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "413592405411-ln05ubc91ohtf2bcpcrp72djltvgt2jp.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD-nvUgHvUB1Rf-_HBJ4eQKMveNrNKViA8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "413592405411-ln05ubc91ohtf2bcpcrp72djltvgt2jp.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "413592405411-7621er41a01ib7fmi98ljkv1sklchu9r.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.cyliaplatform.app"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:413592405411:android:2388b90d1f8bfd5a690616",
+        "android_client_info": {
+          "package_name": "com.cyliaplatform.merchant"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "413592405411-ln05ubc91ohtf2bcpcrp72djltvgt2jp.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD-nvUgHvUB1Rf-_HBJ4eQKMveNrNKViA8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "413592405411-ln05ubc91ohtf2bcpcrp72djltvgt2jp.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "413592405411-7621er41a01ib7fmi98ljkv1sklchu9r.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.cyliaplatform.app"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:413592405411:android:dc91da02a062ed3d690616",
+        "android_client_info": {
+          "package_name": "com.cyliaplatform.rider"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "413592405411-ln05ubc91ohtf2bcpcrp72djltvgt2jp.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD-nvUgHvUB1Rf-_HBJ4eQKMveNrNKViA8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "413592405411-ln05ubc91ohtf2bcpcrp72djltvgt2jp.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "413592405411-7621er41a01ib7fmi98ljkv1sklchu9r.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.cyliaplatform.app"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
