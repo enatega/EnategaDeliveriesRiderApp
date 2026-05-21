@@ -14,6 +14,7 @@ import {
 import { riderHomeService } from '../api/riderHomeService';
 import type { RiderHomeSummary } from '../api/riderHomeTypes';
 import { newOrderBeepManager } from '../sound/newOrderBeep';
+import { applyAssignedSummaryCounts, removeOrderFromNewOrdersCache } from './riderHomeCache';
 
 export function useRiderOrderSocketSync() {
   const queryClient = useQueryClient();
@@ -73,6 +74,10 @@ export function useRiderOrderSocketSync() {
       (payload: RiderOrderStatusUpdatedPayload) => {
         console.log("[rider][socket] order-status-updated received", payload);
         if (!payload?.orderId) return;
+        if (payload.status === 'rider_assigned') {
+          removeOrderFromNewOrdersCache(queryClient, payload.orderId);
+          applyAssignedSummaryCounts(queryClient);
+        }
 
         queryClient.setQueryData<RiderOrderDetail>(
           riderHomeKeys.orderDetail(payload.orderId),

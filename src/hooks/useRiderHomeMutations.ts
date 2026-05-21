@@ -8,13 +8,20 @@ import {
 } from '../api/riderHomeTypes';
 import { riderHomeKeys } from '../api/queryKeys';
 import { riderOrderDetailService } from '../api/riderOrderDetailService';
+import { applyAssignedSummaryCounts, removeOrderFromNewOrdersCache } from './riderHomeCache';
 
 export function useAssignOrderMutation() {
   const queryClient = useQueryClient();
 
   return useMutation<AssignOrderResponse, ApiError, string>({
     mutationFn: riderHomeService.assignOrderToCurrentRider,
-    onSuccess: async () => {
+    onSuccess: async (response, orderId) => {
+      const assignedOrderId = response?.orderId ?? orderId;
+      if (assignedOrderId) {
+        removeOrderFromNewOrdersCache(queryClient, assignedOrderId);
+        applyAssignedSummaryCounts(queryClient);
+      }
+
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: riderHomeKeys.summary() }),
         queryClient.invalidateQueries({ queryKey: riderHomeKeys.ordersAll() }),
