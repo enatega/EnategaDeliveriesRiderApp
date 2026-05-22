@@ -113,6 +113,8 @@ const en = {
   home_comment: 'Comment',
   home_comment_text: 'Please bring it to my room',
   orders_empty: 'No orders available',
+  home_not_approved_title: 'Not Approved',
+  home_orders_hidden_unapproved: 'Your account is pending approval. Orders will appear once approved.',
   order_assigned_title: 'Assigned',
   order_navigate: 'Navigate',
   order_start_navigation: 'Start Navigation to Store',

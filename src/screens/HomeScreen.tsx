@@ -1,29 +1,25 @@
 import React, { useState } from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { Modal, Pressable, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import Svg, { Path } from 'react-native-svg';
-import Text from '../components/Text';
 import TopSegmentedTabs from '../components/TopSegmentedTabs';
-import Sidebar from '../components/Sidebar';
 import { useAppTheme } from '../theme/ThemeProvider';
 import { useTranslations } from '../localization/LocalizationProvider';
-import { useSidebar } from '../hooks/useSidebar';
-import { MainStackParamList } from '../navigation/types';
 import { useRiderHomeSummaryQuery } from '../hooks/useRiderHomeQueries';
+import { useRiderProfileQuery } from '../hooks/useRiderProfileQuery';
 import RiderOrdersList from './home/RiderOrdersList';
 import { RiderOrderTab } from '../api/riderHomeTypes';
+import Text from '../components/Text';
+import { useLogoutMutation } from '../hooks/useAuthMutations';
 
 type HomeFilter = RiderOrderTab;
 
 export default function HomeScreen() {
   const { theme } = useAppTheme();
   const { t } = useTranslations('app');
-  const sidebar = useSidebar();
   const [homeFilter, setHomeFilter] = useState<HomeFilter>('new');
-  const stackNav = useNavigation<NativeStackNavigationProp<MainStackParamList>>();
   const summaryQuery = useRiderHomeSummaryQuery();
+  const profileQuery = useRiderProfileQuery();
+  const logoutMutation = useLogoutMutation();
 
   const filterTabs: HomeFilter[] = ['new', 'processing', 'delivered'];
   const summary = summaryQuery.data;
@@ -33,57 +29,80 @@ export default function HomeScreen() {
     delivered: `${t('orders_delivered')} (${summary?.deliveredOrders ?? 0})`,
   };
 
+  const isApproved = profileQuery.data?.isApproved;
+
+  if (isApproved === false) {
+    return (
+      <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]} edges={['top']}>
+        <Modal transparent animationType="fade" visible>
+          <View style={[styles.modalBackdrop, { backgroundColor: theme.colors.modalBackdrop }]}>
+            <View style={[styles.modalCard, { backgroundColor: theme.colors.surface, borderColor: theme.colors.gray200 }]}>
+              <Text weight="semiBold" style={[styles.modalTitle, { color: theme.colors.gray900 }]}>
+                {t('home_not_approved_title')}
+              </Text>
+              <Text weight="medium" style={[styles.pendingText, { color: theme.colors.gray600 }]}>
+                {t('home_orders_hidden_unapproved')}
+              </Text>
+              <Pressable
+                onPress={() => logoutMutation.mutate()}
+                disabled={logoutMutation.isPending}
+                style={[styles.logoutButton, { backgroundColor: theme.colors.red500 }]}
+              >
+                <Text weight="semiBold" color={theme.colors.white}>
+                  {logoutMutation.isPending ? t('auth_logout_loading') : t('auth_logout')}
+                </Text>
+              </Pressable>
+            </View>
+          </View>
+        </Modal>
+        <View style={styles.blockedContent} />
+      </SafeAreaView>
+    );
+  }
+
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]} edges={['top']}>
-      <View style={styles.header}>
-        <Pressable onPress={sidebar.openSidebar} style={styles.menuButton}>
-          <HamburgerIcon color={theme.colors.gray900} />
-        </Pressable>
-        <Text variant="body" weight="semiBold" style={styles.headerTitle}>{t('home_header_title')}</Text>
-        <View style={styles.menuButton} />
-      </View>
-
       <TopSegmentedTabs tabs={filterTabs} activeTab={homeFilter} onChange={setHomeFilter} labelMap={filterLabelMap} />
 
       <RiderOrdersList tab={homeFilter} />
-
-      <Sidebar
-        visible={sidebar.sidebarOpen}
-        availability={sidebar.availability}
-        onAvailabilityChange={sidebar.setAvailability}
-        onClose={sidebar.closeSidebar}
-        onNavigate={(screen) => stackNav.navigate(screen)}
-        onSwitchTab={() => stackNav.navigate('Home', { screen: 'ProfileTab' })}
-      />
     </SafeAreaView>
-  );
-}
-
-function HamburgerIcon({ color }: { color: string }) {
-  return (
-    <Svg width={24} height={24} viewBox="0 0 24 24" fill="none">
-      <Path
-        d="M4.5 7.5H19.5M4.5 12H19.5M4.5 16.5H19.5"
-        stroke={color}
-        strokeWidth={1.8}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </Svg>
   );
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingTop: 8,
-    paddingBottom: 8,
-    minHeight: 44,
+  blockedContent: {
+    flex: 1,
   },
-  menuButton: { width: 24, height: 24, alignItems: 'center', justifyContent: 'center' },
-  headerTitle: { fontSize: 16, lineHeight: 24 },
+  modalBackdrop: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 24,
+  },
+  modalCard: {
+    width: '100%',
+    borderRadius: 14,
+    borderWidth: 1,
+    paddingHorizontal: 16,
+    paddingVertical: 18,
+    gap: 14,
+  },
+  modalTitle: {
+    fontSize: 18,
+    lineHeight: 26,
+    textAlign: 'center',
+  },
+  pendingText: {
+    textAlign: 'center',
+    fontSize: 14,
+    lineHeight: 20,
+  },
+  logoutButton: {
+    minHeight: 46,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 16,
+  },
 });

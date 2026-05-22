@@ -154,9 +154,27 @@ export default function ProcessingOrderDetailScreen({ route, navigation }: Props
     if (waitingForStoreReadyToPickup) return;
 
     const riderId = session.user?.id;
+    const serverRiderStatus = detailQuery.data?.riderStatus;
+    const serverOrderStatus = detailQuery.data?.status;
 
     if (nextUpdateStatus && riderId) {
-      updateStatusMutation.mutate({ status: nextUpdateStatus, riderId });
+      // Guard against stale UI: skip duplicate transition and re-sync order detail.
+      if (serverRiderStatus === nextUpdateStatus || serverOrderStatus === nextUpdateStatus) {
+        void detailQuery.refetch();
+        return;
+      }
+
+      updateStatusMutation.mutate(
+        { status: nextUpdateStatus, riderId },
+        {
+          onError: (error) => {
+            // If backend says transition is invalid (already moved), refresh state and continue.
+            if (error.status === 400 && error.message.toLowerCase().includes('invalid status transition')) {
+              void detailQuery.refetch();
+            }
+          },
+        },
+      );
       return;
     }
 
