@@ -174,7 +174,7 @@ export default function LoginScreen() {
                   style={[styles.input, { color: theme.colors.gray900 }, inputTextStyle]}
                 />
                 <Pressable onPress={() => setPasswordVisible((v) => !v)} hitSlop={8}>
-                  <EyeIcon visible={passwordVisible} color={theme.colors.gray500} size={layout.icon.xl} />
+                  <EyeIcon visible={passwordVisible} color={theme.colors.gray500} size={layout.icon.lg} />
                 </Pressable>
               </View>
               {passwordError ? (
@@ -198,14 +198,13 @@ export default function LoginScreen() {
           style={({ pressed }) => [
             styles.loginButton,
             {
+              backgroundColor: theme.colors.lime500,
               shadowColor: theme.colors.lime500,
               opacity: pressed ? 0.95 : 1,
             },
             loginMutation.isPending ? styles.disabled : null,
           ]}
         >
-          <View style={[styles.loginButtonLayer, { backgroundColor: theme.colors.lime500 }]} />
-          <View style={[styles.loginButtonLayerRight, { backgroundColor: theme.colors.lime600 }]} />
           <Text weight="semiBold" color={theme.colors.white} style={[styles.loginButtonText, buttonTextStyle]}>
             {loginMutation.isPending ? t('auth_login_loading') : t('auth_login')}
           </Text>
@@ -300,17 +299,6 @@ const styles = StyleSheet.create({
     shadowRadius: layout.shadow.glowRadius,
     elevation: 8,
     position: 'relative',
-  },
-  loginButtonLayer: {
-    ...StyleSheet.absoluteFillObject,
-  },
-  loginButtonLayerRight: {
-    position: 'absolute',
-    right: 0,
-    top: 0,
-    bottom: 0,
-    width: '45%',
-    opacity: 0.95,
   },
   loginButtonText: {
     textAlign: 'center',
