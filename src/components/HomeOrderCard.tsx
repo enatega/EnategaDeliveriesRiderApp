@@ -1,5 +1,5 @@
 import React from 'react';
-import { Image, Pressable, StyleSheet, View } from 'react-native';
+import { Image, Modal, Pressable, StyleSheet, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import Text from './Text';
@@ -56,6 +56,8 @@ export default function HomeOrderCard({ order, tab }: Props) {
   const { t } = useTranslations('app');
   const navigation = useNavigation<NativeStackNavigationProp<MainStackParamList>>();
   const assignOrderMutation = useAssignOrderMutation();
+  const [assignErrorModalVisible, setAssignErrorModalVisible] = React.useState(false);
+  const [assignErrorModalMessage, setAssignErrorModalMessage] = React.useState('');
 
   const safeOrderCode = order.orderCode ?? order.orderId ?? '—';
   const safeStatusLabel =
@@ -85,7 +87,17 @@ export default function HomeOrderCard({ order, tab }: Props) {
 
   const handleActionPress = () => {
     if (tab !== 'new' || !order.orderId) return;
-    assignOrderMutation.mutate(order.orderId);
+    assignOrderMutation.reset();
+    assignOrderMutation.mutate(order.orderId, {
+      onSuccess: () => {
+        setAssignErrorModalVisible(false);
+        setAssignErrorModalMessage('');
+      },
+      onError: (error) => {
+        setAssignErrorModalMessage(error.message || t('order_assign_failed_fallback'));
+        setAssignErrorModalVisible(true);
+      },
+    });
   };
 
   const handleCardPress = () => {
@@ -212,15 +224,45 @@ export default function HomeOrderCard({ order, tab }: Props) {
         ) : null}
 
         {showAction ? (
-          <Button
-            label={buttonLabel}
-            onPress={handleActionPress}
-            disabled={isAssigning || !order.orderId}
-            containerStyle={styles.button}
-            textColor={theme.colors.gray900}
-          />
+          <>
+            <Button
+              label={buttonLabel}
+              onPress={handleActionPress}
+              disabled={isAssigning || !order.orderId}
+              containerStyle={styles.button}
+              textColor={theme.colors.gray900}
+            />
+          </>
         ) : null}
       </View>
+      <Modal
+        transparent
+        animationType="fade"
+        visible={assignErrorModalVisible}
+        onRequestClose={() => setAssignErrorModalVisible(false)}
+      >
+        <View style={[styles.modalBackdrop, { backgroundColor: theme.colors.modalBackdrop }]}>
+          <View
+            style={[
+              styles.modalCard,
+              { backgroundColor: theme.colors.surface, borderColor: theme.colors.gray200 },
+            ]}
+          >
+            <Text weight="semiBold" style={[styles.modalTitle, { color: theme.colors.gray900 }]}>
+              {t('order_assign_failed_title')}
+            </Text>
+            <Text variant="caption" color={theme.colors.gray700}>
+              {assignErrorModalMessage || t('order_assign_failed_fallback')}
+            </Text>
+            <Button
+              label={t('order_assign_failed_close')}
+              onPress={() => setAssignErrorModalVisible(false)}
+              containerStyle={styles.modalButton}
+              textColor={theme.colors.gray900}
+            />
+          </View>
+        </View>
+      </Modal>
     </Pressable>
   );
 }
@@ -362,5 +404,27 @@ const styles = StyleSheet.create({
     height: 44,
     borderRadius: 40,
     marginTop: 4,
+  },
+  modalBackdrop: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 24,
+  },
+  modalCard: {
+    width: '100%',
+    borderRadius: 14,
+    borderWidth: 1,
+    padding: 16,
+    gap: 12,
+  },
+  modalTitle: {
+    fontSize: 18,
+    lineHeight: 24,
+  },
+  modalButton: {
+    marginTop: 4,
+    height: 42,
+    borderRadius: 30,
   },
 });
