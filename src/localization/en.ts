@@ -96,6 +96,8 @@ const en = {
   status_unknown: 'Unknown',
   order_assign_me: 'Assign me',
   order_assigning: 'Assigning...',
+  order_assign_error_title: 'Unable to assign order',
+  common_ok: 'OK',
   order_pick_order: 'Pick Order',
   order_delivered: 'Delivered',
   home_status: 'Status',

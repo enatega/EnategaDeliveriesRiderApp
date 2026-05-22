@@ -2,7 +2,7 @@ const googleMapsApiKey = process.env.GOOGLE_MAPS_API_KEY ?? 'DUMMY_GOOGLE_MAPS_A
 
 module.exports = {
   expo: {
-    name: 'Shaaneiol Driver',
+    name: 'Shaaneiol Rider',
     slug: 'shaaneiol-rider',
     version: '1.0.5',
     orientation: 'portrait',
