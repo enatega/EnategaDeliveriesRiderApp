@@ -5,7 +5,7 @@ import {
   UpdateRiderPasswordResponse,
 } from './riderProfileTypes';
 
-const RIDER_FULL_PROFILE_PATH = '/ride-vehicles/rider/full-profile';
+const RIDER_FULL_PROFILE_PATH = '/apps/deliveries/rider/home/rider/full-profile';
 const RIDER_PASSWORD_PATH = '/ride-vehicles/rider/password';
 
 export const riderProfileService = {
