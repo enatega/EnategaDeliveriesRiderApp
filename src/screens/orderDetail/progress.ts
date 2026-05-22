@@ -47,19 +47,15 @@ export function resolveProgressStatusFromOrder(
   orderStatus?: string | null,
   riderStatus?: string | null,
 ): RiderDeliveryProgressStatus {
-  const finalOrderStatuses = new Set([
-    'picked_up',
-    'out_for_delivery',
-    'arrived',
-    'delivered',
-    'failed',
-  ]);
+  const orderProgress = resolveProgressStatus(orderStatus);
+  const riderProgress = resolveProgressStatus(riderStatus);
 
-  if (orderStatus && finalOrderStatuses.has(orderStatus)) {
-    return resolveProgressStatus(orderStatus);
-  }
+  const orderIndex = DELIVERY_PROGRESS_ORDER.indexOf(orderProgress);
+  const riderIndex = DELIVERY_PROGRESS_ORDER.indexOf(riderProgress);
 
-  return resolveProgressStatus(riderStatus ?? orderStatus);
+  // Prefer the furthest known progress to avoid showing stale previous steps
+  // when order and rider statuses are briefly out of sync.
+  return riderIndex > orderIndex ? riderProgress : orderProgress;
 }
 
 const PROGRESS_STATUS_TO_API_STATUS: Partial<Record<RiderDeliveryProgressStatus, string>> = {
