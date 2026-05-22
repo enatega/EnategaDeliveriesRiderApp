@@ -113,6 +113,8 @@ const fr = {
   home_comment: 'Commentaire',
   home_comment_text: 'Veuillez le livrer a ma chambre',
   orders_empty: 'Aucune commande disponible',
+  home_not_approved_title: 'Non approuve',
+  home_orders_hidden_unapproved: 'Votre compte est en attente d approbation. Les commandes apparaitront une fois approuve.',
   order_assigned_title: 'Assigne',
   order_navigate: 'Naviguer',
   order_start_navigation: 'Commencer la navigation vers le magasin',

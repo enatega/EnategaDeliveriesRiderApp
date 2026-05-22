@@ -8,6 +8,7 @@ export type AuthStackParamList = {
 
 export type MainStackParamList = {
   Home: NavigatorScreenParams<RiderTabParamList> | undefined;
+  ProfileDetails: undefined;
   UpdatePassword: undefined;
   ProcessingOrderDetail: { orderId: string };
   OrderChat: {
