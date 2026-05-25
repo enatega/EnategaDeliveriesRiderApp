@@ -1,5 +1,5 @@
-import React, { useMemo, useState } from 'react';
-import { ActivityIndicator, Linking, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { ActivityIndicator, AppState, Linking, Pressable, ScrollView, StyleSheet, View, type AppStateStatus } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useIsFocused } from '@react-navigation/native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -28,6 +28,7 @@ type Props = NativeStackScreenProps<MainStackParamList, 'ProcessingOrderDetail'>
 
 const FALLBACK_PICKUP = { latitude: 33.6844, longitude: 73.0479 };
 const FALLBACK_DELIVERY = { latitude: 33.6952, longitude: 73.0689 };
+const DETAIL_RESUME_REFETCH_COOLDOWN_MS = 15_000;
 
 const STATUS_TITLE_KEY: Record<RiderDeliveryProgressStatus, string> = {
   [RiderDeliveryProgressStatus.ASSIGNED]: 'order_status_assigned',
@@ -101,6 +102,44 @@ export default function ProcessingOrderDetailScreen({ route, navigation }: Props
   const updateStatusMutation = useUpdateRiderOrderStatusMutation(orderId);
   const [timelineOpen, setTimelineOpen] = useState(false);
   const [headerHeight, setHeaderHeight] = useState(56);
+  const appStateRef = useRef<AppStateStatus>(AppState.currentState);
+  const lastResumeRefetchAtRef = useRef(0);
+  const isFocusedRef = useRef(isFocused);
+  const isFetchingRef = useRef(detailQuery.isFetching);
+
+  useEffect(() => {
+    isFocusedRef.current = isFocused;
+  }, [isFocused]);
+
+  useEffect(() => {
+    isFetchingRef.current = detailQuery.isFetching;
+  }, [detailQuery.isFetching]);
+
+  useEffect(() => {
+    if (!orderId) return undefined;
+
+    const subscription = AppState.addEventListener('change', (nextState) => {
+      const previousState = appStateRef.current;
+      appStateRef.current = nextState;
+
+      const isReturningToForeground =
+        (previousState === 'background' || previousState === 'inactive')
+        && nextState === 'active';
+
+      if (!isReturningToForeground || !isFocusedRef.current) return;
+
+      const now = Date.now();
+      const elapsedSinceLastRefetch = now - lastResumeRefetchAtRef.current;
+      if (elapsedSinceLastRefetch < DETAIL_RESUME_REFETCH_COOLDOWN_MS || isFetchingRef.current) return;
+
+      lastResumeRefetchAtRef.current = now;
+      void detailQuery.refetch();
+    });
+
+    return () => {
+      subscription.remove();
+    };
+  }, [detailQuery.refetch, orderId]);
 
   const mapRegion = useMemo(
     () => ({
