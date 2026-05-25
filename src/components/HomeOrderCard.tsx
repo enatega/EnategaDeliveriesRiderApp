@@ -105,6 +105,16 @@ export default function HomeOrderCard({ order, tab }: Props) {
     navigation.navigate('ProcessingOrderDetail', { orderId: order.orderId });
   };
 
+  const handleChatPress = () => {
+    if (tab !== 'processing' || !order.orderId) return;
+    navigation.navigate('OrderChat', {
+      orderId: order.orderId,
+      name: safeStoreName,
+      phone: null,
+      chatBoxId: null,
+    });
+  };
+
   return (
     <Pressable onPress={handleCardPress} disabled={tab !== 'processing' || !order.orderId}>
       <View style={[styles.card, { borderColor: theme.colors.gray100, backgroundColor: theme.colors.gray50 }]}>
@@ -143,9 +153,15 @@ export default function HomeOrderCard({ order, tab }: Props) {
             </View>
           </View>
           {tab === 'processing' ? (
-            <View style={styles.chatButton}>
+            <Pressable
+              style={styles.chatButton}
+              onPress={(event) => {
+                event.stopPropagation();
+                handleChatPress();
+              }}
+            >
               <ChatBubbleOvalIcon width={24} height={24} />
-            </View>
+            </Pressable>
           ) : null}
         </View>
 
