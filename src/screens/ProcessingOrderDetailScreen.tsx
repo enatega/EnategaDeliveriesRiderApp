@@ -86,6 +86,10 @@ const STATUS_BUTTON_LABEL_KEY: Record<RiderOrderUpdatableStatus, string> = {
   failed: 'order_status_failed',
 };
 
+function isRiderOrderUpdatableStatus(value: string): value is RiderOrderUpdatableStatus {
+  return value in STATUS_BUTTON_LABEL_KEY;
+}
+
 export default function ProcessingOrderDetailScreen({ route, navigation }: Props) {
   const { theme } = useAppTheme();
   const { t } = useTranslations('app');
@@ -138,25 +142,50 @@ export default function ProcessingOrderDetailScreen({ route, navigation }: Props
   const nextTitle = t(NEXT_STATUS_KEY[currentProgressStatus]);
   const step = STEP_VALUE[currentProgressStatus];
   const currentIndex = DELIVERY_PROGRESS_ORDER.indexOf(currentProgressStatus);
-  const nextUpdateStatus = NEXT_UPDATE_STATUS[currentProgressStatus] ?? null;
+  const serverAllowedNextUpdateStatus =
+    detailQuery.data?.nextAllowedStatuses?.find(isRiderOrderUpdatableStatus) ?? null;
+  const fallbackNextUpdateStatus = NEXT_UPDATE_STATUS[currentProgressStatus] ?? null;
+  const nextUpdateStatus = serverAllowedNextUpdateStatus ?? fallbackNextUpdateStatus;
+  const canUpdateStatus = detailQuery.data?.canUpdateStatus === true;
   const isDelivered = currentProgressStatus === RiderDeliveryProgressStatus.DELIVERED;
-  const showStorePreparingAlert = currentProgressStatus === RiderDeliveryProgressStatus.ARRIVED_AT_STORE;
+  const showStorePreparingAlert =
+    currentProgressStatus === RiderDeliveryProgressStatus.ARRIVED_AT_STORE && !canUpdateStatus;
   const showReadyForPickupAlert = currentProgressStatus === RiderDeliveryProgressStatus.WAITING_FOR_ORDER;
-  const waitingForStoreReadyToPickup = Boolean(
-    nextUpdateStatus === 'picked_up' && detailQuery.data?.status !== 'ready',
-  );
+  const waitingForStoreReadyToPickup = false;
   const primaryButtonLabel = nextUpdateStatus
     ? t(STATUS_BUTTON_LABEL_KEY[nextUpdateStatus])
     : t('order_start_navigation');
-  const isPrimaryActionDisabled = updateStatusMutation.isPending || waitingForStoreReadyToPickup;
+  const isPrimaryActionDisabled =
+    updateStatusMutation.isPending
+    || !canUpdateStatus
+    || !nextUpdateStatus
+    || waitingForStoreReadyToPickup;
 
   const handlePrimaryAction = () => {
-    if (waitingForStoreReadyToPickup) return;
+    if (waitingForStoreReadyToPickup || !canUpdateStatus) return;
 
     const riderId = session.user?.id;
+    const serverRiderStatus = detailQuery.data?.riderStatus;
+    const serverOrderStatus = detailQuery.data?.status;
 
     if (nextUpdateStatus && riderId) {
-      updateStatusMutation.mutate({ status: nextUpdateStatus, riderId });
+      // Guard against stale UI: skip duplicate transition and re-sync order detail.
+      if (serverRiderStatus === nextUpdateStatus || serverOrderStatus === nextUpdateStatus) {
+        void detailQuery.refetch();
+        return;
+      }
+
+      updateStatusMutation.mutate(
+        { status: nextUpdateStatus, riderId },
+        {
+          onError: (error) => {
+            // If backend says transition is invalid (already moved), refresh state and continue.
+            if (error.status === 400 && error.message.toLowerCase().includes('invalid status transition')) {
+              void detailQuery.refetch();
+            }
+          },
+        },
+      );
       return;
     }
 
@@ -357,7 +386,7 @@ export default function ProcessingOrderDetailScreen({ route, navigation }: Props
         </View>
       </View>
 
-      <View style={[styles.bottomControls]}>
+      <View style={[styles.bottomControls, { bottom: Math.max(insets.bottom, 8) }]}>
         <View style={styles.floatingRow}>
           <Pressable style={[styles.navigateChip, { backgroundColor: theme.colors.zinc800 }]} onPress={openNavigation}>
             <NavigationIcon color={theme.colors.white} />
@@ -377,9 +406,6 @@ export default function ProcessingOrderDetailScreen({ route, navigation }: Props
               style={[styles.roundAction, { borderColor: theme.colors.gray250, backgroundColor: theme.colors.white }]}
             >
               <ChatBubbleOvalIcon width={20} height={20} />
-              <View style={[styles.badgeDot, { backgroundColor: theme.colors.red500 }]}>
-                <Text variant="caption" weight="semiBold" color={theme.colors.white}>1</Text>
-              </View>
             </Pressable>
           </View>
         </View>
@@ -410,7 +436,15 @@ export default function ProcessingOrderDetailScreen({ route, navigation }: Props
             </Text>
           </View>
 
-          <View style={[styles.modalBottom, { backgroundColor: theme.colors.white }]}>
+          <View
+            style={[
+              styles.modalBottom,
+              {
+                backgroundColor: theme.colors.white,
+                paddingBottom: Math.max(insets.bottom, 12) + 12,
+              },
+            ]}
+          >
             <Text variant="subtitle" color={theme.colors.gray600} style={styles.centerText}>{t('order_ready_next_job')}</Text>
             <Button
               label={t('order_pick_next_order')}
@@ -654,16 +688,6 @@ const styles = StyleSheet.create({
     height: 44,
     borderRadius: 22,
     borderWidth: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  badgeDot: {
-    position: 'absolute',
-    right: 0,
-    top: 0,
-    width: 18,
-    height: 18,
-    borderRadius: 9,
     alignItems: 'center',
     justifyContent: 'center',
   },

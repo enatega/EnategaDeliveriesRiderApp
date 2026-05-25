@@ -1,280 +1,447 @@
-import React, { useMemo, useState } from 'react';
-import { ActivityIndicator, Image, Pressable, ScrollView, StyleSheet, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import Svg, { Path } from 'react-native-svg';
+import React, { useState } from 'react';
+import {
+  ActivityIndicator,
+  Alert,
+  Image,
+  ImageBackground,
+  Linking,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  View,
+} from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import Text from '../../components/Text';
-import { useTranslations } from '../../localization/LocalizationProvider';
 import { useAppTheme } from '../../theme/ThemeProvider';
-import Sidebar from '../../components/Sidebar';
-import { useSidebar } from '../../hooks/useSidebar';
-import { MainStackParamList } from '../../navigation/types';
-import DrivingLicenseBottomSheet from './components/DrivingLicenseBottomSheet';
-import VehiclePlateBottomSheet from './components/VehiclePlateBottomSheet';
+import { useTranslations } from '../../localization/LocalizationProvider';
+import Text from '../../components/Text';
+import ToggleSwitch from '../../components/ToggleSwitch';
 import { useRiderProfileQuery } from '../../hooks/useRiderProfileQuery';
+import { useLogoutMutation } from '../../hooks/useAuthMutations';
+import { MainStackParamList } from '../../navigation/types';
+
+const profileBackground = require('../../assets/images/profileBackground.png');
+const rowIcons = {
+  clock: require('../../assets/images/availability.png'),
+  user: require('../../assets/images/profile.png'),
+  globe: require('../../assets/images/language.png'),
+  vehicle: require('../../assets/images/Bike.png'),
+  card: require('../../assets/images/bank-managment.png'),
+  schedule: require('../../assets/images/work-schedule.png'),
+  list: require('../../assets/images/help.png'),
+  shield: require('../../assets/images/vehicle-type.png'),
+  info: require('../../assets/images/about-us.png'),
+  help: require('../../assets/images/help.png'),
+  logout: require('../../assets/images/logout.png'),
+} as const;
 
 export default function ProfileScreen() {
-  const { t } = useTranslations('app');
   const { theme } = useAppTheme();
-  const sidebar = useSidebar();
-  const stackNav = useNavigation<NativeStackNavigationProp<MainStackParamList>>();
-  const profileQuery = useRiderProfileQuery();
-  const [isDrivingLicenseSheetVisible, setDrivingLicenseSheetVisible] = useState(false);
-  const [isVehiclePlateSheetVisible, setVehiclePlateSheetVisible] = useState(false);
-  const [hasProfileImageError, setHasProfileImageError] = useState(false);
+  const { t } = useTranslations('app');
+  const navigation = useNavigation<NativeStackNavigationProp<MainStackParamList>>();
+  const { data: profileData, isLoading: profileLoading } = useRiderProfileQuery();
+  const logoutMutation = useLogoutMutation();
+  const [availability, setAvailability] = useState(true);
 
-  const profile = profileQuery.data;
-  const profileName = profile?.userName?.trim() || t('profile_name');
-  const profileId =
-    profile?.riderCode?.trim() ||
-    profile?.riderId?.trim() ||
-    profile?.userId?.trim() ||
-    t('profile_id');
-  const profileEmail = profile?.email?.trim() || t('status_unknown');
-  const profileMobile = profile?.mobileNumber?.trim() || t('status_unknown');
-  const drivingLicenseNumber = profile?.drivingLicense?.licenseNo?.trim() || '';
-  const vehiclePlateNumber = profile?.vehiclePlate?.plateNo?.trim() || '';
+  if (profileLoading) {
+    return (
+      <View style={[styles.flex, styles.center, { backgroundColor: theme.colors.gray100 }]}>
+        <ActivityIndicator size="large" color={theme.colors.primary} />
+      </View>
+    );
+  }
 
-  const hasDrivingLicenseDocs = Boolean(
-    profile?.drivingLicense?.registrationDocument?.front ||
-      profile?.drivingLicense?.registrationDocument?.back,
-  );
-  const hasVehiclePlateDocs = Boolean(
-    profile?.vehiclePlate?.registrationDocument?.front ||
-      profile?.vehiclePlate?.registrationDocument?.back,
-  );
+  const profileName = profileData?.userName?.trim() || t('profile_name');
+  const profileImage = profileData?.profileImage?.trim() || '';
+  const riderId =
+    profileData?.riderCode?.trim() ||
+    profileData?.riderId?.trim() ||
+    profileData?.userId?.trim() ||
+    '7853';
+  const initials = profileName
+    .split(' ')
+    .slice(0, 2)
+    .map((w) => w[0])
+    .join('')
+    .toUpperCase();
 
-  const hasDrivingLicenseData = Boolean(drivingLicenseNumber || hasDrivingLicenseDocs);
-  const hasVehiclePlateData = Boolean(vehiclePlateNumber || hasVehiclePlateDocs);
+  const openExternalUrl = async (url: string) => {
+    try {
+      const supported = await Linking.canOpenURL(url);
+      if (!supported) {
+        Alert.alert('Unable to open link', url);
+        return;
+      }
+      await Linking.openURL(url);
+    } catch {
+      Alert.alert('Unable to open link', url);
+    }
+  };
 
-  const profileInitials = useMemo(() => getInitials(profileName), [profileName]);
-  const shouldShowProfileImage = Boolean(profile?.profileImage) && !hasProfileImageError;
+  const menuPrimary = [
+    {
+      key: 'language',
+      icon: 'globe',
+      title: 'Language',
+      subtitle: 'Choose your preferred language',
+      onPress: () => navigation.navigate('Language'),
+    },
+    {
+      key: 'vehicle-type',
+      icon: 'vehicle-type',
+      title: 'Vehicle Type',
+      subtitle: 'Choose your delivery vehicle',
+      onPress: () => navigation.navigate('VehicleType'),
+    },
+    {
+      key: 'bank',
+      icon: 'credit-card',
+      title: 'Bank Management',
+      subtitle: 'Manage your bank accounts',
+      onPress: () => navigation.navigate('BankManagement'),
+    },
+    {
+      key: 'schedule',
+      icon: 'clock',
+      title: 'Work schedule',
+      subtitle: 'Set your working hours and days',
+      onPress: () => navigation.navigate('WorkSchedule'),
+    },
+    
+  ] as const;
+
+  const menuSecondary = [
+    {
+      key: 'privacy',
+      icon: 'shield',
+      title: 'Privacy Policy',
+      subtitle: 'Read our privacy policy',
+      onPress: () => openExternalUrl('https://multivendor.enatega.com/privacy'),
+    },
+    {
+      key: 'about',
+      icon: 'info',
+      title: 'About Us',
+      subtitle: 'Learn more about our company',
+      onPress: () => openExternalUrl('https://multivendor.enatega.com/about'),
+    },
+    {
+      key: 'help',
+      icon: 'help-circle',
+      title: 'Help',
+      subtitle: 'Get help and support',
+      onPress: () => openExternalUrl('https://ninjascode.com/'),
+    },
+  ] as const;
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]} edges={['top']}>
-      <View style={[styles.header, { backgroundColor: theme.colors.surface }]}> 
-        <Pressable onPress={sidebar.openSidebar} style={styles.menuButton}>
-          <HamburgerIcon color={theme.colors.gray900} />
-        </Pressable>
-        <Text weight="semiBold" style={styles.headerTitle}>{t('nav_profile')}</Text>
-        <View style={styles.menuButton} />
-      </View>
-
-      <ScrollView contentContainerStyle={styles.content}>
-        <View style={styles.profileHeader}>
-          <View style={[styles.avatar, { backgroundColor: theme.colors.primary }]}> 
-            {shouldShowProfileImage ? (
-              <Image
-                source={{ uri: profile?.profileImage ?? '' }}
-                style={styles.avatarImage}
-                resizeMode="cover"
-                onError={() => setHasProfileImageError(true)}
-              />
+    <View style={[styles.flex, { backgroundColor: theme.colors.gray100 }]}>
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.contentContainer}>
+        <ImageBackground source={profileBackground} style={styles.hero} imageStyle={styles.heroImage}>
+          <View style={styles.profileRow}>
+            {profileImage ? (
+              <Image source={{ uri: profileImage }} style={styles.avatarImage} />
             ) : (
-              <Text weight="semiBold" color={theme.colors.white}>{profileInitials}</Text>
+              <View style={[styles.avatarCircle, { backgroundColor: theme.colors.surface }]}>
+                <Text weight="semiBold" color={theme.colors.primary} style={styles.avatarText}>
+                  {initials}
+                </Text>
+              </View>
             )}
+            <View style={styles.profileTextWrap}>
+              <Text weight="semiBold" style={[styles.profileName, { color: theme.colors.gray900 }]}>
+                {profileName}
+              </Text>
+              <Text style={[styles.profileId, { color: theme.colors.gray600 }]}>{`ID-${riderId.toString().slice(0, 4)}`}</Text>
+            </View>
           </View>
-          <View style={styles.profileMeta}>
-            <Text weight="semiBold" style={styles.name}>{profileName}</Text>
-            <Text weight="medium" style={{ color: theme.colors.gray600 }}>{`id:: ${profileId}`}</Text>
+        </ImageBackground>
+
+        <View style={[styles.availabilityCard, { borderColor: theme.colors.gray300, backgroundColor: theme.colors.surface }]}>
+          <View style={styles.availabilityLeft}>
+            <View style={styles.iconCircle}>
+              <Image source={rowIcons.clock} style={styles.rowIconImage} resizeMode="contain" tintColor="#90E36D" />
+            </View>
+            <View style={styles.menuTextWrap}>
+              <Text weight="semiBold" style={[styles.menuTitle, { color: theme.colors.gray900 }]}>
+                Availability
+              </Text>
+              <Text style={[styles.menuSubtitle, { color: theme.colors.gray600 }]}>Let others know you&apos;re available</Text>
+            </View>
+          </View>
+          <View style={styles.availabilityRight}>
+            <ToggleSwitch value={availability} onValueChange={setAvailability} />
+            <Text style={[styles.availableText, { color: theme.colors.gray600 }]}>
+              {availability ? t('menu_available') : t('menu_unavailable')}
+            </Text>
           </View>
         </View>
 
-        <ProfileStatusRow
-          title={t('profile_driving_license')}
-          action={t('profile_add')}
-          hasData={hasDrivingLicenseData}
-          valueText={drivingLicenseNumber}
-          onPressAction={() => setDrivingLicenseSheetVisible(true)}
-        />
-        <ProfileStatusRow
-          title={t('profile_vehicle_plate')}
-          action={t('profile_add')}
-          hasData={hasVehiclePlateData}
-          valueText={vehiclePlateNumber}
-          onPressAction={() => setVehiclePlateSheetVisible(true)}
-        />
-
-        <Text weight="semiBold" style={[styles.sectionTitle, { color: theme.colors.gray900 }]}>
-          {t('profile_other_information')}
+        <Text weight="medium" style={[styles.sectionTitle, { color: theme.colors.gray600 }]}>
+          Account &amp; Settings
         </Text>
 
-        {profileQuery.isLoading ? (
-          <View style={styles.loadingWrap}>
-            <ActivityIndicator color={theme.colors.primary} />
-          </View>
-        ) : null}
-
-        {profileQuery.isError ? (
-          <Text variant="caption" color={theme.colors.red500}>
-            {profileQuery.error?.message || t('status_unknown')}
-          </Text>
-        ) : null}
-
-        <InfoCard label={t('profile_email')} value={profileEmail} />
-        <InfoCard
-          label={t('profile_password')}
-          value={t('profile_password_value')}
-          action={t('profile_change')}
-          onPressAction={() => stackNav.navigate('UpdatePassword')}
-        />
-        <InfoCard label={t('profile_mobile_number')} value={profileMobile} />
-      </ScrollView>
-
-      <Sidebar
-        visible={sidebar.sidebarOpen}
-        availability={sidebar.availability}
-        onAvailabilityChange={sidebar.setAvailability}
-        onClose={sidebar.closeSidebar}
-        onNavigate={(screen) => stackNav.navigate(screen)}
-        onSwitchTab={() => stackNav.navigate('Home', { screen: 'ProfileTab' })}
-      />
-
-      <DrivingLicenseBottomSheet
-        visible={isDrivingLicenseSheetVisible}
-        onClose={() => setDrivingLicenseSheetVisible(false)}
-        initialLicenseNumber={drivingLicenseNumber}
-        initialFrontImageUri={profile?.drivingLicense?.registrationDocument?.front ?? null}
-        initialBackImageUri={profile?.drivingLicense?.registrationDocument?.back ?? null}
-      />
-      <VehiclePlateBottomSheet
-        visible={isVehiclePlateSheetVisible}
-        onClose={() => setVehiclePlateSheetVisible(false)}
-        initialVehicleNo={vehiclePlateNumber}
-        initialFrontImageUri={profile?.vehiclePlate?.registrationDocument?.front ?? null}
-        initialBackImageUri={profile?.vehiclePlate?.registrationDocument?.back ?? null}
-      />
-    </SafeAreaView>
-  );
-}
-
-function ProfileStatusRow({
-  title,
-  action,
-  hasData,
-  valueText,
-  onPressAction,
-}: {
-  title: string;
-  action: string;
-  hasData: boolean;
-  valueText?: string;
-  onPressAction: () => void;
-}) {
-  const { theme } = useAppTheme();
-  const { t } = useTranslations('app');
-
-  return (
-    <View style={[styles.rowBlock, { borderBottomColor: theme.colors.gray300 }]}> 
-      <View style={styles.rowHeader}>
-        <Text weight="semiBold">{title}</Text>
-        <Pressable onPress={onPressAction}>
-          <Text weight="medium" style={{ color: theme.colors.blue400 }}>{action}</Text>
-        </Pressable>
-      </View>
-      <View
-        style={[
-          styles.badge,
-          { backgroundColor: hasData ? theme.colors.emerald100 : theme.colors.red100 },
-        ]}
-      >
-        <Text
-          weight="medium"
-          style={{ color: hasData ? theme.colors.emerald900 : theme.colors.red800 }}
-        >
-          {hasData ? valueText || t('profile_add') : t('profile_missing_data')}
-        </Text>
-      </View>
-    </View>
-  );
-}
-
-function InfoCard({
-  label,
-  value,
-  action,
-  onPressAction,
-}: {
-  label: string;
-  value: string;
-  action?: string;
-  onPressAction?: () => void;
-}) {
-  const { theme } = useAppTheme();
-
-  return (
-    <View style={[styles.infoCard, { backgroundColor: theme.colors.gray100, borderColor: theme.colors.gray200 }]}> 
-      <View style={styles.infoHeader}>
-        <Text>{label}</Text>
-        {action ? (
-          <Pressable onPress={onPressAction}>
-            <Text weight="medium" style={{ color: theme.colors.blue400 }}>{action}</Text>
+        <View style={[styles.cardGroup, { borderColor: theme.colors.gray300, backgroundColor: theme.colors.surface }]}>
+          <Pressable style={[styles.menuRow, styles.menuRowDivider, { borderBottomColor: theme.colors.gray200 }]} onPress={() => navigation.navigate('ProfileDetails')}>
+            <View style={styles.iconCircle}>
+              <Image source={rowIcons.user} style={styles.rowIconImage} resizeMode="contain" tintColor="#90E36D" />
+            </View>
+            <View style={styles.menuTextWrap}>
+              <Text weight="semiBold" style={[styles.menuTitle, { color: theme.colors.gray900 }]}>
+                User Profile
+              </Text>
+              <Text style={[styles.menuSubtitle, { color: theme.colors.gray500 }]}>Tap to view profile details</Text>
+            </View>
+            <Text style={[styles.chevron, { color: theme.colors.gray900 }]}>{'>'}</Text>
           </Pressable>
-        ) : null}
-      </View>
-      <Text weight="bold">{value}</Text>
+
+          {menuPrimary.map((item, index) => (
+            <MenuRow
+              key={item.key}
+              icon={item.icon}
+              title={item.title}
+              subtitle={item.subtitle}
+              onPress={item.onPress}
+              showDivider={index < menuPrimary.length - 1}
+            />
+          ))}
+        </View>
+
+        <View style={[styles.cardGroup, { borderColor: theme.colors.gray300, backgroundColor: theme.colors.surface }]}>
+          {menuSecondary.map((item, index) => (
+            <MenuRow
+              key={item.key}
+              icon={item.icon}
+              title={item.title}
+              subtitle={item.subtitle}
+              onPress={item.onPress}
+              showDivider={index < menuSecondary.length - 1}
+            />
+          ))}
+        </View>
+
+        <Pressable
+          style={[styles.logoutCard, { borderColor: theme.colors.gray300, backgroundColor: theme.colors.red100 }]}
+          onPress={() => logoutMutation.mutate()}
+          disabled={logoutMutation.isPending}
+        >
+          <View style={[styles.iconCircleDanger, { backgroundColor: theme.colors.surface }]}>
+            <Image source={rowIcons.logout} style={styles.rowIconImage} resizeMode="contain" />
+          </View>
+          <View style={styles.menuTextWrap}>
+            <Text weight="semiBold" style={[styles.logoutTitle, { color: theme.colors.red500 }]}>
+              {logoutMutation.isPending ? t('auth_logout_loading') : t('auth_logout')}
+            </Text>
+            <Text style={[styles.menuSubtitle, { color: theme.colors.gray600 }]}>Sign out from your account</Text>
+          </View>
+          <Text style={[styles.chevron, { color: theme.colors.gray900 }]}>{'>'}</Text>
+        </Pressable>
+      </ScrollView>
     </View>
   );
 }
 
-function HamburgerIcon({ color }: { color: string }) {
+type MenuRowProps = {
+  icon: 'globe' | 'vehicle-type' | 'credit-card' | 'clock' | 'list' | 'shield' | 'info' | 'help-circle';
+  title: string;
+  subtitle: string;
+  onPress?: (() => void) | undefined;
+  showDivider?: boolean;
+};
+
+function MenuRow({ icon, title, subtitle, onPress, showDivider = false }: MenuRowProps) {
+  const { theme } = useAppTheme();
+  const iconSource =
+    icon === 'globe'
+      ? rowIcons.globe
+      : icon === 'vehicle-type'
+        ? rowIcons.vehicle
+      : icon === 'credit-card'
+        ? rowIcons.card
+        : icon === 'clock'
+          ? rowIcons.schedule
+          : icon === 'list'
+            ? rowIcons.list
+            : icon === 'shield'
+              ? rowIcons.shield
+              : icon === 'info'
+                ? rowIcons.info
+                : rowIcons.help;
+
   return (
-    <Svg width={24} height={24} viewBox="0 0 24 24" fill="none">
-      <Path d="M4.5 7.5H19.5M4.5 12H19.5M4.5 16.5H19.5" stroke={color} strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" />
-    </Svg>
+    <Pressable
+      onPress={onPress}
+      style={[
+        styles.menuRow,
+        showDivider ? styles.menuRowDivider : null,
+        showDivider ? { borderBottomColor: theme.colors.gray200 } : null,
+      ]}
+    >
+      <View style={styles.iconCircle}>
+        <Image
+          source={iconSource}
+          style={styles.rowIconImage}
+          resizeMode="contain"
+          tintColor={icon === 'vehicle-type' ? undefined : '#90E36D'}
+        />
+      </View>
+      <View style={styles.menuTextWrap}>
+        <Text weight="semiBold" style={[styles.menuTitle, { color: theme.colors.gray900 }]}>
+          {title}
+        </Text>
+        <Text style={[styles.menuSubtitle, { color: theme.colors.gray500 }]}>{subtitle}</Text>
+      </View>
+      <Text style={[styles.chevron, { color: theme.colors.gray900 }]}>{'>'}</Text>
+    </Pressable>
   );
-}
-
-function getInitials(name: string): string {
-  const parts = name
-    .split(' ')
-    .map((part) => part.trim())
-    .filter(Boolean);
-
-  if (!parts.length) return 'NA';
-
-  return parts
-    .slice(0, 2)
-    .map((part) => part[0].toUpperCase())
-    .join('');
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
-  header: {
-    minHeight: 56,
+  flex: { flex: 1 },
+  center: { justifyContent: 'center', alignItems: 'center' },
+  contentContainer: {
+    paddingBottom: 120,
+    gap: 12,
+  },
+  hero: {
+    borderBottomLeftRadius: 24,
+    borderBottomRightRadius: 24,
+    height: 150,
+    justifyContent: 'center',
     paddingHorizontal: 16,
+    overflow: 'hidden',
+    marginTop: 6,
+  },
+  heroImage: {
+    borderBottomLeftRadius: 24,
+    borderBottomRightRadius: 24,
+  },
+  profileRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
+    gap: 16,
   },
-  menuButton: { width: 24, height: 24, alignItems: 'center', justifyContent: 'center' },
-  headerTitle: { fontSize: 16, lineHeight: 24 },
-  content: { padding: 16, paddingTop: 16, paddingBottom: 24, gap: 16 },
-  profileHeader: { flexDirection: 'row', alignItems: 'center', gap: 16, paddingBottom: 8 },
-  avatar: {
+  avatarCircle: {
     width: 54,
     height: 54,
     borderRadius: 27,
     alignItems: 'center',
     justifyContent: 'center',
-    overflow: 'hidden',
   },
   avatarImage: {
     width: 54,
     height: 54,
+    borderRadius: 27,
   },
-  profileMeta: { gap: 4 },
-  name: { fontSize: 16, lineHeight: 24 },
-  rowBlock: { borderBottomWidth: 1, paddingVertical: 8, gap: 16 },
-  rowHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  badge: { paddingHorizontal: 12, paddingVertical: 2, borderRadius: 12, alignSelf: 'flex-start' },
-  sectionTitle: { marginTop: 8, fontSize: 18, lineHeight: 28 },
-  infoCard: { borderWidth: 1, borderRadius: 8, paddingHorizontal: 17, paddingVertical: 9, gap: 6 },
-  infoHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  loadingWrap: {
-    paddingVertical: 8,
+  avatarText: {
+    fontSize: 16,
+    lineHeight: 24,
+  },
+  profileTextWrap: {
+    gap: 4,
+  },
+  profileName: {
+    fontSize: 16,
+    lineHeight: 24,
+  },
+  profileId: {
+    fontSize: 14,
+    lineHeight: 20,
+    fontWeight: '500',
+  },
+  availabilityCard: {
+    marginHorizontal: 16,
+    marginTop: -34,
+    borderWidth: 1,
+    borderRadius: 8,
+    padding: 16,
+    flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 12,
+  },
+  availabilityLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    flex: 1,
+  },
+  availabilityRight: {
+    alignItems: 'center',
+    gap: 6,
+  },
+  availableText: {
+    fontSize: 12,
+    lineHeight: 16,
+  },
+  sectionTitle: {
+    marginHorizontal: 16,
+    marginTop: 4,
+    fontSize: 14,
+    lineHeight: 20,
+  },
+  cardGroup: {
+    marginHorizontal: 16,
+    borderRadius: 8,
+    borderWidth: 1,
+    overflow: 'hidden',
+    paddingHorizontal: 16,
+  },
+  menuRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 16,
+    paddingVertical: 16,
+  },
+  menuRowDivider: {
+    borderBottomWidth: 1,
+  },
+  iconCircle: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(144, 227, 109, 0.10)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  iconCircleDanger: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  rowIconImage: {
+    width: 18,
+    height: 18,
+  },
+  menuTextWrap: {
+    flex: 1,
+    gap: 4,
+  },
+  menuTitle: {
+    fontSize: 14,
+    lineHeight: 20,
+  },
+  menuSubtitle: {
+    fontSize: 12,
+    lineHeight: 16,
+  },
+  logoutCard: {
+    marginHorizontal: 16,
+    borderRadius: 8,
+    borderWidth: 1,
+    padding: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 16,
+  },
+  logoutTitle: {
+    fontSize: 14,
+    lineHeight: 20,
+  },
+  chevron: {
+    fontSize: 22,
+    lineHeight: 22,
   },
 });

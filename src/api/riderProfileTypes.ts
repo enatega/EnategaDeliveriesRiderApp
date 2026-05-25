@@ -23,6 +23,7 @@ export type RiderFullProfileResponse = {
   vehiclePlate: VehiclePlateProfile | null;
   email: string | null;
   mobileNumber: string | null;
+  isApproved?: boolean;
 };
 
 export type UpdateRiderPasswordPayload = {

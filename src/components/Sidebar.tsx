@@ -9,6 +9,7 @@ import { lightColors } from '../theme/colors';
 import { useAuth } from '../auth/AuthProvider';
 import { useLogoutMutation } from '../hooks/useAuthMutations';
 import { useTranslations } from '../localization/LocalizationProvider';
+import { useRiderProfileQuery } from '../hooks/useRiderProfileQuery';
 
 type Props = {
   visible: boolean;
@@ -48,6 +49,7 @@ export default function Sidebar({ visible, onClose, availability, onAvailability
   const { theme } = useAppTheme();
   const { t } = useTranslations('app');
   const { session } = useAuth();
+  const profileQuery = useRiderProfileQuery();
   const logoutMutation = useLogoutMutation();
   const insets = useSafeAreaInsets();
   const [mounted, setMounted] = useState(visible);
@@ -80,7 +82,20 @@ export default function Sidebar({ visible, onClose, availability, onAvailability
   };
 
   const user = session.user;
-  const initials = user?.name ? user.name.split(' ').slice(0, 2).map((w) => w[0]).join('').toUpperCase() : 'JS';
+  const profile = profileQuery.data;
+  const displayName = profile?.userName?.trim() || user?.name || 'John Smith';
+  const displayId =
+    profile?.riderCode?.trim() ||
+    profile?.riderId?.trim() ||
+    profile?.userId?.trim() ||
+    user?.id ||
+    'ID-7853';
+  const initials = displayName
+    .split(' ')
+    .slice(0, 2)
+    .map((w) => w[0])
+    .join('')
+    .toUpperCase();
 
   const items: MenuItem[] = [
     {
@@ -184,9 +199,9 @@ export default function Sidebar({ visible, onClose, availability, onAvailability
       <Animated.View style={[styles.drawer, { backgroundColor: theme.colors.gray50, transform: [{ translateX }] }]}>
         <View style={[styles.header, { paddingTop: insets.top + 10 }]}>
           <View style={styles.avatarCircle}><Text variant="body" weight="semiBold" color={theme.colors.primary}>{initials}</Text></View>
-          <Text variant="subtitle" weight="bold" color={theme.colors.text} style={styles.userName}>{user?.name ?? 'John Smith'}</Text>
+          <Text variant="subtitle" weight="bold" color={theme.colors.text} style={styles.userName}>{displayName}</Text>
           <View style={[styles.riderBadge, { backgroundColor: '#D9F8CB' }]}>
-            <Text variant="caption" weight="semiBold" color={theme.colors.gray600}>ID-7853</Text>
+            <Text variant="caption" weight="semiBold" color={theme.colors.gray600}>{displayId}</Text>
           </View>
         </View>
 
