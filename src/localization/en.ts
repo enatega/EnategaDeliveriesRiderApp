@@ -88,6 +88,9 @@ const en = {
   image_zoom_reset: 'Reset',
 
   home_header_title: 'Orders',
+  orders_ready: 'Ready',
+  orders_pickup: 'Pickup',
+  orders_completed: 'Completed',
   orders_new: 'New Orders',
   orders_processing: 'Processing',
   orders_delivered: 'Delivered',
