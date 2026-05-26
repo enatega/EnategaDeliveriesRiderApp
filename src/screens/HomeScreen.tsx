@@ -24,9 +24,14 @@ export default function HomeScreen() {
   const filterTabs: HomeFilter[] = ['new', 'processing', 'delivered'];
   const summary = summaryQuery.data;
   const filterLabelMap: Record<HomeFilter, string> = {
-    new: `${t('orders_new')} (${summary?.newOrders ?? 0})`,
-    processing: `${t('orders_processing')} (${summary?.processingOrders ?? 0})`,
-    delivered: `${t('orders_delivered')} (${summary?.deliveredOrders ?? 0})`,
+    new: t('orders_ready'),
+    processing: t('orders_pickup'),
+    delivered: t('orders_completed'),
+  };
+  const filterCountMap: Record<HomeFilter, number> = {
+    new: summary?.newOrders ?? 0,
+    processing: summary?.processingOrders ?? 0,
+    delivered: summary?.deliveredOrders ?? 0,
   };
 
   const isApproved = profileQuery.data?.isApproved;
@@ -62,7 +67,17 @@ export default function HomeScreen() {
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]} edges={['top']}>
-      <TopSegmentedTabs tabs={filterTabs} activeTab={homeFilter} onChange={setHomeFilter} labelMap={filterLabelMap} />
+      <View style={styles.headerWrap}>
+        <Text weight="semiBold" style={[styles.headerTitle, { color: theme.colors.gray900 }]}>{t('home_header_title')}</Text>
+      </View>
+
+      <TopSegmentedTabs
+        tabs={filterTabs}
+        activeTab={homeFilter}
+        onChange={setHomeFilter}
+        labelMap={filterLabelMap}
+        countMap={filterCountMap}
+      />
 
       <RiderOrdersList tab={homeFilter} />
     </SafeAreaView>
@@ -73,6 +88,16 @@ const styles = StyleSheet.create({
   container: { flex: 1 },
   blockedContent: {
     flex: 1,
+  },
+  headerWrap: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+  },
+  headerTitle: {
+    fontSize: 42 / 2,
+    lineHeight: 56 / 2,
   },
   modalBackdrop: {
     flex: 1,

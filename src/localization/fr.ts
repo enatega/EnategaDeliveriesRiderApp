@@ -88,6 +88,9 @@ const fr = {
   image_zoom_reset: 'Reinitialiser',
 
   home_header_title: 'Commandes',
+  orders_ready: 'Pretes',
+  orders_pickup: 'Collecte',
+  orders_completed: 'Terminees',
   orders_new: 'Nouvelles',
   orders_processing: 'En cours',
   orders_delivered: 'Livrees',
