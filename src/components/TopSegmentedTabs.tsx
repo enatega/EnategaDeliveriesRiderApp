@@ -79,15 +79,15 @@ const styles = StyleSheet.create({
     lineHeight: 22,
   },
   badge: {
-    minWidth: 32,
-    height: 32,
+    minWidth: 24,
+    height: 24,
     borderRadius: 999,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingHorizontal: 8,
+    paddingHorizontal: 6,
   },
   badgeLabel: {
-    fontSize: 12,
-    lineHeight: 16,
+    fontSize: 11,
+    lineHeight: 14,
   },
 });

@@ -19,6 +19,7 @@ export type RiderHomeOrder = {
   distanceKm: number | null;
   paymentMethod: string | null;
   paymentStatus: string | null;
+  courierNote: string | null;
   customerComment: string | null;
   createdAt: string | null;
   canAssignMe: boolean | null;

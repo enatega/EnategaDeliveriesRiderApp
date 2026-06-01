@@ -72,7 +72,7 @@ export default function HomeOrderCard({ order, tab }: Props) {
   const safeDistanceLabel = order.distanceKm == null ? '—' : `${order.distanceKm.toFixed(1)} Km`;
   const safePaymentMethod = order.paymentMethod ?? '—';
   const safePaymentStatus = order.paymentStatus ?? '—';
-  const safeComment = order.customerComment;
+  const safeComment = order.courierNote;
   const safeStoreImage = order.storeImage ?? '';
   const safeCreatedAt = order.createdAt ? new Date(order.createdAt) : null;
   const safeTime = safeCreatedAt && !Number.isNaN(safeCreatedAt.getTime())
@@ -126,7 +126,14 @@ export default function HomeOrderCard({ order, tab }: Props) {
               </View>
               <View style={styles.textBlock}>
                 <Text variant="caption" weight="medium" color={theme.colors.gray600}>{t('home_order_id')}</Text>
-                <Text variant="label" weight="semiBold" color={theme.colors.gray900}>#{safeOrderCode}</Text>
+                <Text
+                  variant="label"
+                  weight="semiBold"
+                  color={theme.colors.gray900}
+                  style={styles.orderCodeText}
+                >
+                  #{safeOrderCode}
+                </Text>
               </View>
             </View>
           </View>
@@ -336,9 +343,13 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   badge: {
-    borderRadius: 12,
-    paddingHorizontal: 10,
-    paddingVertical: 2,
+    borderRadius: 10,
+    paddingHorizontal: 8,
+    paddingVertical: 1,
+  },
+  orderCodeText: {
+    fontSize: 13,
+    lineHeight: 18,
   },
   divider: {
     borderTopWidth: 1,
