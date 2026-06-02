@@ -1,12 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, Image, Pressable, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, FlatList, Image, Pressable, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Svg, { Circle, Path, Rect } from 'react-native-svg';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import Button from '../components/Button';
 import Text from '../components/Text';
-import VerticalList from '../components/VerticalList';
 import { useUpdateVehicleTypeMutation } from '../hooks/useVehicleTypesMutations';
 import { useVehicleTypesQuery } from '../hooks/useVehicleTypesQuery';
 import { useTranslations } from '../localization/LocalizationProvider';
@@ -84,10 +83,17 @@ export default function VehicleTypeScreen() {
           <View style={styles.centerState}>
             <Text style={{ color: theme.colors.gray600, textAlign: 'center' }}>{vehicleTypesQuery.errorMessage}</Text>
           </View>
+        ) : !vehicleTypes.length ? (
+          <View style={styles.centerState}>
+            <Text style={{ color: theme.colors.gray600, textAlign: 'center' }}>
+              No vehicle types available.
+            </Text>
+          </View>
         ) : (
-          <VerticalList
+          <FlatList
             data={vehicleTypes}
             keyExtractor={(item) => item.id}
+            showsVerticalScrollIndicator={false}
             renderItem={({ item }) => (
               <VehicleTypeRow
                 item={item}
@@ -200,7 +206,7 @@ function VehicleIcon({ color }: { color: string }) {
   );
 }
 
-function VehicleImage({ imageUrl }: { imageUrl: string }) {
+function VehicleImage({ imageUrl }: { imageUrl?: string | null }) {
   return (
     <View style={styles.imageWrap}>
       {imageUrl ? (

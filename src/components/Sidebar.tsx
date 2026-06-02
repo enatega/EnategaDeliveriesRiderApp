@@ -4,6 +4,7 @@ import { Linking } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Text from './Text';
 import ToggleSwitch from './ToggleSwitch';
+import LogoutConfirmModal from './LogoutConfirmModal';
 import { useAppTheme } from '../theme/ThemeProvider';
 import { lightColors } from '../theme/colors';
 import { useAuth } from '../auth/AuthProvider';
@@ -51,6 +52,7 @@ export default function Sidebar({ visible, onClose, availability, onAvailability
   const { session } = useAuth();
   const profileQuery = useRiderProfileQuery();
   const logoutMutation = useLogoutMutation();
+  const [isLogoutModalVisible, setLogoutModalVisible] = useState(false);
   const insets = useSafeAreaInsets();
   const [mounted, setMounted] = useState(visible);
   const translateX = useRef(new Animated.Value(-DRAWER_WIDTH)).current;
@@ -189,7 +191,7 @@ export default function Sidebar({ visible, onClose, availability, onAvailability
       type: 'nav',
       label: t('menu_logout'),
       icon: <Image source={SIDEBAR_ICONS.logout} style={styles.iconImage} resizeMode="contain" />,
-      onPress: () => logoutMutation.mutate(),
+      onPress: () => setLogoutModalVisible(true),
     },
   ];
 
@@ -233,6 +235,16 @@ export default function Sidebar({ visible, onClose, availability, onAvailability
           ))}
         </ScrollView>
       </Animated.View>
+      <LogoutConfirmModal
+        visible={isLogoutModalVisible}
+        isLoading={logoutMutation.isPending}
+        onCancel={() => setLogoutModalVisible(false)}
+        onConfirm={() => {
+          setLogoutModalVisible(false);
+          onClose();
+          logoutMutation.mutate();
+        }}
+      />
     </View>
   );
 }

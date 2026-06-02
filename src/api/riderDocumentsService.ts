@@ -4,7 +4,7 @@ import type {
   UpdateRiderDocumentsResponse,
 } from './riderDocumentsTypes';
 
-const RIDER_DOCUMENTS_PATH = '/ride-vehicles/rider/documents';
+const RIDER_DOCUMENTS_PATH = '/apps/deliveries/rider/home/rider/profile/documents';
 
 type UploadField =
   | 'driver_license_front'
@@ -41,11 +41,11 @@ const toFormData = (payload: UpdateRiderDocumentsPayload): FormData => {
   const formData = new FormData();
 
   if (payload.licenseNumber) {
-    formData.append('licenseNumber', payload.licenseNumber);
+    formData.append('license_no', payload.licenseNumber);
   }
 
   if (payload.vehicleNo) {
-    formData.append('vehicle_no', payload.vehicleNo);
+    formData.append('vehicle_plate_no', payload.vehicleNo);
   }
 
   appendImageFile(formData, 'driver_license_front', payload.driverLicenseFrontUri);
@@ -57,10 +57,12 @@ const toFormData = (payload: UpdateRiderDocumentsPayload): FormData => {
 };
 
 export const riderDocumentsService = {
-  updateRiderDocuments: (payload: UpdateRiderDocumentsPayload) =>
-    apiClient.patch<UpdateRiderDocumentsResponse>(RIDER_DOCUMENTS_PATH, toFormData(payload), {
+  updateRiderDocuments: (payload: UpdateRiderDocumentsPayload) => {
+    console.log('[RIDER DOCUMENTS REQUEST][RIDER]', { path: RIDER_DOCUMENTS_PATH });
+    return apiClient.patch<UpdateRiderDocumentsResponse>(RIDER_DOCUMENTS_PATH, toFormData(payload), {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
-    }),
+    });
+  },
 };

@@ -16,6 +16,7 @@ import { useAppTheme } from '../../theme/ThemeProvider';
 import { useTranslations } from '../../localization/LocalizationProvider';
 import Text from '../../components/Text';
 import ToggleSwitch from '../../components/ToggleSwitch';
+import LogoutConfirmModal from '../../components/LogoutConfirmModal';
 import { useRiderProfileQuery } from '../../hooks/useRiderProfileQuery';
 import { useLogoutMutation } from '../../hooks/useAuthMutations';
 import { MainStackParamList } from '../../navigation/types';
@@ -42,6 +43,7 @@ export default function ProfileScreen() {
   const { data: profileData, isLoading: profileLoading } = useRiderProfileQuery();
   const logoutMutation = useLogoutMutation();
   const [availability, setAvailability] = useState(true);
+  const [isLogoutModalVisible, setLogoutModalVisible] = useState(false);
 
   if (profileLoading) {
     return (
@@ -69,12 +71,12 @@ export default function ProfileScreen() {
     try {
       const supported = await Linking.canOpenURL(url);
       if (!supported) {
-        Alert.alert('Unable to open link', url);
+        Alert.alert(t('common_unable_to_open_link'), url);
         return;
       }
       await Linking.openURL(url);
     } catch {
-      Alert.alert('Unable to open link', url);
+      Alert.alert(t('common_unable_to_open_link'), url);
     }
   };
 
@@ -82,29 +84,29 @@ export default function ProfileScreen() {
     {
       key: 'language',
       icon: 'globe',
-      title: 'Language',
-      subtitle: 'Choose your preferred language',
+      title: t('menu_language'),
+      subtitle: t('profile_menu_language_subtitle'),
       onPress: () => navigation.navigate('Language'),
     },
     {
       key: 'vehicle-type',
       icon: 'vehicle-type',
-      title: 'Vehicle Type',
-      subtitle: 'Choose your delivery vehicle',
+      title: t('menu_vehicle_type'),
+      subtitle: t('profile_menu_vehicle_type_subtitle'),
       onPress: () => navigation.navigate('VehicleType'),
     },
     {
       key: 'bank',
       icon: 'credit-card',
-      title: 'Bank Management',
-      subtitle: 'Manage your bank accounts',
+      title: t('menu_bank_management'),
+      subtitle: t('profile_menu_bank_management_subtitle'),
       onPress: () => navigation.navigate('BankManagement'),
     },
     {
       key: 'schedule',
       icon: 'clock',
-      title: 'Work schedule',
-      subtitle: 'Set your working hours and days',
+      title: t('menu_work_schedule'),
+      subtitle: t('profile_menu_work_schedule_subtitle'),
       onPress: () => navigation.navigate('WorkSchedule'),
     },
     
@@ -114,22 +116,22 @@ export default function ProfileScreen() {
     {
       key: 'privacy',
       icon: 'shield',
-      title: 'Privacy Policy',
-      subtitle: 'Read our privacy policy',
+      title: t('menu_privacy_policy'),
+      subtitle: t('profile_menu_privacy_policy_subtitle'),
       onPress: () => openExternalUrl('https://multivendor.enatega.com/privacy'),
     },
     {
       key: 'about',
       icon: 'info',
-      title: 'About Us',
-      subtitle: 'Learn more about our company',
+      title: t('menu_about_us'),
+      subtitle: t('profile_menu_about_us_subtitle'),
       onPress: () => openExternalUrl('https://multivendor.enatega.com/about'),
     },
     {
       key: 'help',
       icon: 'help-circle',
-      title: 'Help',
-      subtitle: 'Get help and support',
+      title: t('menu_help'),
+      subtitle: t('profile_menu_help_subtitle'),
       onPress: () => openExternalUrl('https://ninjascode.com/'),
     },
   ] as const;
@@ -164,9 +166,11 @@ export default function ProfileScreen() {
             </View>
             <View style={styles.menuTextWrap}>
               <Text weight="semiBold" style={[styles.menuTitle, { color: theme.colors.gray900 }]}>
-                Availability
+                {t('menu_availability')}
               </Text>
-              <Text style={[styles.menuSubtitle, { color: theme.colors.gray600 }]}>Let others know you&apos;re available</Text>
+              <Text style={[styles.menuSubtitle, { color: theme.colors.gray600 }]}>
+                {t('profile_menu_availability_subtitle')}
+              </Text>
             </View>
           </View>
           <View style={styles.availabilityRight}>
@@ -178,7 +182,7 @@ export default function ProfileScreen() {
         </View>
 
         <Text weight="medium" style={[styles.sectionTitle, { color: theme.colors.gray600 }]}>
-          Account &amp; Settings
+          {t('profile_account_settings')}
         </Text>
 
         <View style={[styles.cardGroup, { borderColor: theme.colors.gray300, backgroundColor: theme.colors.surface }]}>
@@ -188,9 +192,11 @@ export default function ProfileScreen() {
             </View>
             <View style={styles.menuTextWrap}>
               <Text weight="semiBold" style={[styles.menuTitle, { color: theme.colors.gray900 }]}>
-                User Profile
+                {t('profile_menu_user_profile')}
               </Text>
-              <Text style={[styles.menuSubtitle, { color: theme.colors.gray500 }]}>Tap to view profile details</Text>
+              <Text style={[styles.menuSubtitle, { color: theme.colors.gray500 }]}>
+                {t('profile_menu_user_profile_subtitle')}
+              </Text>
             </View>
             <Text style={[styles.chevron, { color: theme.colors.gray900 }]}>{'>'}</Text>
           </Pressable>
@@ -222,7 +228,7 @@ export default function ProfileScreen() {
 
         <Pressable
           style={[styles.logoutCard, { borderColor: theme.colors.gray300, backgroundColor: theme.colors.red100 }]}
-          onPress={() => logoutMutation.mutate()}
+          onPress={() => setLogoutModalVisible(true)}
           disabled={logoutMutation.isPending}
         >
           <View style={[styles.iconCircleDanger, { backgroundColor: theme.colors.surface }]}>
@@ -232,11 +238,22 @@ export default function ProfileScreen() {
             <Text weight="semiBold" style={[styles.logoutTitle, { color: theme.colors.red500 }]}>
               {logoutMutation.isPending ? t('auth_logout_loading') : t('auth_logout')}
             </Text>
-            <Text style={[styles.menuSubtitle, { color: theme.colors.gray600 }]}>Sign out from your account</Text>
+            <Text style={[styles.menuSubtitle, { color: theme.colors.gray600 }]}>
+              {t('profile_menu_logout_subtitle')}
+            </Text>
           </View>
           <Text style={[styles.chevron, { color: theme.colors.gray900 }]}>{'>'}</Text>
         </Pressable>
       </ScrollView>
+      <LogoutConfirmModal
+        visible={isLogoutModalVisible}
+        isLoading={logoutMutation.isPending}
+        onCancel={() => setLogoutModalVisible(false)}
+        onConfirm={() => {
+          setLogoutModalVisible(false);
+          logoutMutation.mutate();
+        }}
+      />
     </View>
   );
 }

@@ -34,11 +34,11 @@ export default function ProfileDetailsScreen() {
 
   const hasDrivingLicenseDocs = Boolean(
     profile?.drivingLicense?.registrationDocument?.front ||
-      profile?.drivingLicense?.registrationDocument?.back,
+    profile?.drivingLicense?.registrationDocument?.back,
   );
   const hasVehiclePlateDocs = Boolean(
     profile?.vehiclePlate?.registrationDocument?.front ||
-      profile?.vehiclePlate?.registrationDocument?.back,
+    profile?.vehiclePlate?.registrationDocument?.back,
   );
 
   const hasDrivingLicenseData = Boolean(drivingLicenseNumber || hasDrivingLicenseDocs);
@@ -75,7 +75,7 @@ export default function ProfileDetailsScreen() {
           </View>
           <View style={styles.profileMeta}>
             <Text weight="semiBold" style={styles.name}>{profileName}</Text>
-            <Text weight="medium" style={{ color: theme.colors.gray600 }}>{`id:: ${profileId}`}</Text>
+            <Text weight="medium" style={{ color: theme.colors.gray600 }}>{`id: ${profileId}`}</Text>
           </View>
         </View>
 

@@ -3,7 +3,7 @@ export type LanguageOption = {
   name: string;
   countryName: string;
   countryCode: string;
-  imageUrl: string;
+  imageUrl?: string | null;
   isRtl: boolean;
   isSelected?: boolean;
 };
@@ -14,6 +14,13 @@ export type LanguageSettingsResponse = {
   selectedLanguage: LanguageOption | null;
   languages: LanguageOption[];
 };
+
+export type LanguageSettingsApiResponse =
+  | LanguageSettingsResponse
+  | {
+      rider_id: string;
+      rider_language: string;
+    };
 
 export type UpdateLanguagePayload = {
   riderLanguage: string;

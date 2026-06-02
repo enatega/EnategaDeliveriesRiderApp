@@ -160,27 +160,40 @@ function LanguageRow({
   );
 }
 
-function LanguageFlag({ imageUrl, countryCode }: { imageUrl: string; countryCode: string }) {
+function LanguageFlag({ imageUrl, countryCode }: { imageUrl?: string | null; countryCode: string }) {
   const { theme } = useAppTheme();
   const [hasImageError, setHasImageError] = useState(false);
   const shouldShowImage = Boolean(imageUrl) && !hasImageError;
+  const flagEmoji = getFlagEmoji(countryCode);
 
   return (
     <View style={[styles.flagWrap, { backgroundColor: theme.colors.gray100 }]}>
       {shouldShowImage ? (
         <Image
-          source={{ uri: imageUrl }}
+          source={{ uri: imageUrl ?? undefined }}
           style={styles.flagImage}
           resizeMode="cover"
           onError={() => setHasImageError(true)}
         />
       ) : (
-        <Text weight="semiBold" style={{ color: theme.colors.gray700, fontSize: 10, lineHeight: 12 }}>
-          {countryCode || '--'}
+        <Text weight="semiBold" style={{ color: theme.colors.gray700, fontSize: 16, lineHeight: 18 }}>
+          {flagEmoji}
         </Text>
       )}
     </View>
   );
+}
+
+function getFlagEmoji(countryCode: string) {
+  if (!countryCode || countryCode.length !== 2) {
+    return '--';
+  }
+
+  return countryCode
+    .toUpperCase()
+    .split('')
+    .map((char) => String.fromCodePoint(127397 + char.charCodeAt(0)))
+    .join('');
 }
 
 function BackIcon({ color }: { color: string }) {

@@ -91,6 +91,17 @@ function isRiderOrderUpdatableStatus(value: string): value is RiderOrderUpdatabl
   return value in STATUS_BUTTON_LABEL_KEY;
 }
 
+function getNextStatusTitleKey(
+  currentStatus: RiderDeliveryProgressStatus,
+  nextUpdateStatus: RiderOrderUpdatableStatus | null,
+) {
+  if (nextUpdateStatus) {
+    return STATUS_BUTTON_LABEL_KEY[nextUpdateStatus];
+  }
+
+  return NEXT_STATUS_KEY[currentStatus];
+}
+
 export default function ProcessingOrderDetailScreen({ route, navigation }: Props) {
   const { theme } = useAppTheme();
   const { t } = useTranslations('app');
@@ -178,14 +189,17 @@ export default function ProcessingOrderDetailScreen({ route, navigation }: Props
   };
 
   const currentTitle = t(STATUS_TITLE_KEY[currentProgressStatus]);
-  const nextTitle = t(NEXT_STATUS_KEY[currentProgressStatus]);
-  const step = STEP_VALUE[currentProgressStatus];
-  const currentIndex = DELIVERY_PROGRESS_ORDER.indexOf(currentProgressStatus);
+  const serverOrderStatus = detailQuery.data?.status;
   const serverAllowedNextUpdateStatus =
     detailQuery.data?.nextAllowedStatuses?.find(isRiderOrderUpdatableStatus) ?? null;
   const fallbackNextUpdateStatus = NEXT_UPDATE_STATUS[currentProgressStatus] ?? null;
+  const shouldAllowReadyFallback =
+    serverOrderStatus === 'ready' && currentProgressStatus === RiderDeliveryProgressStatus.HEADING_TO_STORE;
   const nextUpdateStatus = serverAllowedNextUpdateStatus ?? fallbackNextUpdateStatus;
-  const canUpdateStatus = detailQuery.data?.canUpdateStatus === true;
+  const nextTitle = t(getNextStatusTitleKey(currentProgressStatus, nextUpdateStatus));
+  const step = STEP_VALUE[currentProgressStatus];
+  const currentIndex = DELIVERY_PROGRESS_ORDER.indexOf(currentProgressStatus);
+  const canUpdateStatus = detailQuery.data?.canUpdateStatus === true || shouldAllowReadyFallback;
   const isDelivered = currentProgressStatus === RiderDeliveryProgressStatus.DELIVERED;
   const showStorePreparingAlert =
     currentProgressStatus === RiderDeliveryProgressStatus.ARRIVED_AT_STORE && !canUpdateStatus;
@@ -205,7 +219,6 @@ export default function ProcessingOrderDetailScreen({ route, navigation }: Props
 
     const riderId = session.user?.id;
     const serverRiderStatus = detailQuery.data?.riderStatus;
-    const serverOrderStatus = detailQuery.data?.status;
 
     if (nextUpdateStatus && riderId) {
       // Guard against stale UI: skip duplicate transition and re-sync order detail.
@@ -379,7 +392,9 @@ export default function ProcessingOrderDetailScreen({ route, navigation }: Props
                     const isCurrent = index === currentIndex;
                     const showConnector = index < DELIVERY_PROGRESS_ORDER.length - 1;
                     const itemTitle = t(STATUS_TITLE_KEY[statusItem]);
-                    const nextDescKey = NEXT_STATUS_KEY[statusItem];
+                    const nextDescKey = isCurrent
+                      ? getNextStatusTitleKey(statusItem, nextUpdateStatus)
+                      : NEXT_STATUS_KEY[statusItem];
                     const itemDesc = statusItem === RiderDeliveryProgressStatus.DELIVERED
                       ? t('order_status_desc_delivered')
                       : t('order_next', { status: t(nextDescKey) });

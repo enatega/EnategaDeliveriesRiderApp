@@ -13,3 +13,4 @@ export { default as EarningsActivityRow } from './EarningsActivityRow';
 export { default as EarningsBottomSheet } from './EarningsBottomSheet';
 export { default as EarningsChart } from './EarningsChart';
 export { default as SummaryCard } from './SummaryCard';
+export { default as LogoutConfirmModal } from './LogoutConfirmModal';

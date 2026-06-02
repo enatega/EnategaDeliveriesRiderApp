@@ -1,10 +1,10 @@
 export type VehicleTypeItem = {
   id: string;
   name: string;
-  imageUrl: string;
+  imageUrl?: string | null;
   created_at: string;
   updated_at: string;
-  isSelected: boolean;
+  isSelected?: boolean;
 };
 
 export type SelectedVehicleType = {
@@ -17,6 +17,15 @@ export type VehicleTypesResponse = {
   selectedVehicleType: SelectedVehicleType | null;
   vehicleTypes: VehicleTypeItem[];
 };
+
+export type VehicleTypesApiResponse =
+  | VehicleTypeItem[]
+  | VehicleTypesResponse
+  | {
+      status?: number;
+      durationMs?: number;
+      data: VehicleTypeItem[];
+    };
 
 export type UpdateVehicleTypePayload = {
   vehicleTypeId: string;

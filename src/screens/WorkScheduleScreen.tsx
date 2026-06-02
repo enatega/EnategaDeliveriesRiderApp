@@ -5,11 +5,9 @@ import Svg, { Circle, Path } from 'react-native-svg';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import Button from '../components/Button';
-import Sidebar from '../components/Sidebar';
 import Text from '../components/Text';
 import TextInput from '../components/TextInput';
 import VerticalList from '../components/VerticalList';
-import { useSidebar } from '../hooks/useSidebar';
 import { useUpdateWorkScheduleMutation } from '../hooks/useWorkScheduleMutations';
 import { useWorkScheduleQuery } from '../hooks/useWorkScheduleQuery';
 import { useTranslations } from '../localization/LocalizationProvider';
@@ -22,7 +20,6 @@ const DEFAULT_SLOT: WorkScheduleSlot = { open: '00:00', close: '23:59' };
 export default function WorkScheduleScreen() {
   const { theme } = useAppTheme();
   const { t } = useTranslations('app');
-  const sidebar = useSidebar();
   const navigation = useNavigation<NativeStackNavigationProp<MainStackParamList>>();
   const workScheduleQuery = useWorkScheduleQuery();
   const updateWorkScheduleMutation = useUpdateWorkScheduleMutation();
@@ -109,8 +106,8 @@ export default function WorkScheduleScreen() {
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]} edges={['top', 'bottom']}>
       <View style={[styles.header, { backgroundColor: theme.colors.surface }]}>
-        <Pressable onPress={sidebar.openSidebar} style={styles.menuButton}>
-          <HamburgerIcon color={theme.colors.gray900} />
+        <Pressable onPress={() => navigation.goBack()} style={styles.menuButton}>
+          <BackArrowIcon color={theme.colors.gray900} />
         </Pressable>
         <Text
           weight="semiBold"
@@ -182,15 +179,6 @@ export default function WorkScheduleScreen() {
           </Text>
         ) : null}
       </View>
-
-      <Sidebar
-        visible={sidebar.sidebarOpen}
-        availability={sidebar.availability}
-        onAvailabilityChange={sidebar.setAvailability}
-        onClose={sidebar.closeSidebar}
-        onNavigate={(screen) => navigation.navigate(screen)}
-        onSwitchTab={() => navigation.navigate('Home', { screen: 'ProfileTab' })}
-      />
     </SafeAreaView>
   );
 }
@@ -292,10 +280,10 @@ function TimeInput({ value, onChangeText }: { value: string; onChangeText: (valu
   );
 }
 
-function HamburgerIcon({ color }: { color: string }) {
+function BackArrowIcon({ color }: { color: string }) {
   return (
     <Svg width={24} height={24} viewBox="0 0 24 24" fill="none">
-      <Path d="M4.5 7.5H19.5M4.5 12H19.5M4.5 16.5H19.5" stroke={color} strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" />
+      <Path d="M15 6L9 12L15 18" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
     </Svg>
   );
 }
