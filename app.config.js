@@ -23,6 +23,7 @@ module.exports = {
         backgroundColor: '#ffffff',
       },
       package: 'com.enatega.deliveries.rider',
+      googleServicesFile: './google-services.json',
       edgeToEdgeEnabled: true,
       softwareKeyboardLayoutMode: 'resize',
     },
@@ -36,6 +37,7 @@ module.exports = {
       policy: 'appVersion',
     },
     plugins: [
+      'expo-notifications',
       'expo-secure-store',
       [
         'expo-image-picker',
