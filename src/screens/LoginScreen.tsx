@@ -14,12 +14,14 @@ import { Text } from '../components';
 import { useTranslations } from '../localization/LocalizationProvider';
 import { useAppTheme } from '../theme/ThemeProvider';
 import { useLoginMutation } from '../hooks/useAuthMutations';
+import { useExpoPushToken } from '../hooks/useExpoPushToken';
 import { layout } from '../theme/layout';
 
 export default function LoginScreen() {
   const { t } = useTranslations('app');
   const { theme } = useAppTheme();
   const loginMutation = useLoginMutation();
+  const { getExpoPushToken, isLoading: isFetchingExpoPushToken } = useExpoPushToken();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [passwordVisible, setPasswordVisible] = useState(false);
@@ -49,12 +51,15 @@ export default function LoginScreen() {
     return valid;
   };
 
-  const handleLogin = () => {
+  const handleLogin = async () => {
     if (!validate()) return;
+
+    const devicePushToken = await getExpoPushToken();
+
     loginMutation.mutate({
       email: email.trim(),
       password,
-      device_push_token: 'fcm-token-optional',
+      device_push_token: devicePushToken ?? undefined,
     });
   };
 
@@ -194,7 +199,7 @@ export default function LoginScreen() {
 
         <Pressable
           onPress={handleLogin}
-          disabled={loginMutation.isPending}
+          disabled={loginMutation.isPending || isFetchingExpoPushToken}
           style={({ pressed }) => [
             styles.loginButton,
             {
@@ -202,11 +207,11 @@ export default function LoginScreen() {
               shadowColor: theme.colors.lime500,
               opacity: pressed ? 0.95 : 1,
             },
-            loginMutation.isPending ? styles.disabled : null,
+            loginMutation.isPending || isFetchingExpoPushToken ? styles.disabled : null,
           ]}
         >
           <Text weight="semiBold" color={theme.colors.white} style={[styles.loginButtonText, buttonTextStyle]}>
-            {loginMutation.isPending ? t('auth_login_loading') : t('auth_login')}
+            {loginMutation.isPending || isFetchingExpoPushToken ? t('auth_login_loading') : t('auth_login')}
           </Text>
         </Pressable>
       </ScrollView>
