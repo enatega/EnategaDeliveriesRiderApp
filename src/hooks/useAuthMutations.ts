@@ -37,9 +37,20 @@ export function useLoginMutation(
   const { setSessionFromResponse } = useAuth();
 
   return useMutation<AuthSessionResponse, ApiError, LoginPayload>({
-    mutationFn: authService.login,
+    mutationFn: async (payload) => {
+      console.log('[LOGIN REQUEST][RIDER]', {
+        email: payload.email,
+        device_push_token: payload.device_push_token ?? null,
+      });
+      return authService.login(payload);
+    },
     ...options,
     onSuccess: async (data, variables, onMutateResult, context) => {
+      console.log('[LOGIN RESPONSE][RIDER]', {
+        user: data.user,
+        accessToken: data.accessToken,
+        refreshToken: data.refreshToken ?? null,
+      });
       await setSessionFromResponse(data);
       queryClient.setQueryData(authKeys.session(), {
         token: data.accessToken,
@@ -48,6 +59,17 @@ export function useLoginMutation(
       });
       await queryClient.invalidateQueries({ queryKey: authKeys.session() });
       options?.onSuccess?.(data, variables, onMutateResult, context);
+    },
+    onError: (error, variables, onMutateResult, context) => {
+      console.log('[LOGIN ERROR][RIDER]', {
+        email: variables.email,
+        device_push_token: variables.device_push_token ?? null,
+        status: error.status,
+        code: error.code ?? null,
+        message: error.message,
+        data: error.data,
+      });
+      options?.onError?.(error, variables, onMutateResult, context);
     },
   });
 }
