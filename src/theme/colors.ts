@@ -1,9 +1,16 @@
-export const lightColors = {
+export type BrandColors = {
+  primary: string;
+  secondary: string;
+  tertiary: string;
+};
+
+const baseLightColors = {
   black: '#000000',
   background: '#FFFFFF',
   surface: '#FFFFFF',
   primary: '#90E36D',
   secondary: '#6B5BFF',
+  tertiary: '#F3F4F6',
   text: '#111827',
   mutedText: '#6B7280',
   border: '#D1D5DB',
@@ -45,12 +52,13 @@ export const lightColors = {
   shadow: 'rgba(17, 24, 39, 0.12)',
 };
 
-export const darkColors: typeof lightColors = {
+const baseDarkColors: typeof baseLightColors = {
   black: '#000000',
   background: '#0F1117',
   surface: '#161A23',
   primary: '#90E36D',
   secondary: '#8B7BFF',
+  tertiary: '#111827',
   text: '#F9FAFB',
   mutedText: '#9CA3AF',
   border: '#424244',
@@ -91,5 +99,32 @@ export const darkColors: typeof lightColors = {
   lime600: '#67C933',
   shadow: 'rgba(2, 6, 23, 0.45)',
 };
+
+export const defaultBrandColors: BrandColors = {
+  primary: baseLightColors.primary,
+  secondary: baseLightColors.secondary,
+  tertiary: baseLightColors.tertiary,
+};
+
+export const applyBrandColors = <
+  TColors extends typeof baseLightColors | typeof baseDarkColors,
+>(
+  colors: TColors,
+  brandColors: BrandColors = defaultBrandColors
+) => ({
+  ...colors,
+  primary: brandColors.primary,
+  secondary: brandColors.secondary,
+  tertiary: brandColors.tertiary,
+  lime500: brandColors.primary,
+  lime600: brandColors.primary,
+});
+
+export const lightColors = applyBrandColors(baseLightColors);
+export const darkColors = applyBrandColors(baseDarkColors, {
+  primary: baseDarkColors.primary,
+  secondary: baseDarkColors.secondary,
+  tertiary: baseDarkColors.tertiary,
+});
 
 export type ThemeColors = typeof lightColors;

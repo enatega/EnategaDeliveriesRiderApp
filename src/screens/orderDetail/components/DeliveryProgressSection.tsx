@@ -135,8 +135,8 @@ export default function DeliveryProgressSection({
                     style={[
                       styles.timelineDot,
                       {
-                        backgroundColor: row.isCompleted ? theme.colors.emerald500 : theme.colors.gray100,
-                        borderColor: row.isCompleted ? theme.colors.emerald500 : theme.colors.gray250,
+                        backgroundColor: row.isCompleted ? theme.colors.primary : theme.colors.gray100,
+                        borderColor: row.isCompleted ? theme.colors.primary : theme.colors.gray250,
                       },
                     ]}
                   >
@@ -146,7 +146,7 @@ export default function DeliveryProgressSection({
                     <View
                       style={[
                         styles.timelineConnector,
-                        { backgroundColor: index < currentIndex ? theme.colors.emerald500 : theme.colors.gray250 },
+                        { backgroundColor: index < currentIndex ? theme.colors.primary : theme.colors.gray250 },
                       ]}
                     />
                   ) : null}
