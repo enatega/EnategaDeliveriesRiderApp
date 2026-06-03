@@ -1,6 +1,6 @@
 import React from 'react';
 import { BottomTabBarProps } from '@react-navigation/bottom-tabs';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { Platform, Pressable, StyleSheet, View } from 'react-native';
 import Text from './Text';
 import HomeIcon from './icons/HomeIcon';
 import WalletIcon from './icons/WalletIcon';
@@ -22,13 +22,18 @@ export default function BottomTabBar({ state, navigation }: BottomTabBarProps) {
   const { t } = useTranslations('app');
   const { theme } = useAppTheme();
   const insets = useSafeAreaInsets();
+  const bottomInset = Platform.OS === 'android'
+    ? insets.bottom + 10
+    : insets.bottom + 6;
+  const horizontalPadding = Platform.OS === 'android' ? 8 : 12;
 
   return (
     <View
       style={[
         styles.container,
         {
-          paddingBottom: Math.max(insets.bottom, 10),
+          paddingBottom: bottomInset,
+          paddingHorizontal: horizontalPadding,
           backgroundColor: theme.colors.gray800,
         },
       ]}
@@ -62,12 +67,24 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingTop: 10,
+    paddingTop: 12,
     borderTopLeftRadius: 12,
     borderTopRightRadius: 12,
+    minHeight: 76,
   },
-  tab: { alignItems: 'center', gap: 7, minWidth: 70 },
+  tab: {
+    flex: 1,
+    minWidth: 0,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 7,
+    paddingHorizontal: 4,
+    paddingVertical: 4,
+  },
   iconWrap: { width: 24, height: 24, alignItems: 'center', justifyContent: 'center' },
-  label: { fontSize: typography.size.xs, lineHeight: typography.lineHeight.xs },
+  label: {
+    fontSize: typography.size.xs,
+    lineHeight: typography.lineHeight.xs,
+    textAlign: 'center',
+  },
 });
