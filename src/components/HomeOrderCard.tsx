@@ -121,8 +121,8 @@ export default function HomeOrderCard({ order, tab }: Props) {
         <View style={styles.row}>
           <View style={styles.topCell}>
             <View style={styles.iconTextRow}>
-              <View style={styles.greenIconWrap}>
-                <ListIcon width={20} height={20}/>
+              <View style={[styles.greenIconWrap, { backgroundColor: theme.colors.tertiary }]}>
+                <ListIcon width={20} height={20} stroke={theme.colors.gray900} />
               </View>
               <View style={styles.textBlock}>
                 <Text variant="caption" weight="medium" color={theme.colors.gray600}>{t('home_order_id')}</Text>
@@ -138,7 +138,7 @@ export default function HomeOrderCard({ order, tab }: Props) {
           </View>
         </View>
 
-        <View style={styles.divider} />
+        <View style={[styles.divider, { borderTopColor: theme.colors.gray200 }]} />
 
         <View style={styles.row}>
           <View style={styles.storeBlock}>
@@ -154,18 +154,24 @@ export default function HomeOrderCard({ order, tab }: Props) {
           </View>
           {tab === 'processing' ? (
             <Pressable
-              style={styles.chatButton}
+              style={[
+                styles.chatButton,
+                {
+                  borderColor: theme.colors.gray200,
+                  backgroundColor: theme.colors.surface,
+                },
+              ]}
               onPress={(event) => {
                 event.stopPropagation();
                 handleChatPress();
               }}
             >
-              <ChatBubbleOvalIcon width={24} height={24} />
+              <ChatBubbleOvalIcon width={24} height={24} stroke={theme.colors.gray900} />
             </Pressable>
           ) : null}
         </View>
 
-        <View style={styles.divider} />
+        <View style={[styles.divider, { borderTopColor: theme.colors.gray200 }]} />
 
         <LocationRow
           kind="pickup"
@@ -182,18 +188,22 @@ export default function HomeOrderCard({ order, tab }: Props) {
           themeColor={theme.colors}
         />
 
-        <View style={styles.distanceRow}>
-          <Image source={locationIcon} style={styles.distanceIcon} resizeMode="contain" />
+        <View style={[styles.distanceRow, { backgroundColor: theme.colors.tertiary }]}>
+          <Image
+            source={locationIcon}
+            style={[styles.distanceIcon, { tintColor: theme.colors.gray500 }]}
+            resizeMode="contain"
+          />
           <Text variant="caption" weight="medium" color={theme.colors.gray500}>{safeDistanceLabel}</Text>
         </View>
 
-        <View style={styles.divider} />
+        <View style={[styles.divider, { borderTopColor: theme.colors.gray200 }]} />
 
         <View style={styles.row}>
           <View style={styles.metaCell}>
             <View style={styles.iconTextRow}>
-              <View style={styles.greenIconWrap}>
-                <DollarIcon width={20} height={20} />
+              <View style={[styles.greenIconWrap, { backgroundColor: theme.colors.tertiary }]}>
+                <DollarIcon width={20} height={20} stroke={theme.colors.gray900} />
               </View>
               <View style={styles.textBlock}>
                 <Text variant="caption" weight="medium" color={theme.colors.gray600}>{t('home_order_amount')}</Text>
@@ -203,8 +213,8 @@ export default function HomeOrderCard({ order, tab }: Props) {
           </View>
           <View style={styles.metaCell}>
             <View style={styles.iconTextRow}>
-              <View style={styles.greenIconWrap}>
-                <ClockIcon width={20} height={20} />
+              <View style={[styles.greenIconWrap, { backgroundColor: theme.colors.tertiary }]}>
+                <ClockIcon width={20} height={20} stroke={theme.colors.gray900} />
               </View>
               <View style={styles.textBlock}>
                 <Text variant="caption" weight="medium" color={theme.colors.gray600}>{t('order_time')}</Text>
@@ -214,7 +224,7 @@ export default function HomeOrderCard({ order, tab }: Props) {
           </View>
         </View>
 
-        <View style={styles.divider} />
+        <View style={[styles.divider, { borderTopColor: theme.colors.gray200 }]} />
 
         <View style={styles.row}>
           <View style={styles.topCell}>
@@ -295,16 +305,18 @@ function LocationRow({ kind, label, value, mapLabel, themeColor }: LocationRowPr
   return (
     <View style={styles.row}>
       <View style={styles.locationBlock}>
-        <View style={styles.greenIconWrap}>
-          {kind === 'pickup' ? <PickupLocationIcon width={20} height={20} /> : <HomeIcon width={20} height={20} />}
+        <View style={[styles.greenIconWrap, { backgroundColor: themeColor.tertiary }]}>
+          {kind === 'pickup'
+            ? <PickupLocationIcon width={20} height={20} stroke={themeColor.gray900} />
+            : <HomeIcon width={20} height={20} stroke={themeColor.gray900} />}
         </View>
         <View style={styles.textBlock}>
           <Text variant="caption" weight="medium" color={themeColor.gray600}>{label}</Text>
           <Text variant="label" weight="semiBold" color={themeColor.gray900}>{value}</Text>
         </View>
       </View>
-      <View style={[styles.mapButton, { borderColor: themeColor.gray200 }]}>
-        <MapSvgIcon width={16} height={16} />
+      <View style={[styles.mapButton, { borderColor: themeColor.gray200, backgroundColor: themeColor.surface }]}>
+        <MapSvgIcon width={16} height={16} stroke={themeColor.gray900} />
         <Text variant="caption" color={themeColor.gray600}>{mapLabel}</Text>
       </View>
     </View>
@@ -342,7 +354,6 @@ const styles = StyleSheet.create({
   },
   divider: {
     borderTopWidth: 1,
-    borderTopColor: '#E5E7EB',
   },
   storeBlock: {
     flexDirection: 'row',
@@ -365,7 +376,6 @@ const styles = StyleSheet.create({
     height: 44,
     borderRadius: 22,
     borderWidth: 1,
-    borderColor: '#E2E8F0',
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -378,7 +388,6 @@ const styles = StyleSheet.create({
   greenIconWrap: {
     padding: 8,
     borderRadius: 6,
-    backgroundColor: 'rgba(144, 227, 109, 0.20)',
   },
   mapButton: {
     flexDirection: 'row',
@@ -393,7 +402,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
-    backgroundColor: '#E5E7EB',
     borderRadius: 6,
     paddingHorizontal: 8,
     paddingVertical: 4,

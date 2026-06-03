@@ -1,4 +1,4 @@
-import { darkColors, lightColors, ThemeColors } from './colors';
+import { applyBrandColors, BrandColors, darkColors, lightColors, ThemeColors } from './colors';
 import { layout } from './layout';
 import { typography } from './typography';
 
@@ -9,12 +9,16 @@ export type Theme = {
   layout: typeof layout;
 };
 
-export const buildTheme = (scheme: 'light' | 'dark' | null): Theme => {
+export const buildTheme = (
+  scheme: 'light' | 'dark' | null,
+  brandColors?: BrandColors
+): Theme => {
   const isDark = scheme === 'dark';
+  const baseColors = isDark ? darkColors : lightColors;
 
   return {
     isDark,
-    colors: isDark ? darkColors : lightColors,
+    colors: brandColors ? applyBrandColors(baseColors, brandColors) : baseColors,
     typography,
     layout,
   };

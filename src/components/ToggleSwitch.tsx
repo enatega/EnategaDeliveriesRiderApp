@@ -1,6 +1,5 @@
 import React, { useEffect, useRef } from 'react';
 import { Animated, Pressable, StyleSheet } from 'react-native';
-import { lightColors } from '../theme/colors';
 import { useAppTheme } from '../theme/ThemeProvider';
 
 type Props = {
@@ -42,7 +41,16 @@ export default function ToggleSwitch({ value, onValueChange, disabled = false }:
         },
       ]}
     >
-      <Animated.View style={[styles.thumb, { transform: [{ translateX }] }]} />
+      <Animated.View
+        style={[
+          styles.thumb,
+          {
+            transform: [{ translateX }],
+            backgroundColor: theme.colors.white,
+            shadowColor: theme.colors.black,
+          },
+        ]}
+      />
     </Pressable>
   );
 }
@@ -59,8 +67,6 @@ const styles = StyleSheet.create({
     width: THUMB_SIZE,
     height: THUMB_SIZE,
     borderRadius: 10,
-    backgroundColor: lightColors.white,
-    shadowColor: lightColors.black,
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
     shadowRadius: 2,
