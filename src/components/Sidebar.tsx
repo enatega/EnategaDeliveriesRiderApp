@@ -6,7 +6,6 @@ import Text from './Text';
 import ToggleSwitch from './ToggleSwitch';
 import LogoutConfirmModal from './LogoutConfirmModal';
 import { useAppTheme } from '../theme/ThemeProvider';
-import { lightColors } from '../theme/colors';
 import { useAuth } from '../auth/AuthProvider';
 import { useLogoutMutation } from '../hooks/useAuthMutations';
 import { useTranslations } from '../localization/LocalizationProvider';
@@ -104,7 +103,7 @@ export default function Sidebar({ visible, onClose, availability, onAvailability
       key: 'availability',
       type: 'toggle',
       label: t('menu_availability'),
-      icon: <Image source={SIDEBAR_ICONS.availability} style={styles.iconImage} resizeMode="contain" />,
+      icon: <Image source={SIDEBAR_ICONS.availability} style={[styles.iconImage, { tintColor: theme.colors.primary }]} resizeMode="contain" />,
       value: availability,
       onToggle: onAvailabilityChange,
       subLabel: availability ? t('menu_available') : t('menu_unavailable'),
@@ -113,7 +112,7 @@ export default function Sidebar({ visible, onClose, availability, onAvailability
       key: 'language',
       type: 'nav',
       label: t('menu_language'),
-      icon: <Image source={SIDEBAR_ICONS.language} style={styles.iconImage} resizeMode="contain" />,
+      icon: <Image source={SIDEBAR_ICONS.language} style={[styles.iconImage, { tintColor: theme.colors.primary }]} resizeMode="contain" />,
       onPress: () => {
         onClose();
         onNavigate('Language');
@@ -123,7 +122,7 @@ export default function Sidebar({ visible, onClose, availability, onAvailability
       key: 'vehicle',
       type: 'nav',
       label: t('menu_vehicle_type'),
-      icon: <Image source={SIDEBAR_ICONS.vehicleType} style={styles.iconImage} resizeMode="contain" />,
+      icon: <Image source={SIDEBAR_ICONS.vehicleType} style={[styles.iconImage, { tintColor: theme.colors.primary }]} resizeMode="contain" />,
       onPress: () => {
         onClose();
         onNavigate('VehicleType');
@@ -133,7 +132,7 @@ export default function Sidebar({ visible, onClose, availability, onAvailability
       key: 'bank',
       type: 'nav',
       label: t('menu_bank_management'),
-      icon: <Image source={SIDEBAR_ICONS.bankManagement} style={styles.iconImage} resizeMode="contain" />,
+      icon: <Image source={SIDEBAR_ICONS.bankManagement} style={[styles.iconImage, { tintColor: theme.colors.primary }]} resizeMode="contain" />,
       onPress: () => {
         onClose();
         onNavigate('BankManagement');
@@ -143,7 +142,7 @@ export default function Sidebar({ visible, onClose, availability, onAvailability
       key: 'schedule',
       type: 'nav',
       label: t('menu_work_schedule'),
-      icon: <Image source={SIDEBAR_ICONS.workSchedule} style={styles.iconImage} resizeMode="contain" />,
+      icon: <Image source={SIDEBAR_ICONS.workSchedule} style={[styles.iconImage, { tintColor: theme.colors.primary }]} resizeMode="contain" />,
       onPress: () => {
         onClose();
         onNavigate('WorkSchedule');
@@ -153,7 +152,7 @@ export default function Sidebar({ visible, onClose, availability, onAvailability
       key: 'profile',
       type: 'nav',
       label: t('menu_profile'),
-      icon: <Image source={SIDEBAR_ICONS.profile} style={styles.iconImage} resizeMode="contain" />,
+      icon: <Image source={SIDEBAR_ICONS.profile} style={[styles.iconImage, { tintColor: theme.colors.primary }]} resizeMode="contain" />,
       onPress: () => {
         onClose();
         onSwitchTab?.();
@@ -163,7 +162,7 @@ export default function Sidebar({ visible, onClose, availability, onAvailability
       key: 'privacy',
       type: 'nav',
       label: t('menu_privacy_policy'),
-      icon: <Image source={SIDEBAR_ICONS.vehicleType} style={styles.iconImage} resizeMode="contain" />,
+      icon: <Image source={SIDEBAR_ICONS.vehicleType} style={[styles.iconImage, { tintColor: theme.colors.primary }]} resizeMode="contain" />,
       onPress: () => {
         void openExternalUrl(PRIVACY_URL);
       },
@@ -172,7 +171,7 @@ export default function Sidebar({ visible, onClose, availability, onAvailability
       key: 'about',
       type: 'nav',
       label: t('menu_about_us'),
-      icon: <Image source={SIDEBAR_ICONS.aboutUs} style={styles.iconImage} resizeMode="contain" />,
+      icon: <Image source={SIDEBAR_ICONS.aboutUs} style={[styles.iconImage, { tintColor: theme.colors.primary }]} resizeMode="contain" />,
       onPress: () => {
         void openExternalUrl(ABOUT_URL);
       },
@@ -181,7 +180,7 @@ export default function Sidebar({ visible, onClose, availability, onAvailability
       key: 'help',
       type: 'nav',
       label: t('menu_help'),
-      icon: <Image source={SIDEBAR_ICONS.help} style={styles.iconImage} resizeMode="contain" />,
+      icon: <Image source={SIDEBAR_ICONS.help} style={[styles.iconImage, { tintColor: theme.colors.primary }]} resizeMode="contain" />,
       onPress: () => {
         void openExternalUrl(HELP_URL);
       },
@@ -197,12 +196,24 @@ export default function Sidebar({ visible, onClose, availability, onAvailability
 
   return (
     <View style={[StyleSheet.absoluteFill, styles.container]} pointerEvents="box-none">
-      <TouchableWithoutFeedback onPress={onClose}><Animated.View style={[styles.backdrop, { opacity: backdropOpacity }]} /></TouchableWithoutFeedback>
+      <TouchableWithoutFeedback onPress={onClose}>
+        <Animated.View
+          style={[
+            styles.backdrop,
+            {
+              opacity: backdropOpacity,
+              backgroundColor: theme.colors.black,
+            },
+          ]}
+        />
+      </TouchableWithoutFeedback>
       <Animated.View style={[styles.drawer, { backgroundColor: theme.colors.gray50, transform: [{ translateX }] }]}>
-        <View style={[styles.header, { paddingTop: insets.top + 10 }]}>
-          <View style={styles.avatarCircle}><Text variant="body" weight="semiBold" color={theme.colors.primary}>{initials}</Text></View>
+        <View style={[styles.header, { backgroundColor: theme.colors.primary, paddingTop: insets.top + 10 }]}>
+          <View style={[styles.avatarCircle, { backgroundColor: theme.colors.white }]}>
+            <Text variant="body" weight="semiBold" color={theme.colors.primary}>{initials}</Text>
+          </View>
           <Text variant="subtitle" weight="bold" color={theme.colors.text} style={styles.userName}>{displayName}</Text>
-          <View style={[styles.riderBadge, { backgroundColor: '#D9F8CB' }]}>
+          <View style={[styles.riderBadge, { backgroundColor: theme.colors.tertiary }]}>
             <Text variant="caption" weight="semiBold" color={theme.colors.gray600}>{displayId}</Text>
           </View>
         </View>
@@ -220,7 +231,7 @@ export default function Sidebar({ visible, onClose, availability, onAvailability
                 },
               ]}
             >
-              <View style={[styles.iconBox, { backgroundColor: '#F0F2F6' }]}>{item.icon}</View>
+              <View style={[styles.iconBox, { backgroundColor: theme.colors.tertiary }]}>{item.icon}</View>
               <Text variant="body" weight="semiBold" color={theme.colors.text} style={styles.rowLabel}>{item.label}</Text>
               {item.type === 'toggle' ? (
                 <View style={styles.toggleWrapper}>
@@ -251,25 +262,18 @@ export default function Sidebar({ visible, onClose, availability, onAvailability
 
 const styles = StyleSheet.create({
   container: { zIndex: 20 },
-  
-  
-  
-  
-  
-  backdrop: { ...StyleSheet.absoluteFillObject,backgroundColor: lightColors.black, opacity: 0.3 },
-  
+  backdrop: { ...StyleSheet.absoluteFillObject, opacity: 0.3 },
   drawer: {
     width: DRAWER_WIDTH,
     height: '100%',
     overflow: 'hidden',
     elevation: 14,
-    shadowColor: lightColors.black,
+    shadowColor: '#000000',
     shadowOffset: { width: 6, height: 0 },
     shadowOpacity: 0.2,
     shadowRadius: 14,
   },
   header: {
-    backgroundColor: lightColors.primary,
     paddingHorizontal: 20,
     paddingBottom: 24,
     borderBottomLeftRadius: 18,
@@ -279,7 +283,6 @@ const styles = StyleSheet.create({
     width: 62,
     height: 62,
     borderRadius: 31,
-    backgroundColor: lightColors.white,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 10,

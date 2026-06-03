@@ -1,10 +1,10 @@
 import React from 'react';
 import { StyleSheet, View } from 'react-native';
 import Text from './Text';
-import { lightColors } from '../theme/colors';
 import { typography } from '../theme/typography';
 import { RiderEarningsChartPoint } from '../api/earningsTypes';
 import { useAppCurrency } from '../hooks/useCurrency';
+import { useAppTheme } from '../theme/ThemeProvider';
 
 export type EarningsChartDataPoint = {
   label: string;
@@ -25,6 +25,7 @@ const getChartKey = (item: EarningsChartDataPoint | RiderEarningsChartPoint) =>
 export default function EarningsChart({ data }: Props) {
   const chartData = data ?? [];
   const { formatCurrency } = useAppCurrency();
+  const { theme } = useAppTheme();
   const maxAmount = Math.max(...chartData.map(getChartAmount), 1);
 
   return (
@@ -37,7 +38,7 @@ export default function EarningsChart({ data }: Props) {
 
         return (
           <View key={getChartKey(item)} style={styles.column}>
-            <Text variant="caption" color={lightColors.gray600} style={styles.amount}>
+            <Text variant="caption" color={theme.colors.gray600} style={styles.amount}>
               {formatCurrency(amount)}
             </Text>
             <View
@@ -46,12 +47,12 @@ export default function EarningsChart({ data }: Props) {
                 {
                   height: barHeight,
                   width: typography.size.xxl,
-                  backgroundColor: lightColors.primary,
-                  borderColor: lightColors.gray100,
+                  backgroundColor: theme.colors.primary,
+                  borderColor: theme.colors.gray100,
                 },
               ]}
             />
-            <Text variant="caption" color={lightColors.gray600} style={styles.label}>
+            <Text variant="caption" color={theme.colors.gray600} style={styles.label}>
               {item.label}
             </Text>
           </View>

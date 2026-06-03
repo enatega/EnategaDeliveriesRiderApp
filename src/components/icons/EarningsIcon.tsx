@@ -1,11 +1,9 @@
 import React from 'react';
 import Svg, { Circle, Path } from 'react-native-svg';
-import { lightColors } from '../../theme/colors';
 
-type Props = { active?: boolean };
+type Props = { color: string };
 
-export default function EarningsIcon({ active = false }: Props) {
-  const color = active ? lightColors.primary : lightColors.gray400;
+export default function EarningsIcon({ color }: Props) {
   return (
     <Svg width={24} height={24} viewBox="0 0 24 24" fill="none">
       <Circle cx={12} cy={12} r={9} stroke={color} strokeWidth={1.5} />

@@ -101,7 +101,7 @@ export default function LoginScreen() {
           />
 
           <View style={[styles.brandBadge, { backgroundColor: theme.colors.gray100, shadowColor: theme.colors.shadow }]}>
-            <ScooterIcon color={theme.colors.lime500} size={layout.icon.xl} />
+            <ScooterIcon color={theme.colors.primary} size={layout.icon.xl} />
           </View>
 
           <View style={styles.headingWrap}>
@@ -109,7 +109,7 @@ export default function LoginScreen() {
               <Text weight="bold" color={theme.colors.gray900} style={[styles.titlePart, titleTextStyle]}>
                 Rider
               </Text>
-              <Text weight="bold" color={theme.colors.lime500} style={[styles.titlePart, titleTextStyle]}>
+              <Text weight="bold" color={theme.colors.primary} style={[styles.titlePart, titleTextStyle]}>
                 {' '}Login
               </Text>
             </View>
@@ -130,7 +130,7 @@ export default function LoginScreen() {
                   },
                 ]}
               >
-                <EnvelopeIcon color={theme.colors.lime500} size={layout.icon.xl} />
+                <EnvelopeIcon color={theme.colors.primary} size={layout.icon.xl} />
                 <RNTextInput
                   value={email}
                   onChangeText={(v) => {
@@ -164,7 +164,7 @@ export default function LoginScreen() {
                   },
                 ]}
               >
-                <LockIcon color={theme.colors.lime500} size={layout.icon.xl} />
+                <LockIcon color={theme.colors.primary} size={layout.icon.xl} />
                 <RNTextInput
                   value={password}
                   onChangeText={(v) => {
@@ -203,8 +203,8 @@ export default function LoginScreen() {
           style={({ pressed }) => [
             styles.loginButton,
             {
-              backgroundColor: theme.colors.lime500,
-              shadowColor: theme.colors.lime500,
+              backgroundColor: theme.colors.primary,
+              shadowColor: theme.colors.primary,
               opacity: pressed ? 0.95 : 1,
             },
             loginMutation.isPending || isFetchingExpoPushToken ? styles.disabled : null,

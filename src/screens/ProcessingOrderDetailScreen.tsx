@@ -406,19 +406,19 @@ export default function ProcessingOrderDetailScreen({ route, navigation }: Props
                             style={[
                               styles.railDot,
                               {
-                                borderColor: isCompleted || isCurrent ? theme.colors.emerald500 : theme.colors.gray250,
-                                backgroundColor: isCompleted ? theme.colors.emerald500 : theme.colors.gray100,
+                                borderColor: isCompleted || isCurrent ? theme.colors.primary : theme.colors.gray250,
+                                backgroundColor: isCompleted ? theme.colors.primary : theme.colors.gray100,
                               },
                             ]}
                           >
                             {isCompleted ? <CheckIcon color={theme.colors.white} /> : null}
-                            {isCurrent ? <View style={[styles.currentInner, { backgroundColor: theme.colors.emerald500 }]} /> : null}
+                            {isCurrent ? <View style={[styles.currentInner, { backgroundColor: theme.colors.primary }]} /> : null}
                           </View>
                           {showConnector ? (
                             <View
                               style={[
                                 styles.railConnector,
-                                { backgroundColor: isCompleted ? theme.colors.emerald500 : theme.colors.gray250 },
+                                { backgroundColor: isCompleted ? theme.colors.primary : theme.colors.gray250 },
                               ]}
                             />
                           ) : null}

@@ -139,7 +139,11 @@ export default function ProfileScreen() {
   return (
     <View style={[styles.flex, { backgroundColor: theme.colors.gray100 }]}>
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.contentContainer}>
-        <ImageBackground source={profileBackground} style={styles.hero} imageStyle={styles.heroImage}>
+        <ImageBackground
+          source={profileBackground}
+          style={[styles.hero, { backgroundColor: theme.colors.primary }]}
+          imageStyle={[styles.heroImage, { tintColor: theme.colors.primary }]}
+        >
           <View style={styles.profileRow}>
             {profileImage ? (
               <Image source={{ uri: profileImage }} style={styles.avatarImage} />
@@ -161,8 +165,13 @@ export default function ProfileScreen() {
 
         <View style={[styles.availabilityCard, { borderColor: theme.colors.gray300, backgroundColor: theme.colors.surface }]}>
           <View style={styles.availabilityLeft}>
-            <View style={styles.iconCircle}>
-              <Image source={rowIcons.clock} style={styles.rowIconImage} resizeMode="contain" tintColor="#90E36D" />
+            <View style={[styles.iconCircle, { backgroundColor: theme.colors.tertiary }]}>
+              <Image
+                source={rowIcons.clock}
+                style={styles.rowIconImage}
+                resizeMode="contain"
+                tintColor={theme.colors.primary}
+              />
             </View>
             <View style={styles.menuTextWrap}>
               <Text weight="semiBold" style={[styles.menuTitle, { color: theme.colors.gray900 }]}>
@@ -187,8 +196,13 @@ export default function ProfileScreen() {
 
         <View style={[styles.cardGroup, { borderColor: theme.colors.gray300, backgroundColor: theme.colors.surface }]}>
           <Pressable style={[styles.menuRow, styles.menuRowDivider, { borderBottomColor: theme.colors.gray200 }]} onPress={() => navigation.navigate('ProfileDetails')}>
-            <View style={styles.iconCircle}>
-              <Image source={rowIcons.user} style={styles.rowIconImage} resizeMode="contain" tintColor="#90E36D" />
+            <View style={[styles.iconCircle, { backgroundColor: theme.colors.tertiary }]}>
+              <Image
+                source={rowIcons.user}
+                style={styles.rowIconImage}
+                resizeMode="contain"
+                tintColor={theme.colors.primary}
+              />
             </View>
             <View style={styles.menuTextWrap}>
               <Text weight="semiBold" style={[styles.menuTitle, { color: theme.colors.gray900 }]}>
@@ -294,12 +308,12 @@ function MenuRow({ icon, title, subtitle, onPress, showDivider = false }: MenuRo
         showDivider ? { borderBottomColor: theme.colors.gray200 } : null,
       ]}
     >
-      <View style={styles.iconCircle}>
+      <View style={[styles.iconCircle, { backgroundColor: theme.colors.tertiary }]}>
         <Image
           source={iconSource}
           style={styles.rowIconImage}
           resizeMode="contain"
-          tintColor={icon === 'vehicle-type' ? undefined : '#90E36D'}
+          tintColor={theme.colors.primary}
         />
       </View>
       <View style={styles.menuTextWrap}>
@@ -417,7 +431,6 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: 'rgba(144, 227, 109, 0.10)',
     alignItems: 'center',
     justifyContent: 'center',
   },
