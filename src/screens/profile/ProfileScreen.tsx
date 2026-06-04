@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { publicLinks } from '../../config/publicLinks';
 import { useAppTheme } from '../../theme/ThemeProvider';
 import { useTranslations } from '../../localization/LocalizationProvider';
 import Text from '../../components/Text';
@@ -116,21 +117,21 @@ export default function ProfileScreen() {
       icon: 'shield',
       title: 'Privacy Policy',
       subtitle: 'Read our privacy policy',
-      onPress: () => openExternalUrl('https://multivendor.enatega.com/privacy'),
+      onPress: () => openExternalUrl(publicLinks.privacyPolicy),
     },
     {
       key: 'about',
       icon: 'info',
       title: 'About Us',
       subtitle: 'Learn more about our company',
-      onPress: () => openExternalUrl('https://multivendor.enatega.com/about'),
+      onPress: () => openExternalUrl(publicLinks.aboutUs),
     },
     {
       key: 'help',
       icon: 'help-circle',
       title: 'Help',
       subtitle: 'Get help and support',
-      onPress: () => openExternalUrl('https://ninjascode.com/'),
+      onPress: () => openExternalUrl(publicLinks.help),
     },
   ] as const;
 

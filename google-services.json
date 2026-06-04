@@ -1,0 +1,67 @@
+{
+  "project_info": {
+    "project_number": "695857855952",
+    "project_id": "eatmile-88948",
+    "storage_bucket": "eatmile-88948.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:695857855952:android:4f139fe9455f9dd5708dd5",
+        "android_client_info": {
+          "package_name": "com.eatmile.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBAtTC389kASufEDvwW-eZGmZJnasKUz_8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:695857855952:android:49f3d77e8bd2b4ef708dd5",
+        "android_client_info": {
+          "package_name": "com.eatmile.rider"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBAtTC389kASufEDvwW-eZGmZJnasKUz_8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:695857855952:android:e81a85047dd127e9708dd5",
+        "android_client_info": {
+          "package_name": "com.eatmile.store"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBAtTC389kASufEDvwW-eZGmZJnasKUz_8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

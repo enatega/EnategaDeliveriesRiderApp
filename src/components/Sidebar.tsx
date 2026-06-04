@@ -4,6 +4,7 @@ import { Linking } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Text from './Text';
 import ToggleSwitch from './ToggleSwitch';
+import { publicLinks } from '../config/publicLinks';
 import { useAppTheme } from '../theme/ThemeProvider';
 import { useAuth } from '../auth/AuthProvider';
 import { useLogoutMutation } from '../hooks/useAuthMutations';
@@ -37,10 +38,6 @@ const SIDEBAR_ICONS = {
   help: require('../assets/images/help.png'),
   logout: require('../assets/images/logout.png'),
 } as const;
-const ABOUT_URL = 'https://multivendor.enatega.com/about';
-const PRIVACY_URL = 'https://multivendor.enatega.com/privacy';
-const HELP_URL = 'https://ninjascode.com/';
-
 function IconBox({ children }: { children: React.ReactNode }) { return <View style={styles.iconBox}>{children}</View>; }
 function ChevronRight({ color }: { color: string }) { return <View style={[styles.chevron, { borderColor: color }]} />; }
 
@@ -162,7 +159,7 @@ export default function Sidebar({ visible, onClose, availability, onAvailability
       label: t('menu_privacy_policy'),
       icon: <Image source={SIDEBAR_ICONS.vehicleType} style={[styles.iconImage, { tintColor: theme.colors.primary }]} resizeMode="contain" />,
       onPress: () => {
-        void openExternalUrl(PRIVACY_URL);
+        void openExternalUrl(publicLinks.privacyPolicy);
       },
     },
     {
@@ -171,7 +168,7 @@ export default function Sidebar({ visible, onClose, availability, onAvailability
       label: t('menu_about_us'),
       icon: <Image source={SIDEBAR_ICONS.aboutUs} style={[styles.iconImage, { tintColor: theme.colors.primary }]} resizeMode="contain" />,
       onPress: () => {
-        void openExternalUrl(ABOUT_URL);
+        void openExternalUrl(publicLinks.aboutUs);
       },
     },
     {
@@ -180,7 +177,7 @@ export default function Sidebar({ visible, onClose, availability, onAvailability
       label: t('menu_help'),
       icon: <Image source={SIDEBAR_ICONS.help} style={[styles.iconImage, { tintColor: theme.colors.primary }]} resizeMode="contain" />,
       onPress: () => {
-        void openExternalUrl(HELP_URL);
+        void openExternalUrl(publicLinks.help);
       },
     },
     {

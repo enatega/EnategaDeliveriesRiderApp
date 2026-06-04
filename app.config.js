@@ -2,8 +2,8 @@ const googleMapsApiKey = process.env.GOOGLE_MAPS_API_KEY ?? 'DUMMY_GOOGLE_MAPS_A
 
 module.exports = {
   expo: {
-    name: 'EnategaDeliveriesRiderApp',
-    slug: 'enatega-deliveries-rider-app',
+    name: 'EatMile Rider',
+    slug: 'eatmile-rider',
     version: '1.0.0',
     orientation: 'portrait',
     icon: './assets/icon.png',
@@ -15,14 +15,15 @@ module.exports = {
     },
     ios: {
       supportsTablet: true,
-      bundleIdentifier: 'com.enatega.deliveries.rider',
+      bundleIdentifier: 'com.eatmile.rider',
+      googleServicesFile: './GoogleService-Info.plist',
     },
     android: {
       adaptiveIcon: {
         foregroundImage: './assets/adaptive-icon.png',
         backgroundColor: '#ffffff',
       },
-      package: 'com.enatega.deliveries.rider',
+      package: 'com.eatmile.rider',
       googleServicesFile: './google-services.json',
       edgeToEdgeEnabled: true,
       softwareKeyboardLayoutMode: 'resize',
@@ -31,7 +32,7 @@ module.exports = {
       favicon: './assets/favicon.png',
     },
     updates: {
-      url: 'https://u.expo.dev/dd251847-b122-424b-b7dd-60bd8ddbbe90',
+      url: 'https://u.expo.dev/b1e7561a-b1d4-4650-a7fe-47fdb86351d3',
     },
     runtimeVersion: {
       policy: 'appVersion',
@@ -57,7 +58,7 @@ module.exports = {
     ],
     extra: {
       eas: {
-        projectId: 'dd251847-b122-424b-b7dd-60bd8ddbbe90',
+        projectId: 'b1e7561a-b1d4-4650-a7fe-47fdb86351d3',
       },
     },
   },
