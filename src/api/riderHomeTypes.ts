@@ -20,6 +20,7 @@ export type RiderHomeOrder = {
   paymentMethod: string | null;
   paymentStatus: string | null;
   customerComment: string | null;
+  courierNote: string | null;
   createdAt: string | null;
   canAssignMe: boolean | null;
 };

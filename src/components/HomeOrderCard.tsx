@@ -72,7 +72,7 @@ export default function HomeOrderCard({ order, tab }: Props) {
   const safeDistanceLabel = order.distanceKm == null ? '—' : `${order.distanceKm.toFixed(1)} Km`;
   const safePaymentMethod = order.paymentMethod ?? '—';
   const safePaymentStatus = order.paymentStatus ?? '—';
-  const safeComment = order.customerComment;
+  const safeComment = order.courierNote ?? '—';
   const safeStoreImage = order.storeImage ?? '';
   const safeCreatedAt = order.createdAt ? new Date(order.createdAt) : null;
   const safeTime = safeCreatedAt && !Number.isNaN(safeCreatedAt.getTime())
