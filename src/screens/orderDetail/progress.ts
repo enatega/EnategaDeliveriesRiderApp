@@ -24,6 +24,7 @@ export const DELIVERY_PROGRESS_ORDER: RiderDeliveryProgressStatus[] = [
 
 const API_STATUS_TO_PROGRESS: Record<string, RiderDeliveryProgressStatus> = {
   rider_assigned: RiderDeliveryProgressStatus.ASSIGNED,
+  ready: RiderDeliveryProgressStatus.HEADING_TO_STORE,
   heading_to_store: RiderDeliveryProgressStatus.HEADING_TO_STORE,
   arrived_at_store: RiderDeliveryProgressStatus.ARRIVED_AT_STORE,
   waiting_for_order: RiderDeliveryProgressStatus.WAITING_FOR_ORDER,

@@ -5,8 +5,8 @@ import {
   UpdateRiderPasswordResponse,
 } from './riderProfileTypes';
 
-const RIDER_FULL_PROFILE_PATH = '/ride-vehicles/rider/full-profile';
-const RIDER_PASSWORD_PATH = '/ride-vehicles/rider/password';
+const RIDER_FULL_PROFILE_PATH = '/apps/deliveries/rider/home/rider/full-profile';
+const RIDER_PASSWORD_PATH = '/users/password';
 
 export const riderProfileService = {
   getFullProfile: () => apiClient.get<RiderFullProfileResponse>(RIDER_FULL_PROFILE_PATH),

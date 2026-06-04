@@ -70,7 +70,6 @@ const NEXT_UPDATE_STATUS: Partial<Record<RiderDeliveryProgressStatus, RiderOrder
   [RiderDeliveryProgressStatus.ASSIGNED]: 'heading_to_store',
   [RiderDeliveryProgressStatus.HEADING_TO_STORE]: 'arrived_at_store',
   [RiderDeliveryProgressStatus.ARRIVED_AT_STORE]: 'waiting_for_order',
-  [RiderDeliveryProgressStatus.WAITING_FOR_ORDER]: 'picked_up',
   [RiderDeliveryProgressStatus.PICKED_UP]: 'out_for_delivery',
   [RiderDeliveryProgressStatus.OUT_FOR_DELIVERY]: 'arrived',
   [RiderDeliveryProgressStatus.ARRIVED_AT_CUSTOMER]: 'delivered',
@@ -89,6 +88,17 @@ const STATUS_BUTTON_LABEL_KEY: Record<RiderOrderUpdatableStatus, string> = {
 
 function isRiderOrderUpdatableStatus(value: string): value is RiderOrderUpdatableStatus {
   return value in STATUS_BUTTON_LABEL_KEY;
+}
+
+function getNextStatusTitleKey(
+  currentStatus: RiderDeliveryProgressStatus,
+  nextUpdateStatus: RiderOrderUpdatableStatus | null,
+) {
+  if (nextUpdateStatus) {
+    return STATUS_BUTTON_LABEL_KEY[nextUpdateStatus];
+  }
+
+  return NEXT_STATUS_KEY[currentStatus];
 }
 
 export default function ProcessingOrderDetailScreen({ route, navigation }: Props) {
@@ -178,22 +188,31 @@ export default function ProcessingOrderDetailScreen({ route, navigation }: Props
   };
 
   const currentTitle = t(STATUS_TITLE_KEY[currentProgressStatus]);
-  const nextTitle = t(NEXT_STATUS_KEY[currentProgressStatus]);
-  const step = STEP_VALUE[currentProgressStatus];
-  const currentIndex = DELIVERY_PROGRESS_ORDER.indexOf(currentProgressStatus);
+  const serverOrderStatus = detailQuery.data?.status;
   const serverAllowedNextUpdateStatus =
     detailQuery.data?.nextAllowedStatuses?.find(isRiderOrderUpdatableStatus) ?? null;
   const fallbackNextUpdateStatus = NEXT_UPDATE_STATUS[currentProgressStatus] ?? null;
+  const shouldAllowReadyFallback =
+    serverOrderStatus === 'ready'
+    && currentProgressStatus === RiderDeliveryProgressStatus.HEADING_TO_STORE;
   const nextUpdateStatus = serverAllowedNextUpdateStatus ?? fallbackNextUpdateStatus;
-  const canUpdateStatus = detailQuery.data?.canUpdateStatus === true;
+  const nextTitle = t(getNextStatusTitleKey(currentProgressStatus, nextUpdateStatus));
+  const step = STEP_VALUE[currentProgressStatus];
+  const currentIndex = DELIVERY_PROGRESS_ORDER.indexOf(currentProgressStatus);
+  const canUpdateStatus =
+    detailQuery.data?.canUpdateStatus === true || shouldAllowReadyFallback;
   const isDelivered = currentProgressStatus === RiderDeliveryProgressStatus.DELIVERED;
   const showStorePreparingAlert =
     currentProgressStatus === RiderDeliveryProgressStatus.ARRIVED_AT_STORE && !canUpdateStatus;
-  const showReadyForPickupAlert = currentProgressStatus === RiderDeliveryProgressStatus.WAITING_FOR_ORDER;
-  const waitingForStoreReadyToPickup = false;
-  const primaryButtonLabel = nextUpdateStatus
-    ? t(STATUS_BUTTON_LABEL_KEY[nextUpdateStatus])
-    : t('order_start_navigation');
+  const waitingForStoreReadyToPickup =
+    currentProgressStatus === RiderDeliveryProgressStatus.WAITING_FOR_ORDER
+    && serverOrderStatus !== 'picked_up';
+  const showReadyForPickupAlert = waitingForStoreReadyToPickup;
+  const primaryButtonLabel = waitingForStoreReadyToPickup
+    ? t('order_waiting_for_order_disabled')
+    : nextUpdateStatus
+      ? t(STATUS_BUTTON_LABEL_KEY[nextUpdateStatus])
+      : t('order_start_navigation');
   const isPrimaryActionDisabled =
     updateStatusMutation.isPending
     || !canUpdateStatus
@@ -205,7 +224,6 @@ export default function ProcessingOrderDetailScreen({ route, navigation }: Props
 
     const riderId = session.user?.id;
     const serverRiderStatus = detailQuery.data?.riderStatus;
-    const serverOrderStatus = detailQuery.data?.status;
 
     if (nextUpdateStatus && riderId) {
       // Guard against stale UI: skip duplicate transition and re-sync order detail.
