@@ -5,7 +5,7 @@ import Text from '../../../components/Text';
 import { useAppTheme } from '../../../theme/ThemeProvider';
 import { useTranslations } from '../../../localization/LocalizationProvider';
 import {
-  DELIVERY_PROGRESS_ORDER,
+  getVisibleDeliveryProgressOrder,
   resolveProgressStatusFromOrder,
   RiderDeliveryProgressStatus,
 } from '../progress';
@@ -13,6 +13,7 @@ import {
 type Props = {
   status?: string | null;
   riderStatus?: string | null;
+  isInstantOrder?: boolean | null;
   selectedStatus?: RiderDeliveryProgressStatus | null;
   onSelectStatus?: (status: RiderDeliveryProgressStatus) => void;
 };
@@ -44,21 +45,26 @@ const STATUS_DESC_KEY: Record<RiderDeliveryProgressStatus, string> = {
 export default function DeliveryProgressSection({
   status,
   riderStatus,
+  isInstantOrder,
   selectedStatus,
   onSelectStatus,
 }: Props) {
   const { theme } = useAppTheme();
   const { t } = useTranslations('app');
   const [timelineOpen, setTimelineOpen] = useState(false);
+  const progressOrder = useMemo(
+    () => getVisibleDeliveryProgressOrder(isInstantOrder !== false),
+    [isInstantOrder],
+  );
 
-  const currentStatus = resolveProgressStatusFromOrder(status, riderStatus);
-  const currentIndex = DELIVERY_PROGRESS_ORDER.indexOf(currentStatus);
+  const currentStatus = resolveProgressStatusFromOrder(status, riderStatus, isInstantOrder !== false);
+  const currentIndex = progressOrder.indexOf(currentStatus);
   const activeStatus = selectedStatus ?? currentStatus;
-  const activeIndex = DELIVERY_PROGRESS_ORDER.indexOf(activeStatus);
-  const nextStatus = DELIVERY_PROGRESS_ORDER[Math.min(currentIndex + 1, DELIVERY_PROGRESS_ORDER.length - 1)];
+  const activeIndex = progressOrder.indexOf(activeStatus);
+  const nextStatus = progressOrder[Math.min(currentIndex + 1, progressOrder.length - 1)];
 
   const timelineRows = useMemo(
-    () => DELIVERY_PROGRESS_ORDER.map((item, index) => ({
+    () => progressOrder.map((item, index) => ({
       item,
       index,
       isCompleted: index <= currentIndex,
@@ -66,7 +72,7 @@ export default function DeliveryProgressSection({
       isSelected: selectedStatus === item,
       time: index <= currentIndex ? '--:--' : '--:--',
     })),
-    [currentIndex, selectedStatus],
+    [currentIndex, progressOrder, selectedStatus],
   );
 
   return (
@@ -84,7 +90,7 @@ export default function DeliveryProgressSection({
         <Text color={theme.colors.gray600}>{t('order_delivery_progress')}</Text>
         <View style={styles.stepWrap}>
           <Text color={theme.colors.gray500}>{t('order_step')}</Text>
-          <Text weight="semiBold" color={theme.colors.gray700}>{`${Math.max(1, currentIndex + 2)}/8`}</Text>
+          <Text weight="semiBold" color={theme.colors.gray700}>{`${Math.max(1, currentIndex + 1)}/${progressOrder.length}`}</Text>
         </View>
       </View>
 
@@ -96,7 +102,7 @@ export default function DeliveryProgressSection({
       <Text color={theme.colors.gray500}>{t('order_next', { status: t(STATUS_LABEL_KEY[nextStatus]) })}</Text>
 
       <View style={styles.segmentsWrap}>
-        {DELIVERY_PROGRESS_ORDER.slice(0, 8).map((item, index) => (
+        {progressOrder.map((item, index) => (
           <View
             key={item}
             style={[

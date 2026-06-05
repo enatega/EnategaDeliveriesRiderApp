@@ -15,6 +15,8 @@ const EMPTY_ORDER_DETAIL: RiderOrderDetail = {
   riderStatus: null,
   riderStatusLabel: null,
   orderType: null,
+  isInstantOrder: null,
+  isConfirmPickup: null,
   storeId: null,
   storeUserId: null,
   storeName: null,
@@ -48,6 +50,18 @@ function normalizeOrderDetail(
   return {
     ...EMPTY_ORDER_DETAIL,
     ...candidate,
+    isInstantOrder:
+      typeof candidate.isInstantOrder === 'boolean'
+        ? candidate.isInstantOrder
+        : typeof (candidate as { is_instant_order?: unknown }).is_instant_order === 'boolean'
+          ? Boolean((candidate as { is_instant_order?: unknown }).is_instant_order)
+          : EMPTY_ORDER_DETAIL.isInstantOrder,
+    isConfirmPickup:
+      typeof candidate.isConfirmPickup === 'boolean'
+        ? candidate.isConfirmPickup
+        : typeof (candidate as { is_confirm_pickup?: unknown }).is_confirm_pickup === 'boolean'
+          ? Boolean((candidate as { is_confirm_pickup?: unknown }).is_confirm_pickup)
+          : EMPTY_ORDER_DETAIL.isConfirmPickup,
     items: Array.isArray(candidate.items) ? candidate.items : [],
     nextAllowedStatuses: Array.isArray(candidate.nextAllowedStatuses)
       ? candidate.nextAllowedStatuses.filter((status): status is string => typeof status === 'string')

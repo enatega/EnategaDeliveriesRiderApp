@@ -17,9 +17,10 @@ import { useUpdateRiderOrderStatusMutation } from '../hooks/useRiderHomeMutation
 import { useAuth } from '../auth/AuthProvider';
 import OrderDetailTopBar from './orderDetail/components/OrderDetailTopBar';
 import {
-  DELIVERY_PROGRESS_ORDER,
+  getVisibleDeliveryProgressOrder,
   resolveProgressStatusFromOrder,
   RiderDeliveryProgressStatus,
+  toApiUpdatableStatus,
 } from './orderDetail/progress';
 import { StatusBar } from 'expo-status-bar';
 import type { RiderOrderUpdatableStatus } from '../api/riderHomeTypes';
@@ -40,40 +41,6 @@ const STATUS_TITLE_KEY: Record<RiderDeliveryProgressStatus, string> = {
   [RiderDeliveryProgressStatus.ARRIVED_AT_CUSTOMER]: 'order_status_arrived_at_customer',
   [RiderDeliveryProgressStatus.DELIVERED]: 'order_status_delivered',
   [RiderDeliveryProgressStatus.FAILED]: 'order_status_failed',
-};
-
-const NEXT_STATUS_KEY: Record<RiderDeliveryProgressStatus, string> = {
-  [RiderDeliveryProgressStatus.ASSIGNED]: 'order_status_heading_to_store',
-  [RiderDeliveryProgressStatus.HEADING_TO_STORE]: 'order_status_arrived_at_store',
-  [RiderDeliveryProgressStatus.ARRIVED_AT_STORE]: 'order_status_waiting_for_order',
-  [RiderDeliveryProgressStatus.WAITING_FOR_ORDER]: 'order_status_picked_up',
-  [RiderDeliveryProgressStatus.PICKED_UP]: 'order_status_out_for_delivery',
-  [RiderDeliveryProgressStatus.OUT_FOR_DELIVERY]: 'order_status_arrived_at_customer',
-  [RiderDeliveryProgressStatus.ARRIVED_AT_CUSTOMER]: 'order_status_delivered',
-  [RiderDeliveryProgressStatus.DELIVERED]: 'order_status_delivered',
-  [RiderDeliveryProgressStatus.FAILED]: 'order_status_failed',
-};
-
-const STEP_VALUE: Record<RiderDeliveryProgressStatus, number> = {
-  [RiderDeliveryProgressStatus.ASSIGNED]: 2,
-  [RiderDeliveryProgressStatus.HEADING_TO_STORE]: 3,
-  [RiderDeliveryProgressStatus.ARRIVED_AT_STORE]: 4,
-  [RiderDeliveryProgressStatus.WAITING_FOR_ORDER]: 5,
-  [RiderDeliveryProgressStatus.PICKED_UP]: 6,
-  [RiderDeliveryProgressStatus.OUT_FOR_DELIVERY]: 7,
-  [RiderDeliveryProgressStatus.ARRIVED_AT_CUSTOMER]: 8,
-  [RiderDeliveryProgressStatus.DELIVERED]: 8,
-  [RiderDeliveryProgressStatus.FAILED]: 8,
-};
-
-const NEXT_UPDATE_STATUS: Partial<Record<RiderDeliveryProgressStatus, RiderOrderUpdatableStatus>> = {
-  [RiderDeliveryProgressStatus.ASSIGNED]: 'heading_to_store',
-  [RiderDeliveryProgressStatus.HEADING_TO_STORE]: 'arrived_at_store',
-  [RiderDeliveryProgressStatus.ARRIVED_AT_STORE]: 'waiting_for_order',
-  [RiderDeliveryProgressStatus.WAITING_FOR_ORDER]: 'picked_up',
-  [RiderDeliveryProgressStatus.PICKED_UP]: 'out_for_delivery',
-  [RiderDeliveryProgressStatus.OUT_FOR_DELIVERY]: 'arrived',
-  [RiderDeliveryProgressStatus.ARRIVED_AT_CUSTOMER]: 'delivered',
 };
 
 const STATUS_BUTTON_LABEL_KEY: Record<RiderOrderUpdatableStatus, string> = {
@@ -99,7 +66,7 @@ function getNextStatusTitleKey(
     return STATUS_BUTTON_LABEL_KEY[nextUpdateStatus];
   }
 
-  return NEXT_STATUS_KEY[currentStatus];
+  return STATUS_TITLE_KEY[currentStatus];
 }
 
 export default function ProcessingOrderDetailScreen({ route, navigation }: Props) {
@@ -162,9 +129,19 @@ export default function ProcessingOrderDetailScreen({ route, navigation }: Props
     [],
   );
 
+  const isInstantOrder = detailQuery.data?.isInstantOrder !== false;
+  const visibleProgressOrder = useMemo(
+    () => getVisibleDeliveryProgressOrder(isInstantOrder),
+    [isInstantOrder],
+  );
+
   const currentProgressStatus = useMemo(
-    () => resolveProgressStatusFromOrder(detailQuery.data?.status, detailQuery.data?.riderStatus),
-    [detailQuery.data?.riderStatus, detailQuery.data?.status],
+    () => resolveProgressStatusFromOrder(
+      detailQuery.data?.status,
+      detailQuery.data?.riderStatus,
+      isInstantOrder,
+    ),
+    [detailQuery.data?.riderStatus, detailQuery.data?.status, isInstantOrder],
   );
 
   const openNavigation = async () => {
@@ -192,19 +169,46 @@ export default function ProcessingOrderDetailScreen({ route, navigation }: Props
   const serverOrderStatus = detailQuery.data?.status;
   const serverAllowedNextUpdateStatus =
     detailQuery.data?.nextAllowedStatuses?.find(isRiderOrderUpdatableStatus) ?? null;
-  const fallbackNextUpdateStatus = NEXT_UPDATE_STATUS[currentProgressStatus] ?? null;
+  const fallbackNextUpdateStatus = useMemo(() => {
+    const currentIndexInOrder = visibleProgressOrder.indexOf(currentProgressStatus);
+    const nextProgressStatus =
+      currentIndexInOrder < 0
+        ? null
+        : visibleProgressOrder[currentIndexInOrder + 1] ?? null;
+
+    if (!nextProgressStatus) {
+      return null;
+    }
+
+    const apiStatus = toApiUpdatableStatus(nextProgressStatus);
+    return apiStatus && isRiderOrderUpdatableStatus(apiStatus) ? apiStatus : null;
+  }, [currentProgressStatus, visibleProgressOrder]);
   const shouldAllowReadyFallback =
     serverOrderStatus === 'ready' && currentProgressStatus === RiderDeliveryProgressStatus.HEADING_TO_STORE;
   const nextUpdateStatus = serverAllowedNextUpdateStatus ?? fallbackNextUpdateStatus;
-  const nextTitle = t(getNextStatusTitleKey(currentProgressStatus, nextUpdateStatus));
-  const step = STEP_VALUE[currentProgressStatus];
-  const currentIndex = DELIVERY_PROGRESS_ORDER.indexOf(currentProgressStatus);
+  const defaultNextStatus = useMemo(() => {
+    const currentIndexInOrder = visibleProgressOrder.indexOf(currentProgressStatus);
+    if (currentIndexInOrder < 0) {
+      return RiderDeliveryProgressStatus.ASSIGNED;
+    }
+
+    return visibleProgressOrder[Math.min(currentIndexInOrder + 1, visibleProgressOrder.length - 1)];
+  }, [currentProgressStatus, visibleProgressOrder]);
+  const nextTitle = nextUpdateStatus
+    ? t(getNextStatusTitleKey(currentProgressStatus, nextUpdateStatus))
+    : t(STATUS_TITLE_KEY[defaultNextStatus]);
+  const currentIndex = visibleProgressOrder.indexOf(currentProgressStatus);
+  const step = currentIndex < 0 ? 1 : Math.min(currentIndex + 1, visibleProgressOrder.length);
+  const totalSteps = visibleProgressOrder.length;
   const canUpdateStatus = detailQuery.data?.canUpdateStatus === true || shouldAllowReadyFallback;
   const isDelivered = currentProgressStatus === RiderDeliveryProgressStatus.DELIVERED;
   const showStorePreparingAlert =
     currentProgressStatus === RiderDeliveryProgressStatus.ARRIVED_AT_STORE && !canUpdateStatus;
   const showReadyForPickupAlert = currentProgressStatus === RiderDeliveryProgressStatus.WAITING_FOR_ORDER;
-  const waitingForStoreReadyToPickup = false;
+  const waitingForStoreReadyToPickup =
+    !isInstantOrder
+    && nextUpdateStatus === 'out_for_delivery'
+    && detailQuery.data?.isConfirmPickup !== true;
   const primaryButtonLabel = nextUpdateStatus
     ? t(STATUS_BUTTON_LABEL_KEY[nextUpdateStatus])
     : t('order_start_navigation');
@@ -337,7 +341,7 @@ export default function ProcessingOrderDetailScreen({ route, navigation }: Props
                 <Text variant="label" weight="medium" color={theme.colors.gray600}>{t('order_delivery_progress')}</Text>
                 <View style={styles.stepWrap}>
                   <Text variant="caption" color={theme.colors.gray500}>{t('order_step')}</Text>
-                  <Text variant="label" weight="semiBold" color={theme.colors.gray700}>{`${step}/8`}</Text>
+                  <Text variant="label" weight="semiBold" color={theme.colors.gray700}>{`${step}/${totalSteps}`}</Text>
                 </View>
               </View>
 
@@ -349,9 +353,9 @@ export default function ProcessingOrderDetailScreen({ route, navigation }: Props
               <Text variant="caption" color={theme.colors.gray500}>{t('order_next', { status: nextTitle })}</Text>
 
               <View style={styles.segmentsWrap}>
-                {Array.from({ length: 8 }).map((_, index) => (
+                {visibleProgressOrder.map((statusItem, index) => (
                   <View
-                    key={index}
+                    key={statusItem}
                     style={[
                       styles.segment,
                       { backgroundColor: theme.colors.gray250 },
@@ -387,14 +391,16 @@ export default function ProcessingOrderDetailScreen({ route, navigation }: Props
                   nestedScrollEnabled
                   showsVerticalScrollIndicator={false}
                 >
-                  {DELIVERY_PROGRESS_ORDER.map((statusItem, index) => {
+                  {visibleProgressOrder.map((statusItem, index) => {
                     const isCompleted = index < currentIndex;
                     const isCurrent = index === currentIndex;
-                    const showConnector = index < DELIVERY_PROGRESS_ORDER.length - 1;
+                    const showConnector = index < visibleProgressOrder.length - 1;
                     const itemTitle = t(STATUS_TITLE_KEY[statusItem]);
+                    const itemNextStatus =
+                      visibleProgressOrder[Math.min(index + 1, visibleProgressOrder.length - 1)];
                     const nextDescKey = isCurrent
                       ? getNextStatusTitleKey(statusItem, nextUpdateStatus)
-                      : NEXT_STATUS_KEY[statusItem];
+                      : STATUS_TITLE_KEY[itemNextStatus];
                     const itemDesc = statusItem === RiderDeliveryProgressStatus.DELIVERED
                       ? t('order_status_desc_delivered')
                       : t('order_next', { status: t(nextDescKey) });

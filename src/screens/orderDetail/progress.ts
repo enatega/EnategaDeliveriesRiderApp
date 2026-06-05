@@ -10,7 +10,7 @@ export enum RiderDeliveryProgressStatus {
   FAILED = 'failed',
 }
 
-export const DELIVERY_PROGRESS_ORDER: RiderDeliveryProgressStatus[] = [
+const INSTANT_DELIVERY_PROGRESS_ORDER: RiderDeliveryProgressStatus[] = [
   RiderDeliveryProgressStatus.ASSIGNED,
   RiderDeliveryProgressStatus.HEADING_TO_STORE,
   RiderDeliveryProgressStatus.ARRIVED_AT_STORE,
@@ -21,6 +21,29 @@ export const DELIVERY_PROGRESS_ORDER: RiderDeliveryProgressStatus[] = [
   RiderDeliveryProgressStatus.DELIVERED,
   RiderDeliveryProgressStatus.FAILED,
 ];
+
+const NON_INSTANT_DELIVERY_PROGRESS_ORDER: RiderDeliveryProgressStatus[] = [
+  RiderDeliveryProgressStatus.ASSIGNED,
+  RiderDeliveryProgressStatus.PICKED_UP,
+  RiderDeliveryProgressStatus.OUT_FOR_DELIVERY,
+  RiderDeliveryProgressStatus.ARRIVED_AT_CUSTOMER,
+  RiderDeliveryProgressStatus.DELIVERED,
+  RiderDeliveryProgressStatus.FAILED,
+];
+
+export function getDeliveryProgressOrder(
+  isInstantOrder = true,
+): RiderDeliveryProgressStatus[] {
+  return isInstantOrder ? INSTANT_DELIVERY_PROGRESS_ORDER : NON_INSTANT_DELIVERY_PROGRESS_ORDER;
+}
+
+export function getVisibleDeliveryProgressOrder(
+  isInstantOrder = true,
+): RiderDeliveryProgressStatus[] {
+  return getDeliveryProgressOrder(isInstantOrder).filter(
+    (status) => status !== RiderDeliveryProgressStatus.FAILED,
+  );
+}
 
 const API_STATUS_TO_PROGRESS: Record<string, RiderDeliveryProgressStatus> = {
   rider_assigned: RiderDeliveryProgressStatus.ASSIGNED,
@@ -47,12 +70,26 @@ export function resolveProgressStatus(status?: string | null): RiderDeliveryProg
 export function resolveProgressStatusFromOrder(
   orderStatus?: string | null,
   riderStatus?: string | null,
+  isInstantOrder = true,
 ): RiderDeliveryProgressStatus {
+  const progressOrder = getDeliveryProgressOrder(isInstantOrder);
   const orderProgress = resolveProgressStatus(orderStatus);
   const riderProgress = resolveProgressStatus(riderStatus);
 
-  const orderIndex = DELIVERY_PROGRESS_ORDER.indexOf(orderProgress);
-  const riderIndex = DELIVERY_PROGRESS_ORDER.indexOf(riderProgress);
+  const orderIndex = progressOrder.indexOf(orderProgress);
+  const riderIndex = progressOrder.indexOf(riderProgress);
+
+  if (orderIndex < 0 && riderIndex < 0) {
+    return RiderDeliveryProgressStatus.ASSIGNED;
+  }
+
+  if (orderIndex < 0) {
+    return riderProgress;
+  }
+
+  if (riderIndex < 0) {
+    return orderProgress;
+  }
 
   // Prefer the furthest known progress to avoid showing stale previous steps
   // when order and rider statuses are briefly out of sync.

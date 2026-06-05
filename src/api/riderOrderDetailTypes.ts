@@ -16,6 +16,8 @@ export type RiderOrderDetail = {
   riderStatus: string | null;
   riderStatusLabel: string | null;
   orderType: string | null;
+  isInstantOrder: boolean | null;
+  isConfirmPickup: boolean | null;
   storeId: string | null;
   storeUserId: string | null;
   storeName: string | null;
