@@ -17,7 +17,7 @@ const isHexColor = (value: string | null | undefined): value is string =>
 export const getBrandColorsFromSettings = (
   settings?: Pick<
     RiderAppSettingsApiResponse,
-    'primary_color' | 'secondary_color' | 'tertiary_color'
+    'primary_color' | 'secondary_color' | 'tertiary_color' | 'btn_text_color'
   > | null
 ): BrandColors => ({
   primary: isHexColor(settings?.primary_color)
@@ -29,6 +29,9 @@ export const getBrandColorsFromSettings = (
   tertiary: isHexColor(settings?.tertiary_color)
     ? settings.tertiary_color
     : defaultBrandColors.tertiary,
+  buttonText: isHexColor(settings?.btn_text_color)
+    ? settings.btn_text_color
+    : defaultBrandColors.buttonText,
 });
 
 export const themeCache = {
@@ -49,6 +52,7 @@ export const themeCache = {
           primary_color: parsed.colors.primary,
           secondary_color: parsed.colors.secondary,
           tertiary_color: parsed.colors.tertiary,
+          btn_text_color: parsed.colors.buttonText,
         }),
         updatedAt: parsed.updatedAt ?? null,
       };

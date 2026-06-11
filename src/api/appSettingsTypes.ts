@@ -10,6 +10,7 @@ export type RiderAppSettingsApiResponse = {
   primary_color: string | null;
   secondary_color: string | null;
   tertiary_color: string | null;
+  btn_text_color: string | null;
   created_at: string;
   updated_at: string;
 };

@@ -43,7 +43,7 @@ export default function BottomTabBar({ state, navigation }: BottomTabBarProps) {
         const meta = TAB_META[route.name as keyof typeof TAB_META];
         const label = t(meta?.key ?? 'nav_home');
         const Icon = meta?.Icon ?? HomeIcon;
-        const iconColor = focused ? theme.colors.primary : theme.colors.gray400;
+        const iconColor = focused ? theme.colors.buttonText : theme.colors.gray400;
 
         const onPress = () => {
           const event = navigation.emit({ type: 'tabPress', target: route.key, canPreventDefault: true });

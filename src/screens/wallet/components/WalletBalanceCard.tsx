@@ -35,7 +35,7 @@ export default function WalletBalanceCard({
       <Button
         label={withdrawLabel}
         onPress={onWithdrawPress}
-        textColor={theme.colors.gray900}
+        textColor={theme.colors.buttonText}
         containerStyle={styles.withdrawButton}
       />
     </View>

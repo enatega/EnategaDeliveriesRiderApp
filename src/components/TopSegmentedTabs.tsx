@@ -44,7 +44,7 @@ export default function TopSegmentedTabs<T extends string>({ tabs, activeTab, on
                 <Text
                   variant="caption"
                   weight="semiBold"
-                  color={active ? theme.colors.gray900 : theme.colors.gray600}
+                  color={active ? theme.colors.buttonText : theme.colors.gray600}
                   style={styles.badgeLabel}
                 >
                   {countMap?.[tab] ?? 0}

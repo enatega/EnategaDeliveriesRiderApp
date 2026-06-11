@@ -263,7 +263,7 @@ export default function HomeOrderCard({ order, tab }: Props) {
               onPress={handleActionPress}
               disabled={isAssigning || !order.orderId}
               containerStyle={styles.button}
-              textColor={theme.colors.gray900}
+              textColor={theme.colors.buttonText}
             />
           </>
         ) : null}

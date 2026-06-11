@@ -2,6 +2,7 @@ export type BrandColors = {
   primary: string;
   secondary: string;
   tertiary: string;
+  buttonText: string;
 };
 
 const baseLightColors = {
@@ -11,6 +12,7 @@ const baseLightColors = {
   primary: '#90E36D',
   secondary: '#6B5BFF',
   tertiary: '#F3F4F6',
+  buttonText: '#111827',
   text: '#111827',
   mutedText: '#6B7280',
   border: '#D1D5DB',
@@ -59,6 +61,7 @@ const baseDarkColors: typeof baseLightColors = {
   primary: '#90E36D',
   secondary: '#8B7BFF',
   tertiary: '#111827',
+  buttonText: '#F9FAFB',
   text: '#F9FAFB',
   mutedText: '#9CA3AF',
   border: '#424244',
@@ -104,6 +107,7 @@ export const defaultBrandColors: BrandColors = {
   primary: baseLightColors.primary,
   secondary: baseLightColors.secondary,
   tertiary: baseLightColors.tertiary,
+  buttonText: baseLightColors.buttonText,
 };
 
 export const applyBrandColors = <
@@ -116,6 +120,7 @@ export const applyBrandColors = <
   primary: brandColors.primary,
   secondary: brandColors.secondary,
   tertiary: brandColors.tertiary,
+  buttonText: brandColors.buttonText,
   lime500: brandColors.primary,
   lime600: brandColors.primary,
 });
@@ -125,6 +130,7 @@ export const darkColors = applyBrandColors(baseDarkColors, {
   primary: baseDarkColors.primary,
   secondary: baseDarkColors.secondary,
   tertiary: baseDarkColors.tertiary,
+  buttonText: baseDarkColors.buttonText,
 });
 
 export type ThemeColors = typeof lightColors;

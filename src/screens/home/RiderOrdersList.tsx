@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo, useRef } from 'react';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import { useQueryClient } from '@tanstack/react-query';
 import Text from '../../components/Text';
@@ -19,11 +19,28 @@ export default function RiderOrdersList({ tab }: Props) {
   const { t } = useTranslations('app');
   const queryClient = useQueryClient();
   const query = useRiderOrdersInfiniteQuery(tab);
-  console.log('list_Data_New_orders',JSON.stringify(query?.data,null,2));
+  const listRef = useRef<any>(null);
+  const previousItemCountRef = useRef(0);
+
   const items = useMemo(
     () => query.data?.pages.flatMap((page) => page.items) ?? [],
     [query.data?.pages],
   );
+
+  useEffect(() => {
+    const previousItemCount = previousItemCountRef.current;
+
+    const shouldScrollToTop =
+      tab === 'new' &&
+      previousItemCount > 0 &&
+      items.length > previousItemCount;
+
+    if (shouldScrollToTop) {
+      listRef.current?.scrollToOffset?.({ offset: 0, animated: true });
+    }
+
+    previousItemCountRef.current = items.length;
+  }, [items, tab]);
 
   const isInitialLoading = query.isLoading && items.length === 0;
   const isRefreshing = query.isRefetching && !query.isFetchingNextPage;
@@ -61,6 +78,7 @@ export default function RiderOrdersList({ tab }: Props) {
 
   return (
     <VerticalList
+      ref={listRef}
       data={items}
       keyExtractor={(item, index) => item.orderId ?? item.orderCode ?? `order-${index}`}
       contentContainerStyle={styles.listContent}

@@ -52,7 +52,8 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
             if (
               currentColors.primary === nextColors.primary &&
               currentColors.secondary === nextColors.secondary &&
-              currentColors.tertiary === nextColors.tertiary
+              currentColors.tertiary === nextColors.tertiary &&
+              currentColors.buttonText === nextColors.buttonText
             ) {
               return currentColors;
             }
