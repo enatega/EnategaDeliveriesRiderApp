@@ -1,0 +1,2034 @@
+%PDF-1.4
+%‚„œ”
+1 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+2 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>
+endobj
+3 0 obj
+<< /Type /Pages /Count 8 /Kids [5 0 R 7 0 R 9 0 R 11 0 R 13 0 R 15 0 R 17 0 R 19 0 R] >>
+endobj
+4 0 obj
+<< /Length 4654 >>
+stream
+q
+0.89 0.94 0.90 rg
+0 823.89 595.28 18 re f
+Q
+BT
+/F2 24.00 Tf
+0.100 0.170 0.230 rg
+1 0 0 1 54.00 777.89 Tm
+(Rider App Client Flow Guide) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 54.00 743.89 Tm
+(Prepared for client review Project: Enatega Deliveries Rider App Document date: June) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 54.00 728.89 Tm
+(19, 2026) Tj
+ET
+BT
+/F2 15.00 Tf
+0.450 0.270 0.060 rg
+1 0 0 1 54.00 701.89 Tm
+(1. Purpose of This Document) Tj
+ET
+BT
+/F2 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 54.00 673.89 Tm
+(This guide explains how the Rider App works from a business and module-flow perspective. It is intended to help client stakeholders understand:) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 658.89 Tm
+(- the rider journey from login to completed delivery) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 643.89 Tm
+(- how the major app modules work together) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 628.89 Tm
+(- which backend services the app depends on) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 613.89 Tm
+(- which operational details are important for launch, testing, and support) Tj
+ET
+BT
+/F2 15.00 Tf
+0.450 0.270 0.060 rg
+1 0 0 1 54.00 586.89 Tm
+(2. Solution Overview) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 54.00 560.89 Tm
+(The Rider App is the delivery partner application used by riders to log in, receive) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 54.00 545.89 Tm
+(available orders, accept and process deliveries, communicate during active orders,) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 54.00 530.89 Tm
+(review earnings, manage wallet withdrawals, and maintain operational profile) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 54.00 515.89 Tm
+(settings.) Tj
+ET
+BT
+/F2 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 54.00 494.89 Tm
+(At a high level, the app works in this sequence:) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 479.89 Tm
+(- the app starts and restores any saved rider session) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 464.89 Tm
+(- unauthenticated riders see the splash and login flow) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 449.89 Tm
+(- authenticated riders land in the main rider experience with four core tabs:) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 434.89 Tm
+(- Home) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 419.89 Tm
+(- Wallet) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 404.89 Tm
+(- Earnings) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 389.89 Tm
+(- Profile) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 374.89 Tm
+(- the Home module is connected to real-time order events through sockets) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 359.89 Tm
+(- order actions update backend status and refresh the rider dashboard) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 344.89 Tm
+(- profile and settings modules let the rider maintain operational data needed for) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 329.89 Tm
+(  delivery work) Tj
+ET
+BT
+/F2 15.00 Tf
+0.450 0.270 0.060 rg
+1 0 0 1 54.00 302.89 Tm
+(3. End-to-End Rider Journey) Tj
+ET
+BT
+/F2 11.50 Tf
+0.100 0.170 0.230 rg
+1 0 0 1 54.00 272.89 Tm
+(3.1 App Launch) Tj
+ET
+BT
+/F2 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 54.00 249.89 Tm
+(When the app opens, it loads its shared providers in this order:) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 234.89 Tm
+(- theme provider) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 219.89 Tm
+(- safe area provider) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 204.89 Tm
+(- TanStack Query provider) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 189.89 Tm
+(- localization provider) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 174.89 Tm
+(- authentication provider) Tj
+ET
+BT
+/F2 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 54.00 153.89 Tm
+(The authentication provider restores the saved token, refresh token, and rider identity from secure device storage. Once this check is complete:) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 138.89 Tm
+(- if a valid token exists, the rider is taken into the main app) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 123.89 Tm
+(- if no token exists, the rider remains in the authentication flow) Tj
+ET
+BT
+/F2 11.50 Tf
+0.100 0.170 0.230 rg
+1 0 0 1 54.00 100.89 Tm
+(3.2 Splash and Login) Tj
+ET
+BT
+/F2 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 54.00 77.89 Tm
+(The authentication flow contains:) Tj
+ET
+BT
+/F1 9 Tf
+0.45 0.49 0.55 rg
+1 0 0 1 513.28 34.00 Tm
+(Page 1) Tj
+ET
+endstream
+endobj
+5 0 obj
+<< /Type /Page /Parent 3 0 R /MediaBox [0 0 595.28 841.89] /Resources << /Font << /F1 1 0 R /F2 2 0 R >> >> /Contents 4 0 R >>
+endobj
+6 0 obj
+<< /Length 4549 >>
+stream
+q
+0.89 0.94 0.90 rg
+0 823.89 595.28 18 re f
+Q
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 777.89 Tm
+(- Splash screen) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 762.89 Tm
+(- Login screen) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 54.00 743.89 Tm
+(The splash screen is a short branded startup animation. It then routes the rider to) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 54.00 728.89 Tm
+(login.) Tj
+ET
+BT
+/F2 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 54.00 707.89 Tm
+(On login:) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 692.89 Tm
+(- the rider enters email and password) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 677.89 Tm
+(- the app validates the input locally) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 662.89 Tm
+(- the app attempts to collect an Expo push token from the device) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 647.89 Tm
+(- the login request is sent to the rider authentication endpoint) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 632.89 Tm
+(- on success, the access token, refresh token, and rider profile are saved securely) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 617.89 Tm
+(- the main rider app opens automatically) Tj
+ET
+BT
+/F2 11.50 Tf
+0.100 0.170 0.230 rg
+1 0 0 1 54.00 594.89 Tm
+(3.3 Main Rider Workspace) Tj
+ET
+BT
+/F2 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 54.00 571.89 Tm
+(Once authenticated, the rider enters the main workspace. The primary navigation consists of four bottom tabs:) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 556.89 Tm
+(- Home) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 541.89 Tm
+(- Wallet) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 526.89 Tm
+(- Earnings) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 511.89 Tm
+(- Profile) Tj
+ET
+BT
+/F2 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 54.00 490.89 Tm
+(Additional detail and settings screens are opened through stack navigation on top of these tabs, such as:) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 475.89 Tm
+(- order detail) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 460.89 Tm
+(- order chat) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 445.89 Tm
+(- earnings detail) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 430.89 Tm
+(- deliveries detail) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 415.89 Tm
+(- profile details) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 400.89 Tm
+(- language) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 385.89 Tm
+(- vehicle type) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 370.89 Tm
+(- bank management) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 355.89 Tm
+(- work schedule) Tj
+ET
+BT
+/F2 15.00 Tf
+0.450 0.270 0.060 rg
+1 0 0 1 54.00 328.89 Tm
+(4. Module-by-Module Functional Flow) Tj
+ET
+BT
+/F2 11.50 Tf
+0.100 0.170 0.230 rg
+1 0 0 1 54.00 298.89 Tm
+(4.1 Home Module) Tj
+ET
+BT
+/F2 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 54.00 275.89 Tm
+(The Home module is the rider's operational dashboard. It displays delivery work grouped into three tabs:) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 260.89 Tm
+(- New) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 245.89 Tm
+(- Processing) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 230.89 Tm
+(- Delivered) Tj
+ET
+BT
+/F2 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 54.00 209.89 Tm
+(The Home module uses a summary API plus paginated order lists. The summary provides counters for:) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 194.89 Tm
+(- new orders) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 179.89 Tm
+(- processing orders) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 164.89 Tm
+(- delivered orders) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 54.00 145.89 Tm
+(The order list is fetched separately for each tab, which keeps the experience) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 54.00 130.89 Tm
+(responsive and allows large lists to be loaded page by page.) Tj
+ET
+BT
+/F2 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 54.00 109.89 Tm
+(Important behavior:) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 94.89 Tm
+(- if the rider profile is marked as not approved, the app blocks order access) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 79.89 Tm
+(- in that state, the rider is shown a pending approval message and can log out) Tj
+ET
+BT
+/F1 9 Tf
+0.45 0.49 0.55 rg
+1 0 0 1 513.28 34.00 Tm
+(Page 2) Tj
+ET
+endstream
+endobj
+7 0 obj
+<< /Type /Page /Parent 3 0 R /MediaBox [0 0 595.28 841.89] /Resources << /Font << /F1 1 0 R /F2 2 0 R >> >> /Contents 6 0 R >>
+endobj
+8 0 obj
+<< /Length 4842 >>
+stream
+q
+0.89 0.94 0.90 rg
+0 823.89 595.28 18 re f
+Q
+BT
+/F2 11.50 Tf
+0.100 0.170 0.230 rg
+1 0 0 1 54.00 769.89 Tm
+(4.2 Real-Time Order Sync) Tj
+ET
+BT
+/F2 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 54.00 746.89 Tm
+(The Rider App includes a real-time socket connection for order activity. Once a rider is logged in:) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 731.89 Tm
+(- the app opens a socket connection using the rider token) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 716.89 Tm
+(- the rider user ID is registered on the socket) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 701.89 Tm
+(- the app listens for events such as:) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 686.89 Tm
+(- order-status-updated) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 671.89 Tm
+(- rider-status-updated) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 656.89 Tm
+(- rider-order-available) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 641.89 Tm
+(- affected query caches are invalidated or updated immediately) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 626.89 Tm
+(- a new-order beep is started or stopped depending on current new-order counts) Tj
+ET
+BT
+/F2 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 54.00 605.89 Tm
+(The socket layer also reconnects when:) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 590.89 Tm
+(- the app returns to the foreground) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 575.89 Tm
+(- internet connectivity is restored) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 54.00 556.89 Tm
+(This ensures the Home dashboard stays in sync with dispatch activity as conditions) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 54.00 541.89 Tm
+(change.) Tj
+ET
+BT
+/F2 11.50 Tf
+0.100 0.170 0.230 rg
+1 0 0 1 54.00 518.89 Tm
+(4.3 Order Assignment and Processing) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 54.00 497.89 Tm
+(When a rider selects an active order, the app opens the order detail and processing) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 54.00 482.89 Tm
+(flow.) Tj
+ET
+BT
+/F2 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 54.00 461.89 Tm
+(This module is responsible for:) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 446.89 Tm
+(- showing order detail) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 431.89 Tm
+(- showing delivery progress state) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 416.89 Tm
+(- allowing rider status transitions) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 401.89 Tm
+(- opening navigation) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 386.89 Tm
+(- calling the customer) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 371.89 Tm
+(- opening order chat) Tj
+ET
+BT
+/F2 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 54.00 350.89 Tm
+(The delivery flow follows a controlled status progression. The screen derives the current progress stage and decides what the next allowed action should be. Typical rider steps include:) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 335.89 Tm
+(- heading to store) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 320.89 Tm
+(- arrived at store) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 305.89 Tm
+(- waiting for order) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 290.89 Tm
+(- picked up) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 275.89 Tm
+(- out for delivery) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 260.89 Tm
+(- arrived at customer) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 245.89 Tm
+(- delivered) Tj
+ET
+BT
+/F2 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 54.00 224.89 Tm
+(When the rider updates the delivery status:) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 209.89 Tm
+(- the update is sent to the backend) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 194.89 Tm
+(- the order detail query is refreshed) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 179.89 Tm
+(- Home summary and order lists are invalidated) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 164.89 Tm
+(- socket-driven updates keep the rest of the app synchronized) Tj
+ET
+BT
+/F2 11.50 Tf
+0.100 0.170 0.230 rg
+1 0 0 1 54.00 141.89 Tm
+(4.4 Order Chat Module) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 54.00 120.89 Tm
+(The order chat screen supports rider communication during an active order.) Tj
+ET
+BT
+/F2 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 54.00 99.89 Tm
+(Its flow is hybrid:) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 84.89 Tm
+(- historical messages are loaded through the API) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 69.89 Tm
+(- live message delivery is handled through a socket connection) Tj
+ET
+BT
+/F1 9 Tf
+0.45 0.49 0.55 rg
+1 0 0 1 513.28 34.00 Tm
+(Page 3) Tj
+ET
+endstream
+endobj
+9 0 obj
+<< /Type /Page /Parent 3 0 R /MediaBox [0 0 595.28 841.89] /Resources << /Font << /F1 1 0 R /F2 2 0 R >> >> /Contents 8 0 R >>
+endobj
+10 0 obj
+<< /Length 4655 >>
+stream
+q
+0.89 0.94 0.90 rg
+0 823.89 595.28 18 re f
+Q
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 777.89 Tm
+(- outgoing messages are sent through both socket emission and API persistence) Tj
+ET
+BT
+/F2 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 54.00 756.89 Tm
+(This design gives the app two benefits:) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 741.89 Tm
+(- the rider sees live updates quickly) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 726.89 Tm
+(- the conversation remains recoverable after reopening the screen) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 54.00 707.89 Tm
+(The chat module also updates order detail state when a new chat box is created during) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 54.00 692.89 Tm
+(the first message exchange.) Tj
+ET
+BT
+/F2 11.50 Tf
+0.100 0.170 0.230 rg
+1 0 0 1 54.00 669.89 Tm
+(4.5 Wallet Module) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 54.00 648.89 Tm
+(The Wallet tab gives riders visibility into their delivery funds and payout activity.) Tj
+ET
+BT
+/F2 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 54.00 627.89 Tm
+(The Wallet module includes:) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 612.89 Tm
+(- current balance display) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 597.89 Tm
+(- available withdrawal amount) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 582.89 Tm
+(- paginated transaction history) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 567.89 Tm
+(- withdrawal request submission) Tj
+ET
+BT
+/F2 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 54.00 546.89 Tm
+(The rider can initiate a withdrawal from the wallet screen. On successful submission:) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 531.89 Tm
+(- the wallet queries are invalidated) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 516.89 Tm
+(- balance and history refresh automatically) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 501.89 Tm
+(- a success confirmation is shown to the rider) Tj
+ET
+BT
+/F2 11.50 Tf
+0.100 0.170 0.230 rg
+1 0 0 1 54.00 478.89 Tm
+(4.6 Earnings Module) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 54.00 457.89 Tm
+(The Earnings tab shows performance-oriented income information.) Tj
+ET
+BT
+/F2 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 54.00 436.89 Tm
+(It includes:) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 421.89 Tm
+(- earnings chart data) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 406.89 Tm
+(- recent earning activity) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 391.89 Tm
+(- navigation to deeper earnings detail) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 54.00 372.89 Tm
+(This module is intended to help riders monitor short-term and historical earning) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 54.00 357.89 Tm
+(patterns based on backend-provided summary data.) Tj
+ET
+BT
+/F2 11.50 Tf
+0.100 0.170 0.230 rg
+1 0 0 1 54.00 334.89 Tm
+(4.7 Profile Module) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 54.00 313.89 Tm
+(The Profile tab acts as the rider's account and operations center.) Tj
+ET
+BT
+/F2 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 54.00 292.89 Tm
+(It provides access to:) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 277.89 Tm
+(- profile overview) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 262.89 Tm
+(- profile details) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 247.89 Tm
+(- password update) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 232.89 Tm
+(- document visibility and updates) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 217.89 Tm
+(- language settings) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 202.89 Tm
+(- vehicle type settings) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 187.89 Tm
+(- bank management) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 172.89 Tm
+(- work schedule) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 157.89 Tm
+(- external informational links) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 142.89 Tm
+(- logout) Tj
+ET
+BT
+/F2 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 54.00 121.89 Tm
+(The profile details flow also supports rider document maintenance, including:) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 106.89 Tm
+(- driving license number and images) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 91.89 Tm
+(- vehicle plate number and images) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 54.00 72.89 Tm
+(Document uploads are sent as multipart form-data to the backend.) Tj
+ET
+BT
+/F1 9 Tf
+0.45 0.49 0.55 rg
+1 0 0 1 513.28 34.00 Tm
+(Page 4) Tj
+ET
+endstream
+endobj
+11 0 obj
+<< /Type /Page /Parent 3 0 R /MediaBox [0 0 595.28 841.89] /Resources << /Font << /F1 1 0 R /F2 2 0 R >> >> /Contents 10 0 R >>
+endobj
+12 0 obj
+<< /Length 4483 >>
+stream
+q
+0.89 0.94 0.90 rg
+0 823.89 595.28 18 re f
+Q
+BT
+/F2 11.50 Tf
+0.100 0.170 0.230 rg
+1 0 0 1 54.00 769.89 Tm
+(4.8 Language Module) Tj
+ET
+BT
+/F2 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 54.00 746.89 Tm
+(The language settings screen:) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 731.89 Tm
+(- loads available language options from the backend) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 716.89 Tm
+(- shows the selected language) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 701.89 Tm
+(- lets the rider update the backend language preference) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 686.89 Tm
+(- updates the in-app language when the chosen language is supported locally) Tj
+ET
+BT
+/F2 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 54.00 665.89 Tm
+(At present, local app translations are configured for:) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 650.89 Tm
+(- English) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 635.89 Tm
+(- French) Tj
+ET
+BT
+/F2 11.50 Tf
+0.100 0.170 0.230 rg
+1 0 0 1 54.00 612.89 Tm
+(4.9 Vehicle Type Module) Tj
+ET
+BT
+/F2 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 54.00 589.89 Tm
+(The vehicle type module:) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 574.89 Tm
+(- loads available delivery vehicle options from the backend) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 559.89 Tm
+(- highlights the rider's selected type) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 544.89 Tm
+(- lets the rider update their active delivery vehicle) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 54.00 525.89 Tm
+(This is important where dispatch logic, capacity rules, or rider presentation depend) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 54.00 510.89 Tm
+(on vehicle type.) Tj
+ET
+BT
+/F2 11.50 Tf
+0.100 0.170 0.230 rg
+1 0 0 1 54.00 487.89 Tm
+(4.10 Bank Management Module) Tj
+ET
+BT
+/F2 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 54.00 464.89 Tm
+(The bank management module allows the rider to maintain payout-related account details, including:) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 449.89 Tm
+(- bank name) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 434.89 Tm
+(- account title) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 419.89 Tm
+(- account number) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 404.89 Tm
+(- IBAN) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 389.89 Tm
+(- currency) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 374.89 Tm
+(- account code) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 54.00 355.89 Tm
+(Client-side validation ensures key required fields are present before submission.) Tj
+ET
+BT
+/F2 11.50 Tf
+0.100 0.170 0.230 rg
+1 0 0 1 54.00 332.89 Tm
+(4.11 Work Schedule Module) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 54.00 311.89 Tm
+(The work schedule module lets the rider manage weekly availability by day.) Tj
+ET
+BT
+/F2 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 54.00 290.89 Tm
+(Each day can be:) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 275.89 Tm
+(- activated or deactivated) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 260.89 Tm
+(- configured with one or more open and close time slots) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 54.00 241.89 Tm
+(This supports operational scheduling scenarios where riders work split shifts or) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 54.00 226.89 Tm
+(non-uniform weekly schedules.) Tj
+ET
+BT
+/F2 15.00 Tf
+0.450 0.270 0.060 rg
+1 0 0 1 54.00 199.89 Tm
+(5. System Flow Behind the Screens) Tj
+ET
+BT
+/F2 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 54.00 171.89 Tm
+(The app follows a clear internal flow:) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 156.89 Tm
+(- screen layer presents rider-facing UI) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 141.89 Tm
+(- hooks layer manages queries and mutations) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 126.89 Tm
+(- service layer handles API communication) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 111.89 Tm
+(- auth layer manages secure session persistence) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 96.89 Tm
+(- socket layer handles real-time order and chat updates) Tj
+ET
+BT
+/F2 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 54.00 75.89 Tm
+(This separation makes the app easier to maintain and helps ensure:) Tj
+ET
+BT
+/F1 9 Tf
+0.45 0.49 0.55 rg
+1 0 0 1 513.28 34.00 Tm
+(Page 5) Tj
+ET
+endstream
+endobj
+13 0 obj
+<< /Type /Page /Parent 3 0 R /MediaBox [0 0 595.28 841.89] /Resources << /Font << /F1 1 0 R /F2 2 0 R >> >> /Contents 12 0 R >>
+endobj
+14 0 obj
+<< /Length 4515 >>
+stream
+q
+0.89 0.94 0.90 rg
+0 823.89 595.28 18 re f
+Q
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 777.89 Tm
+(- reusable business logic) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 762.89 Tm
+(- centralized API handling) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 747.89 Tm
+(- consistent caching) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 732.89 Tm
+(- secure token management) Tj
+ET
+BT
+/F2 15.00 Tf
+0.450 0.270 0.060 rg
+1 0 0 1 54.00 705.89 Tm
+(6. Backend Dependencies) Tj
+ET
+BT
+/F2 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 54.00 677.89 Tm
+(For full production behavior, the Rider App depends on working backend support for:) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 662.89 Tm
+(- rider authentication) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 647.89 Tm
+(- session-based authenticated API access) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 632.89 Tm
+(- rider home summary) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 617.89 Tm
+(- new, processing, and delivered order lists) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 602.89 Tm
+(- order detail retrieval) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 587.89 Tm
+(- order assignment) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 572.89 Tm
+(- rider order status updates) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 557.89 Tm
+(- wallet balance) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 542.89 Tm
+(- wallet history) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 527.89 Tm
+(- withdrawal requests) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 512.89 Tm
+(- earnings summary and activity) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 497.89 Tm
+(- rider profile data) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 482.89 Tm
+(- password update) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 467.89 Tm
+(- rider document upload) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 452.89 Tm
+(- language settings) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 437.89 Tm
+(- vehicle type settings) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 422.89 Tm
+(- bank details) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 407.89 Tm
+(- work schedule) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 392.89 Tm
+(- support chat history) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 377.89 Tm
+(- support chat send message) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 362.89 Tm
+(- socket-based order events) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 347.89 Tm
+(- socket-based chat events) Tj
+ET
+BT
+/F2 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 54.00 326.89 Tm
+(Environment variables currently expected by the app include:) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 311.89 Tm
+(- `EXPO_PUBLIC_API_BASE_URL` \(required\)) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 296.89 Tm
+(- `EXPO_PUBLIC_SOCKET_URL` \(optional override\)) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 281.89 Tm
+(- `EXPO_PUBLIC_SOCKET_PATH` \(optional override\)) Tj
+ET
+BT
+/F2 15.00 Tf
+0.450 0.270 0.060 rg
+1 0 0 1 54.00 254.89 Tm
+(7. Important Operational Notes for the Client) Tj
+ET
+BT
+/F2 11.50 Tf
+0.100 0.170 0.230 rg
+1 0 0 1 54.00 224.89 Tm
+(7.1 Session Handling) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 54.00 203.89 Tm
+(The Rider App is token-driven. A rider is considered logged in when a valid access) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 54.00 188.89 Tm
+(token is available. Tokens and rider identity are stored securely on the device.) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 54.00 169.89 Tm
+(If the backend returns a session-expiry style response, the app can automatically) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 54.00 154.89 Tm
+(clear the session and return the rider to the authentication flow.) Tj
+ET
+BT
+/F2 11.50 Tf
+0.100 0.170 0.230 rg
+1 0 0 1 54.00 131.89 Tm
+(7.2 Push Token Collection) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 54.00 110.89 Tm
+(During login, the app attempts to register an Expo push token so the rider device can) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 54.00 95.89 Tm
+(be targeted for push notifications where supported.) Tj
+ET
+BT
+/F2 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 54.00 74.89 Tm
+(Important note:) Tj
+ET
+BT
+/F1 9 Tf
+0.45 0.49 0.55 rg
+1 0 0 1 513.28 34.00 Tm
+(Page 6) Tj
+ET
+endstream
+endobj
+15 0 obj
+<< /Type /Page /Parent 3 0 R /MediaBox [0 0 595.28 841.89] /Resources << /Font << /F1 1 0 R /F2 2 0 R >> >> /Contents 14 0 R >>
+endobj
+16 0 obj
+<< /Length 5229 >>
+stream
+q
+0.89 0.94 0.90 rg
+0 823.89 595.28 18 re f
+Q
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 777.89 Tm
+(- Expo push token retrieval requires a physical device) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 762.89 Tm
+(- simulators and emulators do not provide the same production behavior) Tj
+ET
+BT
+/F2 11.50 Tf
+0.100 0.170 0.230 rg
+1 0 0 1 54.00 739.89 Tm
+(7.3 Real-Time Experience Depends on Socket Availability) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 54.00 718.89 Tm
+(The live order experience is strongest when the socket server is available and) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 54.00 703.89 Tm
+(reachable. Without socket connectivity, riders can still use API-driven screens, but) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 54.00 688.89 Tm
+(real-time updates will be delayed until the next refresh cycle.) Tj
+ET
+BT
+/F2 11.50 Tf
+0.100 0.170 0.230 rg
+1 0 0 1 54.00 665.89 Tm
+(7.4 Rider Approval Status Matters) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 54.00 644.89 Tm
+(The app checks whether the rider profile is approved. If approval is false, order) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 54.00 629.89 Tm
+(access is blocked on the Home screen. This is an important business-control mechanism) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 54.00 614.89 Tm
+(for onboarding and compliance.) Tj
+ET
+BT
+/F2 11.50 Tf
+0.100 0.170 0.230 rg
+1 0 0 1 54.00 591.89 Tm
+(7.5 Current Map and Navigation Limitation) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 54.00 570.89 Tm
+(The current order detail screen uses fallback pickup and delivery coordinates in the) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 54.00 555.89 Tm
+(map and navigation action. This means the visual route and map launch behavior are) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 54.00 540.89 Tm
+(not yet tied to live order coordinates from the backend.) Tj
+ET
+BT
+/F2 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 54.00 519.89 Tm
+(This is an important rollout note for the client:) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 504.89 Tm
+(- order-processing status updates are implemented) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 489.89 Tm
+(- map/navigation behavior is present) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 474.89 Tm
+(- live location wiring for actual pickup and delivery coordinates still needs to be) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 459.89 Tm
+(  completed if production routing accuracy is required) Tj
+ET
+BT
+/F2 11.50 Tf
+0.100 0.170 0.230 rg
+1 0 0 1 54.00 436.89 Tm
+(7.6 Current Availability Toggle Scope) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 54.00 415.89 Tm
+(The availability switch visible in profile-related UI is currently handled locally in) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 54.00 400.89 Tm
+(the app interface. It is not yet wired to a dedicated backend rider-availability) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 54.00 385.89 Tm
+(update flow in the current codebase.) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 54.00 366.89 Tm
+(If the client expects dispatcher-facing online or offline rider availability control,) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 54.00 351.89 Tm
+(that integration should be confirmed separately.) Tj
+ET
+BT
+/F2 11.50 Tf
+0.100 0.170 0.230 rg
+1 0 0 1 54.00 328.89 Tm
+(7.7 Localization Scope) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 54.00 307.89 Tm
+(Backend language settings are supported, but the app-side translation bundle is) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 54.00 292.89 Tm
+(currently configured for English and French only. Additional languages will require) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 54.00 277.89 Tm
+(app localization resources to be added.) Tj
+ET
+BT
+/F2 15.00 Tf
+0.450 0.270 0.060 rg
+1 0 0 1 54.00 250.89 Tm
+(8. Recommended Client Testing Scenarios) Tj
+ET
+BT
+/F2 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 54.00 222.89 Tm
+(The following scenarios are especially important during UAT or pilot rollout:) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 207.89 Tm
+(- rider login with valid credentials) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 192.89 Tm
+(- rider login with invalid credentials) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 177.89 Tm
+(- session restore after app restart) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 162.89 Tm
+(- rider blocked due to non-approved profile) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 147.89 Tm
+(- new order appearing in Home via socket) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 132.89 Tm
+(- rider assigning or accepting an order) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 117.89 Tm
+(- rider moving through each delivery status) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 102.89 Tm
+(- rider opening chat and sending messages) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 87.89 Tm
+(- wallet balance display) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 72.89 Tm
+(- withdrawal request submission) Tj
+ET
+BT
+/F1 9 Tf
+0.45 0.49 0.55 rg
+1 0 0 1 513.28 34.00 Tm
+(Page 7) Tj
+ET
+endstream
+endobj
+17 0 obj
+<< /Type /Page /Parent 3 0 R /MediaBox [0 0 595.28 841.89] /Resources << /Font << /F1 1 0 R /F2 2 0 R >> >> /Contents 16 0 R >>
+endobj
+18 0 obj
+<< /Length 2287 >>
+stream
+q
+0.89 0.94 0.90 rg
+0 823.89 595.28 18 re f
+Q
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 777.89 Tm
+(- earnings chart and recent activity display) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 762.89 Tm
+(- profile document upload) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 747.89 Tm
+(- bank details update) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 732.89 Tm
+(- language update) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 717.89 Tm
+(- vehicle type update) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 702.89 Tm
+(- work schedule update with multiple time slots) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 687.89 Tm
+(- forced logout on expired session) Tj
+ET
+BT
+/F2 15.00 Tf
+0.450 0.270 0.060 rg
+1 0 0 1 54.00 660.89 Tm
+(9. Summary) Tj
+ET
+BT
+/F2 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 54.00 632.89 Tm
+(The Rider App is structured as a delivery operations application for riders, centered around:) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 617.89 Tm
+(- secure login and session management) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 602.89 Tm
+(- real-time order visibility) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 587.89 Tm
+(- controlled delivery-status progression) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 572.89 Tm
+(- communication during active orders) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 557.89 Tm
+(- wallet and earnings visibility) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 62.00 542.89 Tm
+(- operational profile and settings maintenance) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 54.00 523.89 Tm
+(From a client perspective, the core order lifecycle, profile settings, wallet flow,) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 54.00 508.89 Tm
+(and real-time foundations are all present. The main implementation notes to keep in) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 54.00 493.89 Tm
+(mind are the current fallback map coordinates, the local-only availability toggle) Tj
+ET
+BT
+/F1 10.50 Tf
+0.180 0.200 0.240 rg
+1 0 0 1 54.00 478.89 Tm
+(behavior, and the current two-language in-app localization scope.) Tj
+ET
+BT
+/F1 9 Tf
+0.45 0.49 0.55 rg
+1 0 0 1 513.28 34.00 Tm
+(Page 8) Tj
+ET
+endstream
+endobj
+19 0 obj
+<< /Type /Page /Parent 3 0 R /MediaBox [0 0 595.28 841.89] /Resources << /Font << /F1 1 0 R /F2 2 0 R >> >> /Contents 18 0 R >>
+endobj
+20 0 obj
+<< /Type /Catalog /Pages 3 0 R >>
+endobj
+xref
+0 21
+0000000000 65535 f 
+0000000015 00000 n 
+0000000085 00000 n 
+0000000160 00000 n 
+0000000264 00000 n 
+0000004970 00000 n 
+0000005112 00000 n 
+0000009713 00000 n 
+0000009855 00000 n 
+0000014749 00000 n 
+0000014891 00000 n 
+0000019599 00000 n 
+0000019743 00000 n 
+0000024279 00000 n 
+0000024423 00000 n 
+0000028991 00000 n 
+0000029135 00000 n 
+0000034417 00000 n 
+0000034561 00000 n 
+0000036901 00000 n 
+0000037045 00000 n 
+trailer
+<< /Size 21 /Root 20 0 R >>
+startxref
+37095
+%%EOF
