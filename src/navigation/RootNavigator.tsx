@@ -7,6 +7,10 @@ import AuthNavigator from './AuthNavigator';
 import MainNavigator from './MainNavigator';
 import { buildNavigationTheme } from './navigationTheme';
 import { useRiderOrderSocketSync } from '../hooks/useRiderOrderSocketSync';
+import {
+  navigationRef,
+  openPendingNotification,
+} from './rootNavigation';
 
 export default function RootNavigator() {
   const { theme } = useAppTheme();
@@ -29,7 +33,12 @@ export default function RootNavigator() {
   }
 
   return (
-    <NavigationContainer theme={buildNavigationTheme(theme)}>
+    <NavigationContainer
+      ref={navigationRef}
+      theme={buildNavigationTheme(theme)}
+      onReady={openPendingNotification}
+      onStateChange={openPendingNotification}
+    >
       {isAuthenticated ? <MainNavigator /> : <AuthNavigator />}
     </NavigationContainer>
   );

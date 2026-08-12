@@ -8,6 +8,7 @@ import { ThemeProvider, useAppTheme } from './src/theme/ThemeProvider';
 import QueryProvider from './src/providers/QueryProvider';
 import { LocalizationProvider } from './src/localization/LocalizationProvider';
 import { AuthProvider } from './src/auth/AuthProvider';
+import { usePushNotifications } from './src/hooks/usePushNotifications';
 import './src/localization/i18n';
 
 function getNavigationButtonStyle(backgroundColor: string) {
@@ -30,6 +31,7 @@ function getNavigationButtonStyle(backgroundColor: string) {
 
 function ThemedApp() {
   const { theme } = useAppTheme();
+  usePushNotifications();
   const navigationBarColor = theme.colors.gray800;
 
   useEffect(() => {
